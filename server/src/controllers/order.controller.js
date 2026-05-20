@@ -119,3 +119,68 @@ export const updateOrderStatusAdmin = async (req, res) => {
 		});
 	}
 };
+
+export const getMyOrders = async (req, res) => {
+	try {
+		const orders = await prisma.order.findMany({
+			where: {
+				userId: req.user.id,
+			},
+			include: {
+				items: true,
+				payment: true,
+				coupon: true,
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		});
+
+		return res.status(200).json({
+			success: true,
+			count: orders.length,
+			orders,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Failed to fetch your orders",
+			error: error.message,
+		});
+	}
+};
+
+export const getMySingleOrder = async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const order = await prisma.order.findUnique({
+			where: {
+				id,
+			},
+			include: {
+				items: true,
+				payment: true,
+				coupon: true,
+			},
+		});
+
+		if (!order || order.userId !== req.user.id) {
+			return res.status(404).json({
+				success: false,
+				message: "Order not found",
+			});
+		}
+
+		return res.status(200).json({
+			success: true,
+			order,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Failed to fetch order",
+			error: error.message,
+		});
+	}
+};
