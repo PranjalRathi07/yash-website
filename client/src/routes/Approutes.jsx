@@ -24,7 +24,7 @@ import PrivacyPolicy from "../pages/Privacy-Policy";
 import CareGuide from "../pages/Care-guide";
 import OurStory from "../pages/Ourstory";
 import Login from "../pages/Login";
-
+import AuthCallback from "../pages/AuthCallback";
 function AppRoutes() {
 	return (
 		<Routes>
@@ -53,6 +53,7 @@ function AppRoutes() {
 			<Route path='/care-guide' element={<CareGuide />} />
 			<Route path='/our-story' element={<OurStory />} />
 			<Route path='/login' element={<Login />} />
+			<Route path="/auth/callback" element={<AuthCallback />} />
 		</Routes>
 	);
 }
