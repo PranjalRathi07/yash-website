@@ -7,15 +7,18 @@ import AppRoutes from "./routes/Approutes";
 function App() {
 	const location = useLocation();
 	const isLoginPage = location.pathname === "/login";
+	const isAdminPage = location.pathname.startsWith("/admin");
+	const hideLayout = isLoginPage || isAdminPage;
+
 	return (
 		<>
-			{!isLoginPage && <Navbar />}
+			{!hideLayout && <Navbar />}
 
 			<main>
 				<AppRoutes />
 			</main>
 
-			{!isLoginPage && <Footer />}
+			{!hideLayout && <Footer />}
 		</>
 	);
 }

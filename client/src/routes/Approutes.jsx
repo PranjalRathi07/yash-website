@@ -25,6 +25,12 @@ import CareGuide from "../pages/Care-guide";
 import OurStory from "../pages/Ourstory";
 import Login from "../pages/Login";
 import AuthCallback from "../pages/AuthCallback";
+import Dashboard from "../Adminpanel/page's/Dashboard";
+import ProductManagement from "../Adminpanel/page's/Product-Management";
+import OrderManagement from "../Adminpanel/page's/Order-Management";
+import User from "../Adminpanel/page's/User";
+import Banners from "../Adminpanel/page's/Banners";
+
 function AppRoutes() {
 	return (
 		<Routes>
@@ -54,6 +60,12 @@ function AppRoutes() {
 			<Route path='/our-story' element={<OurStory />} />
 			<Route path='/login' element={<Login />} />
 			<Route path="/auth/callback" element={<AuthCallback />} />
+			<Route path="/admin" element={<Dashboard />} />
+			<Route path="/admin/dashboard" element={<Dashboard />} />
+			<Route path="/admin/products" element={<ProductManagement />} />
+			<Route path="/admin/orders" element={<OrderManagement />} />
+			<Route path="/admin/users" element={<User />} />
+			<Route path="/admin/banners" element={<Banners />} />
 		</Routes>
 	);
 }
