@@ -52,10 +52,10 @@ export const createProduct = async (req, res) => {
 				oldPrice: oldPrice ? Number(oldPrice) : null,
 				stock: stock ? Number(stock) : 0,
 				categoryId,
-				isFeatured: isFeatured === "true",
-				isBestSeller: isBestSeller === "false",
-				isNewArrival: isNewArrival === "true",
-				isFestivalWear: isFestivalWear === "true",
+				isFeatured: isFeatured === "true" || isFeatured === true,
+				isBestSeller: isBestSeller === "true" || isBestSeller === true,
+				isNewArrival: isNewArrival === "true" || isNewArrival === true,
+				isFestivalWear: isFestivalWear === "true" || isFestivalWear === true,
 			},
 		});
 
@@ -106,10 +106,11 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
 	try {
+		const { admin } = req.query;
+		const whereClause = admin === "true" ? {} : { isActive: true };
+
 		const products = await prisma.product.findMany({
-			where: {
-				isActive: true,
-			},
+			where: whereClause,
 			include: {
 				category: true,
 				images: true,

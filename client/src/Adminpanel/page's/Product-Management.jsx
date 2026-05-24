@@ -1,82 +1,266 @@
-/** @format */
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
+import api from "../../services/api";
 
-const INITIAL_PRODUCTS = [
-	{
-		id: "KV-SILK-001",
-		name: "Divine Silk Poshak",
-		category: "Sacred Attire",
-		price: "₹8,499",
-		stock: 42,
-		status: "Available",
-		image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDmZ9KivkJ2Wue7XjLv4dZtaHpHY2YB2YAePwXlp70iVXIbFE69vhczsBRsfKTdBVTxcC8W8NkywGpEf3QI8uVG-6fHFIMbDmxDbM5WVE3Dc4rylKAcgdlcfilCajJyMIfCrFMvCj7Jsm3Aeinem4zpChw2fzHeeq5gE5kPeXhSLYnhuapnrcKPYs9A9HOxdE-g4ZylTIukZSZhqrFQ4NR-JwPBZSskAlOUJcOjymEq8MoZFPV2Hp1kM7JK74AFf9cwaz_KNR2oEEdv",
-	},
-	{
-		id: "KV-MUK-042",
-		name: "Vrindavan Mukut",
-		category: "Ornaments",
-		price: "₹12,750",
-		stock: 3,
-		status: "Low Stock",
-		image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVrQYvaRtlfAGXgbE_nSRxzehz_v0s9QI7dAHhTrIR9P_4jYnFtJrv0_2aPMzbubFp3amuo-BpVpgx1o4iwdFXhytbRBrDO3ZsqKhwocBvuGUjUdujEpwjWPyEerAiZnYwWqTavaHUxzz0Rx6je3bPoKRtOmHZWj5ootE747XE31SPVf47cyjveLMEhtcPKuEMp7NoEpXIbqRGDtrt5lljO9X9Wbds_GoeicU3xJBR7coSrmynfuUnXZHI8WWwVvCIHEC-N7SZt3XA",
-	},
-	{
-		id: "KV-ACC-099",
-		name: "Sandalwood Varmala",
-		category: "Accessories",
-		price: "₹3,200",
-		stock: 120,
-		status: "Available",
-		image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCWkYQhqK1ZsDbbS47V2-J2ZwLMyh3wyyJgQcXR3MR7gnKqK32LLWL14ctbgUks50nUVvMYdsMW-ojc75gd4N1JTiTmswAt_n9AS7FKNBTDjrksZSMCADMawoFZULaxo0vx6Yq2v6YQ6fFrRJRd8lNkAr9PsH_oFBXgsdMjC25Or4QBCDFOLPoYMFKwK8pFN02lcbmYdzfXZtWYd0VQxRnI1_U6U3PPPd7WmCd-ncGtzf3zEwtQB10BHJ9tEprgZsT-BsDo8S2jKry7",
-	},
-];
+const PLACEHOLDER_IMAGE = "https://placehold.co/150x200?text=No+Image";
 
 export default function ProductManagement() {
-	const navigate = useNavigate();
-	const [products, setProducts] = useState(INITIAL_PRODUCTS);
+	const [products, setProducts] = useState([]);
+	const [categories, setCategories] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
 	const [searchQuery, setSearchQuery] = useState("");
-	
-	// Add Product modal state
+
+	// Add/Edit Product Modal State
 	const [showAddModal, setShowAddModal] = useState(false);
+	const [isEditing, setIsEditing] = useState(false);
+	const [editingProductId, setEditingProductId] = useState(null);
+	const [showCategoryInput, setShowCategoryInput] = useState(false);
+	const [newCategoryName, setNewCategoryName] = useState("");
+
 	const [newProduct, setNewProduct] = useState({
-		name: "",
-		category: "Sacred Attire",
+		title: "",
+		description: "",
 		price: "",
+		oldPrice: "",
 		stock: "",
+		categoryId: "",
+		isFeatured: false,
+		isBestSeller: false,
+		isNewArrival: false,
+		isFestivalWear: false,
 	});
 
-	const handleAddProduct = (e) => {
-		e.preventDefault();
-		if (!newProduct.name || !newProduct.price || !newProduct.stock) return;
+	// Image upload state
+	const [imageFiles, setImageFiles] = useState([]);
+	const [imagePreviews, setImagePreviews] = useState([]);
 
-		const added = {
-			id: `KV-PROD-${Math.floor(Math.random() * 900) + 100}`,
-			name: newProduct.name,
-			category: newProduct.category,
-			price: `₹${parseFloat(newProduct.price).toLocaleString("en-IN")}`,
-			stock: parseInt(newProduct.stock),
-			status: parseInt(newProduct.stock) > 5 ? "Available" : "Low Stock",
-			image: INITIAL_PRODUCTS[0].image, // default image
+	const fetchCategories = useCallback(async () => {
+		try {
+			const response = await api.get("/api/categories");
+			if (response.data.success) {
+				setCategories(response.data.categories);
+				if (response.data.categories.length > 0) {
+					setNewProduct((prev) => {
+						if (!prev.categoryId) {
+							return {
+								...prev,
+								categoryId: response.data.categories[0].id,
+							};
+						}
+						return prev;
+					});
+				}
+			}
+		} catch (err) {
+			console.error("Failed to fetch categories:", err);
+		}
+	}, []);
+
+	const fetchProducts = useCallback(async () => {
+		try {
+			setLoading(true);
+			const response = await api.get("/api/products?admin=true");
+			if (response.data.success) {
+				setProducts(response.data.products);
+			}
+		} catch (err) {
+			console.error("Failed to fetch products:", err);
+			setError("Could not retrieve sacred products from the database.");
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		let isMounted = true;
+		const loadData = async () => {
+			await Promise.resolve();
+			if (isMounted) {
+				await fetchProducts();
+				await fetchCategories();
+			}
 		};
+		loadData();
+		return () => {
+			isMounted = false;
+		};
+	}, [fetchProducts, fetchCategories]);
 
-		setProducts([added, ...products]);
-		setNewProduct({ name: "", category: "Sacred Attire", price: "", stock: "" });
-		setShowAddModal(false);
+	// Handle Image File Changes & Preview
+	const handleImageChange = (e) => {
+		const files = Array.from(e.target.files);
+		if (files.length > 0) {
+			setImageFiles((prev) => [...prev, ...files]);
+			const previews = files.map((file) => URL.createObjectURL(file));
+			setImagePreviews((prev) => [...prev, ...previews]);
+		}
 	};
 
-	const handleDeleteProduct = (id) => {
+	// Drag & Drop Handlers
+	const handleDragOver = (e) => {
+		e.preventDefault();
+	};
+
+	const handleDrop = (e) => {
+		e.preventDefault();
+		const files = Array.from(e.dataTransfer.files);
+		if (files.length > 0) {
+			setImageFiles((prev) => [...prev, ...files]);
+			const previews = files.map((file) => URL.createObjectURL(file));
+			setImagePreviews((prev) => [...prev, ...previews]);
+		}
+	};
+
+	const removeSelectedImage = (index) => {
+		setImageFiles((prev) => prev.filter((_, idx) => idx !== index));
+		setImagePreviews((prev) => {
+			const target = prev[index];
+			if (target && target.startsWith("blob:")) {
+				URL.revokeObjectURL(target);
+			}
+			return prev.filter((_, idx) => idx !== index);
+		});
+	};
+
+	const handleOpenAddModal = () => {
+		setIsEditing(false);
+		setEditingProductId(null);
+		setNewProduct({
+			title: "",
+			description: "",
+			price: "",
+			oldPrice: "",
+			stock: "",
+			categoryId: categories.length > 0 ? categories[0].id : "",
+			isFeatured: false,
+			isBestSeller: false,
+			isNewArrival: false,
+			isFestivalWear: false,
+		});
+		setImageFiles([]);
+		setImagePreviews([]);
+		setShowAddModal(true);
+	};
+
+	const handleEditClick = (product) => {
+		setIsEditing(true);
+		setEditingProductId(product.id);
+		setNewProduct({
+			title: product.title,
+			description: product.description || "",
+			price: product.price ? product.price.toString() : "",
+			oldPrice: product.oldPrice ? product.oldPrice.toString() : "",
+			stock: product.stock ? product.stock.toString() : "",
+			categoryId: product.categoryId || (categories.length > 0 ? categories[0].id : ""),
+			isFeatured: product.isFeatured || false,
+			isBestSeller: product.isBestSeller || false,
+			isNewArrival: product.isNewArrival || false,
+			isFestivalWear: product.isFestivalWear || false,
+		});
+		if (product.images && product.images.length > 0) {
+			setImagePreviews(product.images.map((img) => img.url));
+		} else {
+			setImagePreviews([]);
+		}
+		setImageFiles([]);
+		setShowAddModal(true);
+	};
+
+	const handleSubmitProduct = async (e) => {
+		e.preventDefault();
+		if (!newProduct.title || !newProduct.price || !newProduct.stock || !newProduct.categoryId || !newProduct.description) {
+			alert("Please fill in all required fields (Title, Category, Price, Stock, and Description).");
+			return;
+		}
+
+		try {
+			const formData = new FormData();
+			formData.append("title", newProduct.title);
+			formData.append("description", newProduct.description);
+			formData.append("price", newProduct.price);
+			if (newProduct.oldPrice) {
+				formData.append("oldPrice", newProduct.oldPrice);
+			}
+			formData.append("stock", newProduct.stock);
+			formData.append("categoryId", newProduct.categoryId);
+			formData.append("isFeatured", newProduct.isFeatured);
+			formData.append("isBestSeller", newProduct.isBestSeller);
+			formData.append("isNewArrival", newProduct.isNewArrival);
+			formData.append("isFestivalWear", newProduct.isFestivalWear);
+
+			if (imageFiles.length > 0) {
+				imageFiles.forEach((file) => {
+					formData.append("images", file);
+				});
+			}
+
+			let response;
+			if (isEditing) {
+				response = await api.put(`/api/products/${editingProductId}`, formData, {
+					headers: { "Content-Type": "multipart/form-data" },
+				});
+			} else {
+				response = await api.post("/api/products", formData, {
+					headers: { "Content-Type": "multipart/form-data" },
+				});
+			}
+
+			if (response.data.success) {
+				alert(isEditing ? "Sacred Deity Product updated successfully!" : "Sacred Deity Product added successfully!");
+				setShowAddModal(false);
+				fetchProducts();
+			} else {
+				alert("Failed to save product: " + response.data.message);
+			}
+		} catch (err) {
+			console.error("Save product error:", err);
+			alert("An error occurred while saving the product: " + (err.response?.data?.message || err.message));
+		}
+	};
+
+	const handleDeleteProduct = async (id) => {
 		if (confirm("Are you sure you want to delete this sacred product?")) {
-			setProducts(products.filter((p) => p.id !== id));
+			try {
+				const response = await api.delete(`/api/products/${id}`);
+				if (response.data.success) {
+					alert("Deity Product deleted successfully.");
+					fetchProducts();
+				} else {
+					alert("Failed to delete product: " + response.data.message);
+				}
+			} catch (err) {
+				console.error("Delete error:", err);
+				alert("Error deleting product: " + (err.response?.data?.message || err.message));
+			}
+		}
+	};
+
+	const handleAddCategoryInline = async (e) => {
+		e.preventDefault();
+		if (!newCategoryName.trim()) return;
+
+		try {
+			const response = await api.post("/api/categories", { name: newCategoryName });
+			if (response.data.success) {
+				const newCat = response.data.category;
+				setCategories((prev) => [newCat, ...prev]);
+				setNewProduct((prev) => ({ ...prev, categoryId: newCat.id }));
+				setNewCategoryName("");
+				setShowCategoryInput(false);
+			} else {
+				alert("Failed to add category: " + response.data.message);
+			}
+		} catch (err) {
+			console.error("Add category error:", err);
+			alert("Error creating category: " + (err.response?.data?.message || err.message));
 		}
 	};
 
 	const filteredProducts = products.filter((p) =>
-		p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-		p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+		p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+		(p.category?.name && p.category.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
 		p.id.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
@@ -101,8 +285,8 @@ export default function ProductManagement() {
 							</p>
 						</div>
 						<button
-							onClick={() => setShowAddModal(true)}
-							className='gradient-btn px-6 py-3.5 rounded-xl flex items-center gap-2 text-primary font-bold shadow-md hover:shadow-lg transition-all scale-100 active:scale-95 group'>
+							onClick={handleOpenAddModal}
+							className='gradient-btn px-6 py-3.5 rounded-xl flex items-center gap-2 text-primary font-bold shadow-md hover:shadow-lg transition-all scale-100 active:scale-95 group cursor-pointer'>
 							<span className='material-symbols-outlined transition-transform duration-300 group-hover:rotate-90' data-icon='add'>
 								add
 							</span>
@@ -113,10 +297,10 @@ export default function ProductManagement() {
 					{/* Bento Stats section */}
 					<div className='grid grid-cols-1 md:grid-cols-4 gap-6 mb-10'>
 						{[
-							{ title: "Total Products", value: "1,284", icon: "inventory", change: "+12%", bg: "bg-surface-bright" },
-							{ title: "Sacred Silk", value: "452", icon: "shopping_bag", change: "Active", bg: "bg-surface-bright" },
-							{ title: "Low Inventory", value: `${products.filter(p => p.stock <= 5).length}`, icon: "warning", change: "Action required", bg: "bg-surface-bright", isError: true },
-							{ title: "Top Category", value: "Mukut", icon: "trending_up", change: "Trending", bg: "bg-surface-bright" },
+							{ title: "Total Products", value: products.length.toString(), icon: "inventory", change: "Live DB", bg: "bg-surface-bright" },
+							{ title: "Out of Stock", value: products.filter(p => p.stock === 0).length.toString(), icon: "error_outline", change: "Critical", bg: "bg-surface-bright", isError: products.filter(p => p.stock === 0).length > 0 },
+							{ title: "Low Inventory", value: products.filter(p => p.stock > 0 && p.stock <= 5).length.toString(), icon: "warning", change: "Action required", bg: "bg-surface-bright", isError: products.filter(p => p.stock > 0 && p.stock <= 5).length > 0 },
+							{ title: "Total Categories", value: categories.length.toString(), icon: "category", change: "Managed", bg: "bg-surface-bright" },
 						].map((stat, idx) => (
 							<div
 								key={idx}
@@ -136,160 +320,417 @@ export default function ProductManagement() {
 					</div>
 
 					{/* Product Table Control */}
-					<div className='bg-surface rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden'>
-						<div className='overflow-x-auto'>
-							<table className='w-full text-left border-collapse'>
-								<thead className='bg-surface-container text-on-surface-variant/80 font-semibold uppercase tracking-wider text-[11px] border-b border-outline-variant/20'>
-									<tr>
-										<th className='px-6 py-4'>Sacred Image</th>
-										<th className='px-6 py-4'>Product Name</th>
-										<th className='px-6 py-4'>Category</th>
-										<th className='px-6 py-4 text-center'>Stock Level</th>
-										<th className='px-6 py-4'>Premium Price</th>
-										<th className='px-6 py-4'>Status</th>
-										<th className='px-6 py-4 text-right'>Actions</th>
-									</tr>
-								</thead>
-								<tbody className='divide-y divide-outline-variant/10'>
-									{filteredProducts.map((product) => (
-										<tr key={product.id} className='hover:bg-surface-container-low/40 transition-colors group'>
-											<td className='px-6 py-5'>
-												<div className='w-16 h-20 rounded-lg overflow-hidden border border-outline-variant/30 shadow-sm bg-surface-container'>
-													<img className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' src={product.image} alt={product.name} />
-												</div>
-											</td>
-											<td className='px-6 py-5'>
-												<p className='font-bold text-primary'>{product.name}</p>
-												<span className='text-[10px] text-on-surface-variant/70 uppercase tracking-wider'>SKU: {product.id}</span>
-											</td>
-											<td className='px-6 py-5'>
-												<span className='px-2.5 py-1 rounded-full bg-secondary-container/10 text-primary text-xs font-semibold border border-outline-variant/10'>
-													{product.category}
-												</span>
-											</td>
-											<td className='px-6 py-5 text-center'>
-												<div className='flex flex-col items-center gap-1.5'>
-													<div className='w-24 h-1.5 bg-outline-variant/30 rounded-full overflow-hidden'>
-														<div
-															className={`h-full ${product.stock <= 5 ? "bg-red-500" : "bg-linear-to-r from-[#E7C96F] to-[#ffdfa0]"}`}
-															style={{ width: `${Math.min(product.stock * 2, 100)}%` }}
-														/>
-													</div>
-													<span className='text-xs font-semibold text-on-surface-variant/80'>{product.stock} units</span>
-												</div>
-											</td>
-											<td className='px-6 py-5'>
-												<p className='font-serif font-bold text-primary text-lg'>{product.price}</p>
-											</td>
-											<td className='px-6 py-5'>
-												<span
-													className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-														product.stock > 5
-															? "bg-green-50 text-green-700 border border-green-200"
-															: "bg-red-50 text-red-700 border border-red-200"
-													}`}>
-													<span className={`w-1.5 h-1.5 rounded-full ${product.stock > 5 ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
-													{product.stock > 5 ? "Available" : "Low Stock"}
-												</span>
-											</td>
-											<td className='px-6 py-5 text-right'>
-												<div className='flex items-center gap-2 justify-end'>
-													<button
-														onClick={() => alert(`Edit product ${product.id}`)}
-														className='p-2 hover:bg-tertiary-fixed/15 rounded-lg text-primary transition-colors focus:outline-none'>
-														<span className='material-symbols-outlined text-[18px]' data-icon='edit'>edit</span>
-													</button>
-													<button
-														onClick={() => handleDeleteProduct(product.id)}
-														className='p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors focus:outline-none'>
-														<span className='material-symbols-outlined text-[18px]' data-icon='delete'>delete</span>
-													</button>
-												</div>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
+					{loading ? (
+						<div className='flex flex-col items-center justify-center p-20 bg-surface rounded-2xl border border-outline-variant/20 shadow-sm'>
+							<span className='material-symbols-outlined text-[48px] text-tertiary animate-spin mb-4'>sync</span>
+							<p className='text-on-surface-variant font-serif text-lg'>Fetching divine collection from the sanctuary...</p>
 						</div>
-					</div>
+					) : error ? (
+						<div className='flex flex-col items-center justify-center p-20 bg-surface rounded-2xl border border-red-200 shadow-sm'>
+							<span className='material-symbols-outlined text-[48px] text-red-600 mb-4'>error</span>
+							<p className='text-red-700 font-bold mb-2'>{error}</p>
+							<button onClick={fetchProducts} className='px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold cursor-pointer'>Retry Fetch</button>
+						</div>
+					) : filteredProducts.length === 0 ? (
+						<div className='flex flex-col items-center justify-center p-20 bg-surface rounded-2xl border border-outline-variant/20 shadow-sm text-center'>
+							<span className='material-symbols-outlined text-[48px] text-tertiary/50 mb-4'>inventory_2</span>
+							<h3 className='font-serif text-2xl text-primary font-bold mb-2'>Sanctuary is Empty</h3>
+							<p className='text-on-surface-variant max-w-sm mb-6'>No sacred products found in your inventory. Add your first deity product to get started!</p>
+							<button onClick={handleOpenAddModal} className='gradient-btn px-6 py-3 rounded-lg text-primary font-bold shadow-md hover:shadow-lg cursor-pointer'>Add First Product</button>
+						</div>
+					) : (
+						<div className='bg-surface rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden'>
+							<div className='overflow-x-auto'>
+								<table className='w-full text-left border-collapse'>
+									<thead className='bg-surface-container text-on-surface-variant/80 font-semibold uppercase tracking-wider text-[11px] border-b border-outline-variant/20'>
+										<tr>
+											<th className='px-6 py-4'>Sacred Image</th>
+											<th className='px-6 py-4'>Product Name</th>
+											<th className='px-6 py-4'>Category</th>
+											<th className='px-6 py-4 text-center'>Stock Level</th>
+											<th className='px-6 py-4'>Premium Price</th>
+											<th className='px-6 py-4'>Tags & Flags</th>
+											<th className='px-6 py-4 text-right'>Actions</th>
+										</tr>
+									</thead>
+									<tbody className='divide-y divide-outline-variant/10'>
+										{filteredProducts.map((product) => {
+											// Calculate discount percentage if oldPrice exists
+											let discountPercent = 0;
+											if (product.oldPrice && Number(product.oldPrice) > Number(product.price)) {
+												discountPercent = Math.round((1 - Number(product.price) / Number(product.oldPrice)) * 100);
+											}
+
+											return (
+												<tr key={product.id} className='hover:bg-surface-container-low/40 transition-colors group'>
+													<td className='px-6 py-5'>
+														<div className='w-16 h-20 rounded-lg overflow-hidden border border-outline-variant/30 shadow-sm bg-surface-container flex items-center justify-center'>
+															<img 
+																className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' 
+																src={product.images?.[0]?.url || PLACEHOLDER_IMAGE} 
+																alt={product.title} 
+																onError={(e) => { e.target.src = PLACEHOLDER_IMAGE; }}
+															/>
+														</div>
+													</td>
+													<td className='px-6 py-5'>
+														<p className='font-bold text-primary'>{product.title}</p>
+														<span className='text-[10px] text-on-surface-variant/70 uppercase tracking-wider'>SKU: {product.sku || product.id.substring(0, 8).toUpperCase()}</span>
+													</td>
+													<td className='px-6 py-5'>
+														<span className='px-2.5 py-1 rounded-full bg-secondary-container/10 text-primary text-xs font-semibold border border-outline-variant/10'>
+															{product.category?.name || "Sacred Collection"}
+														</span>
+													</td>
+													<td className='px-6 py-5 text-center'>
+														<div className='flex flex-col items-center gap-1.5'>
+															<div className='w-24 h-1.5 bg-outline-variant/30 rounded-full overflow-hidden'>
+																<div
+																	className={`h-full ${product.stock <= 5 ? "bg-red-500" : "bg-linear-to-r from-[#E7C96F] to-[#ffdfa0]"}`}
+																	style={{ width: `${Math.min(product.stock * 2, 100)}%` }}
+																/>
+															</div>
+															<span className='text-xs font-semibold text-on-surface-variant/80'>{product.stock} units</span>
+														</div>
+													</td>
+													<td className='px-6 py-5'>
+														<div className='flex flex-col'>
+															<p className='font-serif font-bold text-primary text-lg'>₹{Number(product.price).toLocaleString("en-IN")}</p>
+															{product.oldPrice && Number(product.oldPrice) > Number(product.price) && (
+																<div className='flex items-center gap-1.5 mt-0.5'>
+																	<span className='text-xs text-on-surface-variant/60 line-through'>₹{Number(product.oldPrice).toLocaleString("en-IN")}</span>
+																	<span className='text-[9px] font-bold text-tertiary-fixed bg-tertiary-fixed/15 px-1.5 py-0.5 rounded'>
+																		{discountPercent}% OFF
+																	</span>
+																</div>
+															)}
+														</div>
+													</td>
+													<td className='px-6 py-5'>
+														<div className='flex flex-wrap gap-1.5 max-w-45'>
+															{product.isFestivalWear && (
+																<span className='px-2 py-0.5 text-[9px] font-bold rounded bg-amber-50 text-amber-700 border border-amber-200 uppercase tracking-wider'>Festival</span>
+															)}
+															{product.isNewArrival && (
+																<span className='px-2 py-0.5 text-[9px] font-bold rounded bg-purple-50 text-purple-700 border border-purple-200 uppercase tracking-wider'>New</span>
+															)}
+															{product.isBestSeller && (
+																<span className='px-2 py-0.5 text-[9px] font-bold rounded bg-green-50 text-green-700 border border-green-200 uppercase tracking-wider'>Best</span>
+															)}
+															{product.isFeatured && (
+																<span className='px-2 py-0.5 text-[9px] font-bold rounded bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider'>Featured</span>
+															)}
+															{!product.isFestivalWear && !product.isNewArrival && !product.isBestSeller && !product.isFeatured && (
+																<span className='text-xs text-on-surface-variant/50 italic'>Standard Attire</span>
+															)}
+														</div>
+													</td>
+													<td className='px-6 py-5 text-right'>
+														<div className='flex items-center gap-2 justify-end'>
+															<button
+																onClick={() => handleEditClick(product)}
+																className='p-2 hover:bg-tertiary-fixed/15 rounded-lg text-primary transition-colors focus:outline-none cursor-pointer'>
+																<span className='material-symbols-outlined text-[18px]' data-icon='edit'>edit</span>
+															</button>
+															<button
+																onClick={() => handleDeleteProduct(product.id)}
+																className='p-2 hover:bg-red-50 rounded-lg text-red-600 transition-colors focus:outline-none cursor-pointer'>
+																<span className='material-symbols-outlined text-[18px]' data-icon='delete'>delete</span>
+															</button>
+														</div>
+													</td>
+												</tr>
+											);
+										})}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					)}
 				</main>
 			</div>
 
-			{/* Add Product Modal */}
+			{/* Add/Edit Product Modal */}
 			{showAddModal && (
 				<div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn'>
-					<div className='bg-surface w-full max-w-md rounded-2xl overflow-hidden shadow-2xl p-6 border border-outline-variant/30'>
-						<div className='flex justify-between items-center mb-6'>
-							<h3 className='font-serif text-2xl font-bold text-primary'>Enshrine Deity Product</h3>
-							<button onClick={() => setShowAddModal(false)} className='text-outline-variant hover:text-primary focus:outline-none'>
+					<div className='bg-surface w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl border border-outline-variant/30 flex flex-col max-h-[90vh]'>
+						{/* Modal Header */}
+						<div className='flex justify-between items-center px-6 py-5 border-b border-outline-variant/15 bg-surface-container-low'>
+							<h3 className='font-serif text-2xl font-bold text-primary'>
+								{isEditing ? "Revise Deity Product" : "Enshrine Deity Product"}
+							</h3>
+							<button onClick={() => setShowAddModal(false)} className='text-outline-variant hover:text-primary focus:outline-none cursor-pointer'>
 								<span className='material-symbols-outlined' data-icon='close'>close</span>
 							</button>
 						</div>
 
-						<form onSubmit={handleAddProduct} className='space-y-4'>
-							<div>
-								<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
-									Product Name
-								</label>
-								<input
-									value={newProduct.name}
-									onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-									className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
-									placeholder='e.g. Divine Silk Poshak'
-									type='text'
-									required
-								/>
-							</div>
-
-							<div>
-								<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
-									Category
-								</label>
-								<select
-									value={newProduct.category}
-									onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-									className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'>
-									<option value='Sacred Attire'>Sacred Attire</option>
-									<option value='Ornaments'>Ornaments</option>
-									<option value='Accessories'>Accessories</option>
-								</select>
-							</div>
-
-							<div className='grid grid-cols-2 gap-4'>
+						{/* Modal Body / Scrollable Form */}
+						<form onSubmit={handleSubmitProduct} className='flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8'>
+							
+							{/* LEFT COLUMN: Image & Flags */}
+							<div className='space-y-6'>
+								{/* 1. PRODUCT IMAGE UPLOAD COLUMN */}
 								<div>
 									<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
-										Price (INR)
+										Product Image(s) <span className='text-red-500'>*</span>
+									</label>
+									
+									<div 
+										onDragOver={handleDragOver}
+										onDrop={handleDrop}
+										className='border-2 border-dashed border-outline-variant/50 rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer relative group'
+									>
+										<input 
+											type='file' 
+											accept='image/*' 
+											multiple
+											onChange={handleImageChange}
+											className='absolute inset-0 opacity-0 cursor-pointer'
+										/>
+										<div className='flex flex-col items-center justify-center gap-2'>
+											<span className='material-symbols-outlined text-[36px] text-tertiary group-hover:scale-110 transition-transform duration-300'>cloud_upload</span>
+											<p className='text-sm font-bold text-primary'>Drag & Drop or Click to Upload</p>
+											<p className='text-xs text-on-surface-variant/60'>PNG, JPG or JPEG (Max 5MB per file)</p>
+										</div>
+									</div>
+
+									{/* Image Previews */}
+									{imagePreviews.length > 0 && (
+										<div className='grid grid-cols-3 gap-3 mt-4'>
+											{imagePreviews.map((preview, index) => (
+												<div key={index} className='aspect-4/5 rounded-lg border border-outline-variant/30 overflow-hidden relative group bg-surface-container shadow-sm'>
+													<img src={preview} alt='Preview' className='w-full h-full object-cover' />
+													<button 
+														type='button'
+														onClick={() => removeSelectedImage(index)}
+														className='absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow focus:outline-none transition-all scale-0 group-hover:scale-100 flex items-center justify-center'
+													>
+														<span className='material-symbols-outlined text-xs' style={{ fontSize: "14px" }}>close</span>
+													</button>
+												</div>
+											))}
+										</div>
+									)}
+								</div>
+
+								{/* 3. FLAG/PARAMETER CHECKBOXES (Festival Wear, New Arrival, etc.) */}
+								<div className='bg-surface-container-low p-4 rounded-xl border border-outline-variant/15 space-y-4'>
+									<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 pb-2 border-b border-outline-variant/10'>
+										Special Attire Tags
+									</label>
+									
+									<div className='grid grid-cols-2 gap-4'>
+										<label className='flex items-center gap-3 cursor-pointer group relative'>
+											<input 
+												type='checkbox'
+												checked={newProduct.isFestivalWear}
+												onChange={(e) => setNewProduct({ ...newProduct, isFestivalWear: e.target.checked })}
+												className='peer appearance-none w-5 h-5 border-[1.5px] border-outline-variant/40 rounded-sm checked:bg-primary checked:border-primary transition-all cursor-pointer'
+											/>
+											<span className='material-symbols-outlined absolute text-[14px] text-surface opacity-0 peer-checked:opacity-100 pointer-events-none' style={{ marginLeft: "3px" }}>check</span>
+											<span className='text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors ml-1'>Festival Wear</span>
+										</label>
+
+										<label className='flex items-center gap-3 cursor-pointer group relative'>
+											<input 
+												type='checkbox'
+												checked={newProduct.isNewArrival}
+												onChange={(e) => setNewProduct({ ...newProduct, isNewArrival: e.target.checked })}
+												className='peer appearance-none w-5 h-5 border-[1.5px] border-outline-variant/40 rounded-sm checked:bg-primary checked:border-primary transition-all cursor-pointer'
+											/>
+											<span className='material-symbols-outlined absolute text-[14px] text-surface opacity-0 peer-checked:opacity-100 pointer-events-none' style={{ marginLeft: "3px" }}>check</span>
+											<span className='text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors ml-1'>New Arrival</span>
+										</label>
+
+										<label className='flex items-center gap-3 cursor-pointer group relative'>
+											<input 
+												type='checkbox'
+												checked={newProduct.isBestSeller}
+												onChange={(e) => setNewProduct({ ...newProduct, isBestSeller: e.target.checked })}
+												className='peer appearance-none w-5 h-5 border-[1.5px] border-outline-variant/40 rounded-sm checked:bg-primary checked:border-primary transition-all cursor-pointer'
+											/>
+											<span className='material-symbols-outlined absolute text-[14px] text-surface opacity-0 peer-checked:opacity-100 pointer-events-none' style={{ marginLeft: "3px" }}>check</span>
+											<span className='text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors ml-1'>Best Seller</span>
+										</label>
+
+										<label className='flex items-center gap-3 cursor-pointer group relative'>
+											<input 
+												type='checkbox'
+												checked={newProduct.isFeatured}
+												onChange={(e) => setNewProduct({ ...newProduct, isFeatured: e.target.checked })}
+												className='peer appearance-none w-5 h-5 border-[1.5px] border-outline-variant/40 rounded-sm checked:bg-primary checked:border-primary transition-all cursor-pointer'
+											/>
+											<span className='material-symbols-outlined absolute text-[14px] text-surface opacity-0 peer-checked:opacity-100 pointer-events-none' style={{ marginLeft: "3px" }}>check</span>
+											<span className='text-xs font-bold text-on-surface-variant group-hover:text-primary transition-colors ml-1'>Featured Product</span>
+										</label>
+									</div>
+								</div>
+
+								{/* Live Discount Calculator Preview */}
+								{newProduct.price && newProduct.oldPrice && Number(newProduct.oldPrice) > Number(newProduct.price) && (
+									<div className='p-3 bg-green-50 border border-green-200 text-green-800 rounded-xl text-xs flex items-center justify-between font-semibold'>
+										<span className='flex items-center gap-1.5'>
+											<span className='material-symbols-outlined text-[16px]'>local_offer</span>
+											Live Storefront Discount Badge:
+										</span>
+										<span className='bg-green-700 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-bounce'>
+											{Math.round((1 - Number(newProduct.price) / Number(newProduct.oldPrice)) * 100)}% OFF
+										</span>
+									</div>
+								)}
+							</div>
+
+							{/* RIGHT COLUMN: Text parameters & details */}
+							<div className='space-y-4'>
+								{/* Product Name */}
+								<div>
+									<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
+										Product Name <span className='text-red-500'>*</span>
 									</label>
 									<input
-										value={newProduct.price}
-										onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+										value={newProduct.title}
+										onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
 										className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
-										placeholder='e.g. 8499'
-										type='number'
+										placeholder='e.g. Divine Silk Poshak'
+										type='text'
 										required
 									/>
 								</div>
+
+								{/* Category Selection */}
+								<div>
+									<div className='flex justify-between items-center mb-2'>
+										<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80'>
+											Category <span className='text-red-500'>*</span>
+										</label>
+										<button 
+											type='button' 
+											onClick={() => setShowCategoryInput(!showCategoryInput)}
+											className='text-[10px] uppercase font-bold text-tertiary flex items-center gap-1 hover:underline focus:outline-none cursor-pointer'
+										>
+											<span className='material-symbols-outlined text-xs' style={{ fontSize: "12px" }}>add</span>
+											New Category
+										</button>
+									</div>
+
+									{/* Inline Category Creation Input */}
+									{showCategoryInput && (
+										<div className='flex items-center gap-2 mb-3 bg-surface-container-low p-2 rounded-lg border border-outline-variant/15 animate-fadeIn'>
+											<input
+												value={newCategoryName}
+												onChange={(e) => setNewCategoryName(e.target.value)}
+												className='flex-1 bg-surface border border-outline-variant/20 rounded p-1.5 text-xs text-on-surface'
+												placeholder='e.g. Bansuri'
+												type='text'
+											/>
+											<button
+												type='button'
+												onClick={handleAddCategoryInline}
+												className='bg-primary text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-primary-container transition-colors cursor-pointer'
+											>
+												Add
+											</button>
+										</div>
+									)}
+
+									<select
+										value={newProduct.categoryId}
+										onChange={(e) => setNewProduct({ ...newProduct, categoryId: e.target.value })}
+										className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface font-sans'
+										required
+									>
+										{categories.length === 0 ? (
+											<option value=''>No Categories Available</option>
+										) : (
+											categories.map((cat) => (
+												<option key={cat.id} value={cat.id}>{cat.name}</option>
+											))
+										)}
+									</select>
+								</div>
+
+								{/* Prices & Stock Grid */}
+								<div className='grid grid-cols-3 gap-4'>
+									{/* Selling Price */}
+									<div>
+										<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
+											Price (INR) <span className='text-red-500'>*</span>
+										</label>
+										<input
+											value={newProduct.price}
+											onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+											className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
+											placeholder='Selling (e.g. 3825)'
+											type='number'
+											required
+										/>
+									</div>
+									
+									{/* 2. OLD PRICE INPUT COLUMN */}
+									<div>
+										<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
+											Old Price (INR)
+										</label>
+										<input
+											value={newProduct.oldPrice}
+											onChange={(e) => setNewProduct({ ...newProduct, oldPrice: e.target.value })}
+											className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
+											placeholder='Original (e.g. 4500)'
+											type='number'
+										/>
+									</div>
+
+									{/* Stock */}
+									<div>
+										<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
+											Stock <span className='text-red-500'>*</span>
+										</label>
+										<input
+											value={newProduct.stock}
+											onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+											className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
+											placeholder='e.g. 42'
+											type='number'
+											required
+										/>
+									</div>
+								</div>
+
+								{/* 4. PRODUCT DESCRIPTION COLUMN */}
 								<div>
 									<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
-										Stock level
+										Product Description <span className='text-red-500'>*</span>
 									</label>
-									<input
-										value={newProduct.stock}
-										onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-										className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
-										placeholder='e.g. 42'
-										type='number'
+									<textarea
+										value={newProduct.description}
+										onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+										className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface min-h-30'
+										placeholder='Describe the divine craftsmanship, materials, size guides, and spiritual narratives of this deity piece...'
 										required
 									/>
 								</div>
 							</div>
 
-							<button
-								type='submit'
-								className='w-full bg-primary text-tertiary-fixed font-bold rounded-lg py-3 hover:bg-primary-container transition-all shadow-md transform active:scale-95 flex items-center justify-center gap-2 mt-6'>
-								<span className='material-symbols-outlined text-[18px]'>add</span>
-								<span>Add Deity Product</span>
-							</button>
+							{/* Actions (Span 2 Columns) */}
+							<div className='col-span-1 md:col-span-2 border-t border-outline-variant/15 pt-5 flex items-center justify-end gap-3'>
+								<button
+									type='button'
+									onClick={() => setShowAddModal(false)}
+									className='px-5 py-2.5 rounded-lg border border-outline-variant/30 text-primary font-bold hover:bg-surface-container-low transition-colors cursor-pointer'
+								>
+									Cancel
+								</button>
+								<button
+									type='submit'
+									className='bg-primary text-white font-bold rounded-lg px-6 py-2.5 hover:bg-primary-container transition-all shadow-md flex items-center gap-2 cursor-pointer'
+								>
+									<span className='material-symbols-outlined text-[18px]'>
+										{isEditing ? "check" : "add"}
+									</span>
+									<span>{isEditing ? "Save Modifications" : "Enshrine Deity Product"}</span>
+								</button>
+							</div>
+
 						</form>
 					</div>
 				</div>

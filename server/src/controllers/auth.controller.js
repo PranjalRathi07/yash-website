@@ -180,3 +180,93 @@ export const getMe = async (req, res) => {
 		});
 	}
 };
+
+export const getAllUsersAdmin = async (req, res) => {
+	try {
+		const users = await prisma.user.findMany({
+			where: {
+				role: "CUSTOMER",
+			},
+			include: {
+				orders: true,
+			},
+			orderBy: {
+				createdAt: "desc",
+			},
+		});
+
+		const formattedUsers = users.map((user) => {
+			const totalSpend = user.orders
+				.filter((o) => o.paymentStatus === "PAID")
+				.reduce((acc, order) => acc + Number(order.finalAmount), 0);
+
+			return {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				phone: user.phone,
+				role: user.role,
+				isActive: user.isActive,
+				ordersCount: user.orders.length,
+				totalSpend: totalSpend,
+				createdAt: user.createdAt,
+			};
+		});
+
+		return res.status(200).json({
+			success: true,
+			count: formattedUsers.length,
+			users: formattedUsers,
+		});
+	} catch (error) {
+		console.error("Get all users admin error:", error);
+		return res.status(500).json({
+			success: false,
+			message: "Failed to fetch users",
+			error: error.message,
+		});
+	}
+};
+
+export const toggleUserStatusAdmin = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { isActive } = req.body;
+
+		const user = await prisma.user.findUnique({
+			where: { id },
+		});
+
+		if (!user) {
+			return res.status(404).json({
+				success: false,
+				message: "Devotee account not found",
+			});
+		}
+
+		const updatedUser = await prisma.user.update({
+			where: { id },
+			data: {
+				isActive: isActive === undefined ? !user.isActive : isActive,
+			},
+		});
+
+		return res.status(200).json({
+			success: true,
+			message: `Devotee account ${updatedUser.isActive ? "activated" : "deactivated"} successfully`,
+			user: {
+				id: updatedUser.id,
+				name: updatedUser.name,
+				email: updatedUser.email,
+				isActive: updatedUser.isActive,
+			},
+		});
+	} catch (error) {
+		console.error("Toggle user status error:", error);
+		return res.status(500).json({
+			success: false,
+			message: "Failed to toggle devotee account status",
+			error: error.message,
+		});
+	}
+};

@@ -35,7 +35,7 @@ export default function Sidebar({ activeTab }) {
 							onClick={() => navigate(tab.path)}
 							className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 font-medium text-left group cursor-pointer ${
 								isActive
-									? "text-tertiary-fixed bg-secondary-container golden-glow font-semibold"
+									? "text-tertiary-fixed bg-secondary-container font-semibold"
 									: "text-white/70 hover:text-tertiary-fixed hover:bg-primary-container"
 							}`}>
 							<span

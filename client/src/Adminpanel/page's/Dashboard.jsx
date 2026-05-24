@@ -1,44 +1,8 @@
-/** @format */
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
-
-const METRICS = [
-	{
-		id: "revenue",
-		label: "TOTAL REVENUE",
-		value: "₹4,28,500",
-		change: "+12.5%",
-		icon: "payments",
-		changeColor: "text-green-600 bg-green-50",
-	},
-	{
-		id: "orders",
-		label: "SACRED ORDERS",
-		value: "1,204",
-		change: "+8.2%",
-		icon: "eco",
-		changeColor: "text-green-600 bg-green-50",
-	},
-	{
-		id: "devotees",
-		label: "NEW DEVOTEES",
-		value: "842",
-		change: "New",
-		icon: "person_celebrate",
-		changeColor: "text-[#D4A017] bg-[#f5ead4]/50",
-	},
-	{
-		id: "coupons",
-		label: "ACTIVE COUPONS",
-		value: "14",
-		change: "Active",
-		icon: "sell",
-		changeColor: "text-[#081B4B] bg-[#f5ead4]",
-	},
-];
+import api from "../../services/api";
 
 const SALES_DATA = [
 	{ month: "Jan", amount: "₹12k", height: "h-[40%]", hoverHeight: "hover:h-[50%]" },
@@ -50,62 +14,44 @@ const SALES_DATA = [
 	{ month: "Jul", amount: "₹13k", height: "h-[45%]", hoverHeight: "hover:h-[55%]" },
 ];
 
-const RECENT_ORDERS = [
-	{
-		id: "#KV-8902",
-		devotee: "Aditi Rao",
-		initials: "AR",
-		date: "Oct 24, 2023",
-		collection: "Banarasi Silk",
-		amount: "₹42,500",
-		status: "Delivered",
-	},
-	{
-		id: "#KV-8903",
-		devotee: "Vikram Khanna",
-		initials: "VK",
-		date: "Oct 25, 2023",
-		collection: "Gold Jewelry",
-		amount: "₹1,12,000",
-		status: "Shipped",
-	},
-	{
-		id: "#KV-8904",
-		devotee: "Sita Mishra",
-		initials: "SM",
-		date: "Oct 25, 2023",
-		collection: "Temple Murti",
-		amount: "₹18,200",
-		status: "Processing",
-	},
-	{
-		id: "#KV-8905",
-		devotee: "Rajiv Jain",
-		initials: "RJ",
-		date: "Oct 26, 2023",
-		collection: "Silken Veil",
-		amount: "₹8,900",
-		status: "Delivered",
-	},
-	{
-		id: "#KV-8906",
-		devotee: "Neelam Mittal",
-		initials: "NM",
-		date: "Oct 26, 2023",
-		collection: "Banarasi Silk",
-		amount: "₹58,000",
-		status: "Processing",
-	},
-];
-
 export default function Dashboard() {
 	const navigate = useNavigate();
+	const [stats, setStats] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
 
 	// Time state
 	const [time, setTime] = useState(new Date());
 
 	// Interaction States
 	const [hoveredBar, setHoveredBar] = useState(null);
+
+	const fetchDashboardData = async () => {
+		try {
+			setError(null);
+			const response = await api.get("/api/admin/dashboard");
+			if (response.data.success) {
+				setStats(response.data.stats);
+			}
+		} catch (err) {
+			console.error("Dashboard statistics load error:", err);
+			setError("Failed to retrieve live metrics from the temple database.");
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	// Fetch stats on mount safely
+	useEffect(() => {
+		let isMounted = true;
+		const loadData = async () => {
+			if (isMounted) {
+				await fetchDashboardData();
+			}
+		};
+		loadData();
+		return () => { isMounted = false; };
+	}, []);
 
 	// Fetch current date/time
 	useEffect(() => {
@@ -124,6 +70,43 @@ export default function Dashboard() {
 		const timeOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true };
 		return date.toLocaleTimeString("en-US", timeOptions);
 	};
+
+	const dashboardMetrics = stats
+		? [
+				{
+					id: "revenue",
+					label: "TOTAL REVENUE",
+					value: `₹${Number(stats.totalRevenue).toLocaleString("en-IN")}`,
+					change: "Live DB",
+					icon: "payments",
+					changeColor: "text-green-600 bg-green-50",
+				},
+				{
+					id: "orders",
+					label: "SACRED ORDERS",
+					value: stats.totalOrders.toString(),
+					change: `Pending: ${stats.pendingOrders}`,
+					icon: "eco",
+					changeColor: stats.pendingOrders > 0 ? "text-amber-600 bg-amber-50" : "text-green-600 bg-green-50",
+				},
+				{
+					id: "devotees",
+					label: "TOTAL DEVOTEES",
+					value: stats.totalCustomers.toString(),
+					change: "Registered",
+					icon: "person_celebrate",
+					changeColor: "text-[#D4A017] bg-[#f5ead4]/50",
+				},
+				{
+					id: "products",
+					label: "SACRED ATTRIBUTES",
+					value: stats.totalProducts.toString(),
+					change: `Low Stock: ${stats.lowStockProducts.length}`,
+					icon: "sell",
+					changeColor: stats.lowStockProducts.length > 0 ? "text-red-600 bg-red-50" : "text-[#081B4B] bg-[#f5ead4]",
+				},
+		  ]
+		: [];
 
 	return (
 		<div className='min-h-screen bg-surface font-sans text-on-surface flex'>
@@ -156,30 +139,42 @@ export default function Dashboard() {
 					</div>
 
 					{/* Metrics Grid */}
-					<div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12'>
-						{METRICS.map((metric) => (
-							<div
-								key={metric.id}
-								className='bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant/20 hover:border-tertiary-fixed hover:-translate-y-1 transition-all duration-300 group cursor-pointer'>
-								<div className='flex justify-between items-start mb-4'>
-									<div className='p-3 rounded-xl bg-tertiary-fixed/15 text-primary group-hover:scale-110 transition-transform duration-300'>
-										<span className='material-symbols-outlined' data-icon={metric.icon}>
-											{metric.icon}
+					{loading ? (
+						<div className='flex flex-col items-center justify-center p-12 bg-surface rounded-2xl border border-outline-variant/20 shadow-sm mb-12'>
+							<span className='material-symbols-outlined text-[48px] text-tertiary animate-spin mb-4'>sync</span>
+							<p className='text-on-surface-variant font-serif text-lg'>Retrieving sacred numbers from database...</p>
+						</div>
+					) : error ? (
+						<div className='flex flex-col items-center justify-center p-12 bg-surface rounded-2xl border border-red-200 shadow-sm mb-12'>
+							<span className='material-symbols-outlined text-[48px] text-red-600 mb-4'>error</span>
+							<p className='text-red-700 font-bold'>{error}</p>
+						</div>
+					) : (
+						<div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-12'>
+							{dashboardMetrics.map((metric) => (
+								<div
+									key={metric.id}
+									className='bg-surface p-6 rounded-2xl shadow-sm border border-outline-variant/20 hover:border-tertiary-fixed hover:-translate-y-1 transition-all duration-300 group cursor-pointer'>
+									<div className='flex justify-between items-start mb-4'>
+										<div className='p-3 rounded-xl bg-tertiary-fixed/15 text-primary group-hover:scale-110 transition-transform duration-300'>
+											<span className='material-symbols-outlined' data-icon={metric.icon}>
+												{metric.icon}
+											</span>
+										</div>
+										<span className={`text-[10px] font-bold px-2 py-1 rounded ${metric.changeColor}`}>
+											{metric.change}
 										</span>
 									</div>
-									<span className={`text-[10px] font-bold px-2 py-1 rounded ${metric.changeColor}`}>
-										{metric.change}
-									</span>
+									<p className='text-xs uppercase tracking-wider text-on-surface-variant/70 font-semibold'>
+										{metric.label}
+									</p>
+									<h3 className='font-serif text-3xl font-bold text-primary mt-2 tracking-wide'>
+										{metric.value}
+									</h3>
 								</div>
-								<p className='text-xs uppercase tracking-wider text-on-surface-variant/70 font-semibold'>
-									{metric.label}
-								</p>
-								<h3 className='font-serif text-3xl font-bold text-primary mt-2 tracking-wide'>
-									{metric.value}
-								</h3>
-							</div>
-						))}
-					</div>
+							))}
+						</div>
+					)}
 
 					{/* Charts and Visualization (Bento Style) */}
 					<div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12'>
@@ -190,10 +185,10 @@ export default function Dashboard() {
 									Sales Growth Narrative
 								</h4>
 								<div className='flex gap-2 bg-surface-container p-1 rounded-full border border-outline-variant/10'>
-									<button className='px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-tertiary-fixed shadow-sm'>
+									<button className='px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-tertiary-fixed shadow-sm cursor-pointer'>
 										Monthly
 									</button>
-									<button className='px-4 py-1.5 rounded-full text-xs font-bold text-on-surface-variant/80 hover:bg-surface-container-high transition-colors'>
+									<button className='px-4 py-1.5 rounded-full text-xs font-bold text-on-surface-variant/80 hover:bg-surface-container-high transition-colors cursor-pointer'>
 										Yearly
 									</button>
 								</div>
@@ -271,6 +266,7 @@ export default function Dashboard() {
 										strokeDashoffset='-180'
 										strokeLinecap='round'
 										strokeWidth='10'
+										className='transition-all duration-500 hover:stroke-width-[12px]'
 									/>
 								</svg>
 								<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center'>
@@ -308,7 +304,7 @@ export default function Dashboard() {
 							</h4>
 							<button
 								onClick={() => navigate("/admin/orders")}
-								className='text-primary font-bold text-sm hover:underline decoration-tertiary-fixed decoration-2 underline-offset-6 transition-all'>
+								className='text-primary font-bold text-sm hover:underline decoration-tertiary-fixed decoration-2 underline-offset-6 transition-all cursor-pointer'>
 								View All Orders
 							</button>
 						</div>
@@ -316,56 +312,71 @@ export default function Dashboard() {
 							<table className='w-full text-left border-collapse'>
 								<thead className='bg-surface-container text-on-surface-variant/80 font-semibold uppercase tracking-wider text-[11px] border-b border-outline-variant/20'>
 									<tr>
-										<th className='px-8 py-4'>Order ID</th>
+										<th className='px-8 py-4'>Order Number</th>
 										<th className='px-8 py-4'>Devotee</th>
 										<th className='px-8 py-4'>Date</th>
-										<th className='px-8 py-4'>Collection</th>
+										<th className='px-8 py-4'>Payment Mode</th>
 										<th className='px-8 py-4'>Amount</th>
 										<th className='px-8 py-4'>Status</th>
 									</tr>
 								</thead>
 								<tbody className='divide-y divide-outline-variant/10'>
-									{RECENT_ORDERS.map((order, idx) => (
-										<tr key={idx} className='hover:bg-surface-container-low/40 transition-colors group'>
-											<td className='px-8 py-5 font-bold text-primary tracking-wide'>{order.id}</td>
-											<td className='px-8 py-5'>
-												<div className='flex items-center gap-3'>
-													<div className='w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-xs text-primary border border-tertiary-fixed/30'>
-														{order.initials}
-													</div>
-													<span className='font-medium'>{order.devotee}</span>
-												</div>
-											</td>
-											<td className='px-8 py-5 text-on-surface-variant/80 text-sm'>{order.date}</td>
-											<td className='px-8 py-5'>
-												<span className='px-3 py-1 rounded-full bg-secondary-container/10 text-primary text-xs font-semibold border border-outline-variant/10'>
-													{order.collection}
-												</span>
-											</td>
-											<td className='px-8 py-5 font-bold text-primary'>{order.amount}</td>
-											<td className='px-8 py-5'>
-												<span
-													className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-														order.status === "Delivered"
-															? "bg-green-50 text-green-700 border border-green-200"
-															: order.status === "Shipped"
-															? "bg-blue-50 text-blue-700 border border-blue-200"
-															: "bg-amber-50 text-amber-700 border border-amber-200"
-													}`}>
-													<span
-														className={`w-1.5 h-1.5 rounded-full ${
-															order.status === "Delivered"
-																? "bg-green-500"
-																: order.status === "Shipped"
-																? "bg-blue-500"
-																: "bg-amber-500 animate-pulse"
-														}`}
-													/>
-													{order.status}
-												</span>
-											</td>
+									{loading ? (
+										<tr>
+											<td colSpan={6} className='text-center p-8 text-on-surface-variant/60 font-serif italic'>Loading recent requests...</td>
 										</tr>
-									))}
+									) : error || !stats?.recentOrders || stats.recentOrders.length === 0 ? (
+										<tr>
+											<td colSpan={6} className='text-center p-8 text-on-surface-variant/60 font-serif italic'>No recent requests logged in sanctuary.</td>
+										</tr>
+									) : (
+										stats.recentOrders.map((order, idx) => {
+											const initials = order.fullName.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) || "KV";
+											const orderDate = new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+											
+											return (
+												<tr key={order.id || idx} className='hover:bg-surface-container-low/40 transition-colors group'>
+													<td className='px-8 py-5 font-bold text-primary tracking-wide'>{order.orderNumber}</td>
+													<td className='px-8 py-5'>
+														<div className='flex items-center gap-3'>
+															<div className='w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-bold text-xs text-primary border border-tertiary-fixed/30'>
+																{initials}
+															</div>
+															<span className='font-medium'>{order.fullName}</span>
+														</div>
+													</td>
+													<td className='px-8 py-5 text-on-surface-variant/80 text-sm'>{orderDate}</td>
+													<td className='px-8 py-5'>
+														<span className='px-3 py-1 rounded-full bg-secondary-container/10 text-primary text-xs font-semibold border border-outline-variant/10'>
+															{order.paymentMethod || "COD"}
+														</span>
+													</td>
+													<td className='px-8 py-5 font-bold text-primary'>₹{Number(order.finalAmount).toLocaleString("en-IN")}</td>
+													<td className='px-8 py-5'>
+														<span
+															className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+																order.orderStatus === "DELIVERED"
+																	? "bg-green-50 text-green-700 border border-green-200"
+																	: order.orderStatus === "SHIPPED"
+																	? "bg-blue-50 text-blue-700 border border-blue-200"
+																	: "bg-amber-50 text-amber-700 border border-amber-200"
+															}`}>
+															<span
+																className={`w-1.5 h-1.5 rounded-full ${
+																	order.orderStatus === "DELIVERED"
+																		? "bg-green-500"
+																		: order.orderStatus === "SHIPPED"
+																		? "bg-blue-500"
+																		: "bg-amber-500 animate-pulse"
+																}`}
+															/>
+															{order.orderStatus}
+														</span>
+													</td>
+												</tr>
+											);
+										})
+									)}
 								</tbody>
 							</table>
 						</div>
