@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
+import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
 
 const prisma = new PrismaClient();
 
@@ -266,6 +267,109 @@ export const toggleUserStatusAdmin = async (req, res) => {
 		return res.status(500).json({
 			success: false,
 			message: "Failed to toggle devotee account status",
+			error: error.message,
+		});
+	}
+};
+
+export const updateProfile = async (req, res) => {
+	try {
+		const userId = req.user.id;
+		const { name, email, phone } = req.body;
+
+		if (!name) {
+			return res.status(400).json({
+				success: false,
+				message: "Name is required",
+			});
+		}
+
+		if (email && email !== req.user.email) {
+			const existingEmail = await prisma.user.findUnique({
+				where: { email },
+			});
+			if (existingEmail) {
+				return res.status(400).json({
+					success: false,
+					message: "Email is already in use by another devotee",
+				});
+			}
+		}
+
+		const updatedUser = await prisma.user.update({
+			where: { id: userId },
+			data: {
+				name,
+				email: email || null,
+				phone: phone || null,
+			},
+			select: {
+				id: true,
+				name: true,
+				email: true,
+				phone: true,
+				role: true,
+				isActive: true,
+			},
+		});
+
+		return res.status(200).json({
+			success: true,
+			message: "Sacred profile updated successfully",
+			user: updatedUser,
+		});
+	} catch (error) {
+		console.error("Update profile error:", error);
+		return res.status(500).json({
+			success: false,
+			message: "Failed to update profile",
+			error: error.message,
+		});
+	}
+};
+
+export const updateProfilePicture = async (req, res) => {
+	try {
+		const userId = req.user.id;
+
+		if (!req.file) {
+			return res.status(400).json({
+				success: false,
+				message: "Profile image file is required",
+			});
+		}
+
+		const result = await uploadToCloudinary(
+			req.file.buffer,
+			"yash-website/profiles",
+		);
+
+		const updatedUser = await prisma.user.update({
+			where: { id: userId },
+			data: {
+				profilePic: result.secure_url,
+			},
+			select: {
+				id: true,
+				name: true,
+				email: true,
+				phone: true,
+				role: true,
+				isActive: true,
+				profilePic: true,
+			},
+		});
+
+		return res.status(200).json({
+			success: true,
+			message: "Sacred profile picture updated successfully",
+			user: updatedUser,
+		});
+	} catch (error) {
+		console.error("Update profile picture error:", error);
+		return res.status(500).json({
+			success: false,
+			message: "Failed to upload profile picture",
 			error: error.message,
 		});
 	}

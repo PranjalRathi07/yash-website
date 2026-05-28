@@ -1,16 +1,32 @@
-/** @format */
-
-import React from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import api from "../services/api";
 
 export default function ProfileDashboard() {
 	const navigate = useNavigate();
+	const [localUser] = useState(() => {
+		const saved = localStorage.getItem("currentUser");
+		return saved ? JSON.parse(saved) : null;
+	});
+
+	const { data: currentUser } = useQuery({
+		queryKey: ["auth", "me"],
+		queryFn: async () => {
+			const res = await api.get("/api/auth/me");
+			if (res.data?.user) {
+				localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+			}
+			return res.data.user;
+		},
+		initialData: localUser,
+	});
 
 	return (
 		<div className='space-y-12'>
 			<div className='mb-12'>
 				<h1 className='font-serif text-6xl text-primary mb-2'>
-					Namaste, Arjuna Sharma
+					Namaste, {currentUser?.name || "Devotee"}
 				</h1>
 				<p className='text-on-surface-variant font-sans text-lg'>
 					Welcome back to your sacred sanctuary of style.
@@ -19,11 +35,19 @@ export default function ProfileDashboard() {
 			{/* User Overview */}
 			<section className='bg-surface-container-lowest rounded-md p-8 border-[0.5px] border-tertiary/20 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden'>
 				<div className='relative shrink-0'>
-					<img
-						alt='User Profile'
-						className='w-32 h-32 rounded-full object-cover border-2 border-tertiary/30 p-1'
-						src='https://lh3.googleusercontent.com/aida-public/AB6AXuDf6fjR-kfj0RQB-uijgi73sbnwMC831AuAxIuIVRW0b7XKUqPsUfTaz_5JYBh8QpwDVKuSNtujrDodXdfFruZv1Aeh5RZlvxSVN-CtoeVROj6XnvVhbMRgPF2NKsOLUb3Q2LApgmCX5OT6UtsVgAGNeskf61KNeJpn274Da6bAc8DZVtfjoeInqaPiSeev0SGb7d6K4WUdg2N1Pc8-ycVl89hiRkRrPxTzFcHZVNnOsezJH-R9LVdgwL4treH7R8hrkQFYgdg-V_7G'
-					/>
+					{currentUser?.profilePic ? (
+						<img
+							alt='User Profile'
+							className='w-32 h-32 rounded-full object-cover border-2 border-tertiary/30 p-1'
+							src={currentUser.profilePic}
+						/>
+					) : (
+						<div className='w-32 h-32 rounded-full border-2 border-tertiary/30 p-1 flex items-center justify-center bg-surface-container-low'>
+							<div className='w-full h-full rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary'>
+								<span className='material-symbols-outlined text-[48px]'>person</span>
+							</div>
+						</div>
+					)}
 					<div className='absolute bottom-2 right-2 bg-surface p-1 rounded-full text-tertiary'>
 						<span
 							className='material-symbols-outlined text-[20px]'
@@ -34,16 +58,16 @@ export default function ProfileDashboard() {
 				</div>
 
 				<div className='space-y-2 text-center md:text-left grow'>
-					<h2 className='font-serif text-3xl text-primary'>Arjuna Sharma</h2>
+					<h2 className='font-serif text-3xl text-primary'>{currentUser?.name || "Devotee"}</h2>
 					<p className='text-on-surface-variant font-sans flex justify-center md:justify-start items-center gap-2'>
 						<span className='material-symbols-outlined text-[18px]'>mail</span>
-						arjuna.sharma@divinemail.com
+						{currentUser?.email || "devotee@temple.com"}
 					</p>
 					<p className='text-on-surface-variant font-sans flex justify-center md:justify-start items-center gap-2'>
 						<span className='material-symbols-outlined text-[18px]'>
 							calendar_today
 						</span>
-						Member since Jan 2023
+						Member since Jan 2026
 					</p>
 				</div>
 

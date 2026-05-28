@@ -14,8 +14,8 @@ export default function Banners() {
 	// Upload modal states
 	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [newBanner, setNewBanner] = useState({
-		title: "",
-		subtitle: "",
+		page: "Home",
+		section: "Hero",
 		linkUrl: "",
 		priority: "0",
 		isActive: true,
@@ -93,15 +93,15 @@ export default function Banners() {
 
 	const handleUploadBanner = async (e) => {
 		e.preventDefault();
-		if (!newBanner.title || !bannerFile) {
+		if (!bannerFile) {
 			alert("Please fill all required fields, including the banner image.");
 			return;
 		}
 
 		try {
 			const formData = new FormData();
-			formData.append("title", newBanner.title);
-			formData.append("subtitle", newBanner.subtitle);
+			formData.append("page", newBanner.page);
+			formData.append("section", newBanner.section);
 			formData.append("linkUrl", newBanner.linkUrl);
 			formData.append("priority", newBanner.priority);
 			formData.append("isActive", newBanner.isActive.toString());
@@ -117,8 +117,8 @@ export default function Banners() {
 				alert("Sacred visual campaign created successfully!");
 				setShowUploadModal(false);
 				setNewBanner({
-					title: "",
-					subtitle: "",
+					page: "Home",
+					section: "Hero",
 					linkUrl: "",
 					priority: "0",
 					isActive: true,
@@ -136,8 +136,8 @@ export default function Banners() {
 	};
 
 	const filteredBanners = banners.filter((c) =>
-		c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-		(c.subtitle && c.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
+		c.page?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+		c.section?.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
 	return (
@@ -214,7 +214,7 @@ export default function Banners() {
 										<img
 											className='w-full h-full object-cover transition-transform duration-700 group-hover:scale-105'
 											src={camp.imageUrl || PLACEHOLDER_BANNER}
-											alt={camp.title}
+											alt={`${camp.page} - ${camp.section}`}
 											onError={(e) => { e.target.src = PLACEHOLDER_BANNER; }}
 										/>
 										<div className='absolute top-4 left-4 bg-primary text-tertiary-fixed px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-outline-variant/10'>
@@ -227,8 +227,8 @@ export default function Banners() {
 											<span className='text-xs font-semibold text-on-surface-variant/70 mb-2 block truncate'>
 												Redirects: {camp.linkUrl || "No Link Target"}
 											</span>
-											<h3 className='font-serif text-xl font-bold text-primary mb-2 leading-tight truncate'>{camp.title}</h3>
-											<p className='text-xs text-on-surface-variant/80 font-sans mb-6 line-clamp-2 h-8'>{camp.subtitle || "No description provided."}</p>
+											<h3 className='font-serif text-xl font-bold text-primary mb-2 leading-tight truncate'>{camp.page}</h3>
+											<p className='text-xs text-on-surface-variant/80 font-sans mb-6 line-clamp-2 h-8'>Section: {camp.section}</p>
 											
 											<div className='space-y-4 mb-6'>
 												<div className='flex items-center justify-between p-3 bg-surface-container rounded-xl border border-outline-variant/10'>
@@ -321,33 +321,46 @@ export default function Banners() {
 								</div>
 							</div>
 
-							{/* Title */}
-							<div>
-								<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
-									Campaign Title <span className='text-red-500'>*</span>
-								</label>
-								<input
-									value={newBanner.title}
-									onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })}
-									className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
-									placeholder='e.g. Divine Winter Collection'
-									type='text'
-									required
-								/>
-							</div>
-
-							{/* Subtitle */}
-							<div>
-								<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
-									Campaign Subtitle
-								</label>
-								<input
-									value={newBanner.subtitle}
-									onChange={(e) => setNewBanner({ ...newBanner, subtitle: e.target.value })}
-									className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
-									placeholder='e.g. Luxurious silken poshak to adorn your beloved deity.'
-									type='text'
-								/>
+							{/* Page & Section */}
+							<div className='grid grid-cols-2 gap-4'>
+								<div>
+									<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
+										Target Page <span className='text-red-500'>*</span>
+									</label>
+									<select
+										value={newBanner.page}
+										onChange={(e) => setNewBanner({ ...newBanner, page: e.target.value, section: e.target.value === "Home" ? "Hero" : "Top Banner" })}
+										className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
+										required
+									>
+										<option value="Home">Home Page</option>
+										<option value="Products">Products Page</option>
+										<option value="Categories">Categories Page</option>
+									</select>
+								</div>
+								
+								<div>
+									<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
+										Target Section <span className='text-red-500'>*</span>
+									</label>
+									<select
+										value={newBanner.section}
+										onChange={(e) => setNewBanner({ ...newBanner, section: e.target.value })}
+										className='w-full bg-surface-container border border-outline-variant/20 rounded-lg p-2.5 text-sm focus:ring-1 focus:ring-tertiary-fixed text-on-surface'
+										required
+									>
+										{newBanner.page === "Home" && (
+											<>
+												<option value="Hero">Hero Section</option>
+												<option value="Janmashtami Special">Janmashtami Special</option>
+												<option value="Featured Collection">Featured Collection</option>
+											</>
+										)}
+										{newBanner.page !== "Home" && (
+											<option value="Top Banner">Top Banner</option>
+										)}
+									</select>
+								</div>
 							</div>
 
 							{/* Grid Redirects & priority */}

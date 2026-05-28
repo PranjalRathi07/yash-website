@@ -1,10 +1,29 @@
 /** @format */
 
 // Checkout.jsx
-import React, { useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import api from "../services/api";
 
 export default function Checkout() {
 	const [selectedPayment, setSelectedPayment] = useState("card");
+
+	const [localUser] = useState(() => {
+		const saved = localStorage.getItem("currentUser");
+		return saved ? JSON.parse(saved) : null;
+	});
+
+	const { data: currentUser } = useQuery({
+		queryKey: ["auth", "me"],
+		queryFn: async () => {
+			const res = await api.get("/api/auth/me");
+			if (res.data?.user) {
+				localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+			}
+			return res.data.user;
+		},
+		initialData: localUser,
+	});
 
 	return (
 		<div className='bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col'>
@@ -26,7 +45,7 @@ export default function Checkout() {
 							<div className='bg-[#fdfaf5] p-6 rounded-md border-[0.5px] border-tertiary/30 flex justify-between items-start'>
 								<div>
 									<p className='font-sans text-sm font-semibold text-primary mb-1'>
-										Arjun Das
+										{currentUser?.name || "Devotee"}
 									</p>
 									<p className='font-sans text-sm text-on-surface-variant leading-relaxed'>
 										Vrindavan Dham, Sector 5, Lane 3
@@ -35,7 +54,7 @@ export default function Checkout() {
 										Near ISKCON Temple, Mathura, UP - 281121
 									</p>
 									<p className='font-sans text-sm text-on-surface-variant mt-2'>
-										+91 98765 43210
+										{currentUser?.phone || "+91 98765 43210"}
 									</p>
 								</div>
 								<button
@@ -202,7 +221,7 @@ export default function Checkout() {
 													<input
 														type='text'
 														placeholder='Enter Code'
-														className='bg-surface border-[0.5px] border-tertiary/30 rounded-md px-3 py-1.5 font-sans text-sm focus:outline-none focus:border-tertiary flex-1 max-w-[200px]'
+														className='bg-surface border-[0.5px] border-tertiary/30 rounded-md px-3 py-1.5 font-sans text-sm focus:outline-none focus:border-tertiary flex-1 max-w-50'
 													/>
 													<button
 														type='button'

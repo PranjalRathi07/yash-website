@@ -108,6 +108,33 @@ export default function Dashboard() {
 		  ]
 		: [];
 
+	const dynamicPillars = stats?.categoryPillars && stats.categoryPillars.length > 0
+		? stats.categoryPillars.map((pillar, idx) => {
+				const colors = [
+					{ color: "bg-[#E7C96F]", strokeColor: "#E7C96F" },
+					{ color: "bg-[#b88a0e]", strokeColor: "#b88a0e" },
+					{ color: "bg-[#102A66]", strokeColor: "#102A66" }
+				];
+				const defaultColor = colors[idx] || colors[2];
+				return {
+					label: pillar.label,
+					percent: pillar.percent,
+					value: pillar.value,
+					color: defaultColor.color,
+					strokeColor: defaultColor.strokeColor
+				};
+		  })
+		: [
+				{ label: "Banarasi Silks", percent: 68, value: "₹1.8L", color: "bg-[#E7C96F]", strokeColor: "#E7C96F" },
+				{ label: "Temple Jewelry", percent: 22, value: "₹85K", color: "bg-[#b88a0e]", strokeColor: "#b88a0e" },
+				{ label: "Murti Art", percent: 10, value: "₹42K", color: "bg-[#102A66]", strokeColor: "#102A66" }
+		  ];
+
+	const mainPillarPercent = dynamicPillars[0]?.percent || 0;
+	const c1Length = (dynamicPillars[0]?.percent / 100) * 251.2;
+	const c2Length = (dynamicPillars[1]?.percent / 100) * 251.2;
+	const c3Length = (dynamicPillars[2]?.percent / 100) * 251.2;
+
 	return (
 		<div className='min-h-screen bg-surface font-sans text-on-surface flex'>
 			<Sidebar activeTab="dashboard" />
@@ -194,32 +221,36 @@ export default function Dashboard() {
 								</div>
 							</div>
 
-							{/* Chart Mock Visualization */}
-							<div className='h-75 w-full flex items-end gap-5 px-4 relative'>
-								{SALES_DATA.map((bar, idx) => (
-									<div
-										key={idx}
-										onMouseEnter={() => setHoveredBar(idx)}
-										onMouseLeave={() => setHoveredBar(null)}
-										className={`flex-1 rounded-t-xl group relative cursor-pointer transition-all duration-500 ${
-											bar.special
-												? "bg-linear-to-t from-[#E7C96F] to-[#ffdfa0]"
-												: "bg-surface-container-high hover:bg-secondary-container"
-												} ${bar.height} ${bar.hoverHeight}`}>
-										{/* Floating Tooltip */}
+							{/* Chart Live Visualization */}
+							<div className='h-75 w-full flex items-end gap-3 md:gap-5 px-4 relative'>
+								{(stats?.salesGrowth || SALES_DATA).map((bar, idx) => {
+									const heightVal = bar.heightPercent !== undefined ? `${bar.heightPercent}%` : bar.height;
+									const amountVal = bar.amount;
+									
+									return (
 										<div
-											className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-tertiary-fixed text-[10px] py-1 px-2.5 rounded-lg shadow-md font-bold whitespace-nowrap transition-all duration-300 ${
-												hoveredBar === idx || bar.special ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
-											}`}>
-											{bar.amount}
+											key={idx}
+											onMouseEnter={() => setHoveredBar(idx)}
+											onMouseLeave={() => setHoveredBar(null)}
+											style={bar.heightPercent !== undefined ? { height: heightVal } : {}}
+											className={`flex-1 rounded-t-xl group relative cursor-pointer transition-all duration-500 bg-surface-container-high hover:bg-secondary-container ${
+												bar.heightPercent === undefined ? bar.height : ""
+											} ${bar.heightPercent === undefined ? bar.hoverHeight : ""}`}>
+											{/* Floating Tooltip */}
+											<div
+												className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-tertiary-fixed text-[10px] py-1 px-2.5 rounded-lg shadow-md font-bold whitespace-nowrap transition-all duration-300 ${
+													hoveredBar === idx ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
+												}`}>
+												{amountVal}
+											</div>
 										</div>
-									</div>
-								))}
+									);
+								})}
 							</div>
 
 							{/* Months labels */}
 							<div className='flex justify-between mt-4 px-4 text-xs font-semibold tracking-wider text-on-surface-variant/80 uppercase font-sans'>
-								{SALES_DATA.map((bar, idx) => (
+								{(stats?.salesGrowth || SALES_DATA).map((bar, idx) => (
 									<span key={idx} className='w-full text-center'>
 										{bar.month}
 									</span>
@@ -243,51 +274,66 @@ export default function Dashboard() {
 										r='40'
 										stroke='#102A66'
 										strokeWidth='10'
+										className='opacity-10'
 									/>
-									<circle
-										cx='50'
-										cy='50'
-										fill='transparent'
-										r='40'
-										stroke='#E7C96F'
-										strokeDasharray='180 251.2'
-										strokeDashoffset='0'
-										strokeLinecap='round'
-										strokeWidth='10'
-										className='transition-all duration-500 hover:stroke-width-[12px]'
-									/>
-									<circle
-										cx='50'
-										cy='50'
-										fill='transparent'
-										r='40'
-										stroke='#b88a0e'
-										strokeDasharray='60 251.2'
-										strokeDashoffset='-180'
-										strokeLinecap='round'
-										strokeWidth='10'
-										className='transition-all duration-500 hover:stroke-width-[12px]'
-									/>
+									{dynamicPillars[0] && (
+										<circle
+											cx='50'
+											cy='50'
+											fill='transparent'
+											r='40'
+											stroke={dynamicPillars[0].strokeColor}
+											strokeDasharray={`${c1Length} 251.2`}
+											strokeDashoffset='0'
+											strokeLinecap='round'
+											strokeWidth='10'
+											className='transition-all duration-500 hover:stroke-width-[12px]'
+										/>
+									)}
+									{dynamicPillars[1] && (
+										<circle
+											cx='50'
+											cy='50'
+											fill='transparent'
+											r='40'
+											stroke={dynamicPillars[1].strokeColor}
+											strokeDasharray={`${c2Length} 251.2`}
+											strokeDashoffset={`-${c1Length}`}
+											strokeLinecap='round'
+											strokeWidth='10'
+											className='transition-all duration-500 hover:stroke-width-[12px]'
+										/>
+									)}
+									{dynamicPillars[2] && (
+										<circle
+											cx='50'
+											cy='50'
+											fill='transparent'
+											r='40'
+											stroke={dynamicPillars[2].strokeColor}
+											strokeDasharray={`${c3Length} 251.2`}
+											strokeDashoffset={`-${c1Length + c2Length}`}
+											strokeLinecap='round'
+											strokeWidth='10'
+											className='transition-all duration-500 hover:stroke-width-[12px]'
+										/>
+									)}
 								</svg>
 								<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center'>
-									<p className='font-serif text-4xl font-bold text-white tracking-wide'>68%</p>
-									<p className='text-[10px] text-tertiary-fixed uppercase font-bold tracking-widest mt-1'>
-										Silks
+									<p className='font-serif text-4xl font-bold text-white tracking-wide'>{mainPillarPercent}%</p>
+									<p className='text-[10px] text-tertiary-fixed uppercase font-bold tracking-widest mt-1 truncate max-w-30'>
+										{dynamicPillars[0]?.label || "Silks"}
 									</p>
 								</div>
 							</div>
 
 							{/* Pillars Legend */}
 							<div className='w-full space-y-3 mt-4'>
-								{[
-									{ label: "Banarasi Silks", value: "₹1.8L", color: "bg-[#E7C96F]" },
-									{ label: "Temple Jewelry", value: "₹85K", color: "bg-[#b88a0e]" },
-									{ label: "Murti Art", value: "₹42K", color: "bg-[#102A66]" },
-								].map((pillar, idx) => (
+								{dynamicPillars.map((pillar, idx) => (
 									<div key={idx} className='flex justify-between items-center text-xs'>
 										<div className='flex items-center gap-2.5'>
 											<span className={`w-2.5 h-2.5 rounded-full ${pillar.color}`} />
-											<span className='text-white/80 font-medium'>{pillar.label}</span>
+											<span className='text-white/80 font-medium truncate max-w-37.5'>{pillar.label}</span>
 										</div>
 										<span className='text-tertiary-fixed font-bold tracking-wide'>{pillar.value}</span>
 									</div>

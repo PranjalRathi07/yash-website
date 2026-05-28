@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import Topbar from "../components/Topbar";
 import Sidebar from "../components/Sidebar";
 import api from "../../services/api";
@@ -6,6 +7,7 @@ import api from "../../services/api";
 const PLACEHOLDER_IMAGE = "https://placehold.co/100x120?text=No+Image";
 
 export default function OrderManagement() {
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -53,6 +55,25 @@ export default function OrderManagement() {
 		setEditTrackingId(order.trackingId || "");
 	};
 
+	const orderIdParam = searchParams.get("orderId");
+
+	useEffect(() => {
+		if (orderIdParam && orders.length > 0) {
+			const found = orders.find(o => o.id === orderIdParam);
+			if (found && (!selectedOrder || selectedOrder.id !== found.id)) {
+				const timer = setTimeout(() => {
+					handleViewDetails(found);
+				}, 0);
+				return () => clearTimeout(timer);
+			}
+		}
+	}, [orderIdParam, orders, selectedOrder]);
+
+	const handleCloseModal = () => {
+		setSelectedOrder(null);
+		setSearchParams({});
+	};
+
 	const handleUpdateStatus = async (e) => {
 		e.preventDefault();
 		try {
@@ -64,7 +85,7 @@ export default function OrderManagement() {
 			});
 			if (response.data.success) {
 				alert("Sacred Request timeline updated successfully!");
-				setSelectedOrder(null);
+				handleCloseModal();
 				fetchOrders();
 			} else {
 				alert("Failed to update timeline: " + response.data.message);
@@ -246,7 +267,7 @@ export default function OrderManagement() {
 					<div className='bg-surface w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl border border-outline-variant/30 flex flex-col max-h-[90vh]'>
 						<div className='p-6 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container-low'>
 							<h3 className='font-serif text-2xl font-bold text-primary'>Sacred Request {selectedOrder.orderNumber}</h3>
-							<button onClick={() => setSelectedOrder(null)} className='text-outline-variant hover:text-primary focus:outline-none cursor-pointer'>
+							<button onClick={handleCloseModal} className='text-outline-variant hover:text-primary focus:outline-none cursor-pointer'>
 								<span className='material-symbols-outlined' data-icon='close'>close</span>
 							</button>
 						</div>
@@ -261,7 +282,7 @@ export default function OrderManagement() {
 								<div className='divide-y divide-outline-variant/10 max-h-48 overflow-y-auto pr-2'>
 									{(selectedOrder.items || []).map((item) => (
 										<div key={item.id} className='flex items-center gap-4 py-3 first:pt-0 last:pb-0'>
-											<div className='w-12 h-14 rounded overflow-hidden border border-outline-variant/25 bg-surface-container flex-shrink-0'>
+											<div className='w-12 h-14 rounded overflow-hidden border border-outline-variant/25 bg-surface-container shrink-0'>
 												<img className='w-full h-full object-cover' src={item.productImage || PLACEHOLDER_IMAGE} alt={item.productTitle} />
 											</div>
 											<div className='flex-1 min-w-0'>
@@ -366,7 +387,7 @@ export default function OrderManagement() {
 
 						{/* Modal Footer */}
 						<div className='p-5 bg-surface-container border-t border-outline-variant/15 flex justify-end gap-3'>
-							<button onClick={() => setSelectedOrder(null)} className='px-5 py-2.5 text-xs text-primary font-bold hover:bg-surface-container-high rounded-lg transition-colors cursor-pointer'>
+							<button onClick={handleCloseModal} className='px-5 py-2.5 text-xs text-primary font-bold hover:bg-surface-container-high rounded-lg transition-colors cursor-pointer'>
 								Close Ledger
 							</button>
 						</div>

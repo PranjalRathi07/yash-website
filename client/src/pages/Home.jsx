@@ -1,11 +1,63 @@
-/** @format */
-
-import React from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import logoIcon from "../assets/Logo.jpeg";
+import api from "../services/api";
+
+const ProductSkeleton = () => (
+	<div className='flex flex-col group relative overflow-hidden bg-transparent'>
+		{/* Image Container Skeleton */}
+		<div className='aspect-4/5 shimmer-bg mb-6 relative overflow-hidden' />
+		
+		{/* Info Section Skeleton */}
+		<div className='grow flex flex-col'>
+			{/* Title Skeleton */}
+			<div className='h-7 w-3/4 shimmer-bg mb-2' />
+			{/* Category Skeleton */}
+			<div className='h-3.5 w-1/3 shimmer-bg mb-4' />
+
+			{/* Price & Add to Cart Skeleton */}
+			<div className='mt-auto flex items-center justify-between'>
+				<div className='h-6 w-1/4 shimmer-bg' />
+				<div className='h-10 w-10 rounded-full shimmer-bg' />
+			</div>
+		</div>
+	</div>
+);
 
 export default function KrishnaVasanam() {
 	const navigate = useNavigate();
+	const [banners, setBanners] = useState([]);
+
+	const { data: productsData, isLoading: productsLoading } = useQuery({
+		queryKey: ["products", "new-arrivals"],
+		queryFn: async () => {
+			const res = await api.get("/api/products");
+			return res.data;
+		},
+	});
+
+	const newArrivals = productsData?.success 
+		? productsData.products.filter(p => p.isNewArrival).slice(0, 4) 
+		: [];
+
+	useEffect(() => {
+		const fetchBanners = async () => {
+			try {
+				const res = await api.get("/api/banners");
+				if (res.data?.success) {
+					setBanners(res.data.banners.filter(b => b.page === "Home"));
+				}
+			} catch (error) {
+				console.error("Failed to fetch banners", error);
+			}
+		};
+		fetchBanners();
+	}, []);
+
+	const heroBanner = banners.find(b => b.section === "Hero");
+	const janmashtamiBanner = banners.find(b => b.section === "Janmashtami Special");
+	const featuredBanner = banners.find(b => b.section === "Featured Collection");
 	const categories = [
 		{ icon: "styler", label: "Daily Wear" },
 		{ icon: "celebration", label: "Festive Wear" },
@@ -17,34 +69,7 @@ export default function KrishnaVasanam() {
 		{ icon: "featured_seasonal_and_gifts", label: "Combo Packs" },
 	];
 
-	const arrivals = [
-		{
-			title: "Makhanchor Set",
-			subtitle: "Pure Silk & Brocade",
-			price: "₹1,299",
-			badge: "New",
-			img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBPO4eW1TVJuezUrS_VBSR_Cb_BLawc0qMqIHQnfe5mDopm7_tQYsurLOxLWfjHnNTTqRiHrP6IvJeik6OgtmFBt48H-FUvXa_YM0cx4hkVKdNUd--lwP_yue2ae3JdMgjlSm4LrKtsdR7ubKSM_DqQUyjelsy7Q5dm2F4UzDDZSaLjMHEZDU3XZrzezPhA6SJm4a7_caasVM1W3-m0Akjzy3rkkmlqge9IXNkp8opyz4CidDtHSmbidCIAPnmIdycGpC5VsZRd2cHN",
-		},
-		{
-			title: "Vrindavan Bliss",
-			subtitle: "Handmade Organic Cotton",
-			price: "₹850",
-			img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDCv8vMKKsd2yuxhwDOxsd_AoAM4OHJ4Rz3i1FCrP4JMZJUOG2LQ3mR_I-lqj0pcyLWzUXk03WHLXarlFn6x4hA-MEh9EAPIz2m9wzN_ULfgI5RLJqo3kpjlZH9H6ylPXcYOOcrGzjlBB9a062426nLCg2rfKelV746Nh7l_8es_xgKUxbdVbJ-2x3S6VJbd_cSAjzjzWN55R4DMsSXOqkBr2Uaf632XaFeDU-GfkXjQLnALqzThSePDmESED5HbePtHvWrFsiWy3Y8",
-		},
-		{
-			title: "Divine Shringar",
-			subtitle: "Premium Temple Jewelry",
-			price: "₹2,499",
-			badge: "New",
-			img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAmYw-2iYnDCRUwuNSFSmpW0oNODMx4K7XcOgR3JRt1tBRIzb_M1jKmeinPYSVw_JO8KLoS3QRiA-BZtyF_1nWx1ZoIGYdTYav5NV9YQnIKJeqaUdpqt1MfI5CqhLP8wtJu0pWoXiKgIeD7PXOYnbE3fwXCcfev2O16VR11No8-aVXthF4a-cKw94AlR5jLMSMx9sZbEJvCU8uIyJZNB47B4HXfNvOwW5PnFmsh36jgu6gYPnYpzX4p_gEJN5kP3_rCJxDKEB8LOOv0",
-		},
-		{
-			title: "Gopi Gitanjali",
-			subtitle: "Yellow Festive Vastra",
-			price: "₹1,550",
-			img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAC5KZ4ThwXzaZwkl0XZ31R-OARRIEa5eNLSrJzA4GR0P3vriAouNr7eFYg_o1HcTQRmV49-fDGtvQBeM2_h_fiVH1Fld0nDKmcWK-VqV0n13ZBocuY5RnSUA3GXnoaPkutUYcn2Bw0MlQZVPXTNePQLVbeRglC7tPTEvoLElmTVDABdZAbSZPB3bJ_3uVM4XiVHWniKaKRHdhTUU8LWovzWh6ooL3ZKeFWA76P2ZdZbHatp-UsBeYtCaiRB3w1RAIzD4VW60q62tej",
-		},
-	];
+
 
 	return (
 		<div className='bg-surface font-sans text-on-surface selection:bg-tertiary/20 selection:text-primary'>
@@ -54,7 +79,9 @@ export default function KrishnaVasanam() {
 					<img
 						className='w-full h-full object-cover object-center'
 						alt='Luxury silk fabric background'
-						src='https://lh3.googleusercontent.com/aida-public/AB6AXuAxk00buKNvC0wKPU6lb9o3uDUw-QrLerzLMaYyOslZkToHwJ-5B-Ah2C_P02qpT947QqCQgC26KHvuwSUUu_Mx5Xwh7StL7YCSVovYqcYqGIObMDF7doQRBCCGCuggWWs1_3XtgWGkgBtyxvBJ548oDTH5E4M1iS5k7Bt7Tw-kPnEUoSoq5DKfwV8wwjUOA0WJHfOimSZ0gZIdnZWiZGPBSoCZVvQbBhu_mq7dgYuE9ZZ0da4rWuULED-_C3BqrOqeD6DeLpQ71cQA'
+						src={heroBanner?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAxk00buKNvC0wKPU6lb9o3uDUw-QrLerzLMaYyOslZkToHwJ-5B-Ah2C_P02qpT947QqCQgC26KHvuwSUUu_Mx5Xwh7StL7YCSVovYqcYqGIObMDF7doQRBCCGCuggWWs1_3XtgWGkgBtyxvBJ548oDTH5E4M1iS5k7Bt7Tw-kPnEUoSoq5DKfwV8wwjUOA0WJHfOimSZ0gZIdnZWiZGPBSoCZVvQbBhu_mq7dgYuE9ZZ0da4rWuULED-_C3BqrOqeD6DeLpQ71cQA'}
+						onClick={() => heroBanner?.linkUrl && navigate(heroBanner.linkUrl)}
+						style={{ cursor: heroBanner?.linkUrl ? 'pointer' : 'default' }}
 					/>
 				</div>
 				<div className='absolute inset-0 bg-linear-to-r from-primary via-primary/60 to-transparent' />
@@ -126,9 +153,11 @@ export default function KrishnaVasanam() {
 					<div className='w-full lg:w-1/2 relative scale-95'>
 						<div className='absolute -inset-4 border-[0.5px] border-tertiary/30 rounded-tl-[100px] rounded-br-[100px] z-0' />
 						<img
-							className='relative z-10 w-full object-cover rounded-tl-[100px] rounded-br-[100px] shadow-[0_20px_40px_rgba(31,31,31,0.04)]'
+							className='relative z-10 w-full object-cover rounded-tl-[100px] rounded-br-[100px] shadow-[0_20px_40px_rgba(31,31,31,0.04)] transition-transform duration-500 hover:scale-[1.02]'
 							alt='Featured heritage collection'
-							src='https://lh3.googleusercontent.com/aida-public/AB6AXuCay_nQZSSFRQFxhSEwbO71Mod8_zatZkq59b9Q2E4dykixVCbg_Ukgd9bL87OEyMPKUzDQJCyjutStajvudbVgmwJtMH2s-mtI7i0oh2UEeIcuPsdXSt2zNNKu3teU00ZgfdsmFNqU6PVhYTwMflzN7wfEKcFLi-dWoTVp4YJJLLmYrz-FtnshwFQuX57SemKL5ilQUZKlcEhd8nEgylWMRVr_hI7ENWtRk6FRYXREufvEfoS3R7l1pB2tELRI8azBBEckHRJFyq4n'
+							src={featuredBanner?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuCay_nQZSSFRQFxhSEwbO71Mod8_zatZkq59b9Q2E4dykixVCbg_Ukgd9bL87OEyMPKUzDQJCyjutStajvudbVgmwJtMH2s-mtI7i0oh2UEeIcuPsdXSt2zNNKu3teU00ZgfdsmFNqU6PVhYTwMflzN7wfEKcFLi-dWoTVp4YJJLLmYrz-FtnshwFQuX57SemKL5ilQUZKlcEhd8nEgylWMRVr_hI7ENWtRk6FRYXREufvEfoS3R7l1pB2tELRI8azBBEckHRJFyq4n'}
+							onClick={() => featuredBanner?.linkUrl && navigate(featuredBanner.linkUrl)}
+							style={{ cursor: featuredBanner?.linkUrl ? 'pointer' : 'default' }}
 						/>
 					</div>
 
@@ -174,57 +203,65 @@ export default function KrishnaVasanam() {
 				</div>
 
 				<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
-					{arrivals.map((p) => (
-						<div
-							key={p.title}
-							onClick={() => navigate('/product/1')}
-							className='group relative flex flex-col transition-all duration-500 rounded-md overflow-hidden cursor-pointer'>
-							<div className='aspect-4/5 overflow-hidden rounded-md mb-6 relative'>
-								<img
-									className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-									alt={p.title}
-									src={p.img}
-								/>
-								{p.badge ? (
+					{productsLoading ? (
+						Array.from({ length: 4 }).map((_, idx) => (
+							<ProductSkeleton key={idx} />
+						))
+					) : newArrivals.length === 0 ? (
+						<div className="col-span-full py-10 text-center text-on-surface-variant">No new arrivals found.</div>
+					) : (
+						newArrivals.map((p) => (
+							<div
+								key={p.id}
+								onClick={() => navigate(`/product/${p.slug}`)}
+								className='group relative flex flex-col transition-all duration-500 rounded-md overflow-hidden cursor-pointer'>
+								<div className='aspect-4/5 overflow-hidden rounded-md mb-6 relative'>
+									<img
+										className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
+										alt={p.title}
+										src={p.images?.[0]?.url || "https://placehold.co/400x500?text=No+Image"}
+									/>
 									<span className='absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold'>
-										{p.badge}
+										New
 									</span>
-								) : null}
-							</div>
+								</div>
 
-							<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium'>
-								{p.title}
-							</h3>
-							<p className='font-sans text-sm text-on-surface-variant mb-4'>
-								{p.subtitle}
-							</p>
+								<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium truncate'>
+									{p.title}
+								</h3>
+								<p className='font-sans text-sm text-on-surface-variant mb-4 truncate'>
+									{p.category?.name || "Divine Attire"}
+								</p>
 
-							<div className='flex items-center justify-between mt-auto'>
-								<span className='font-sans text-lg text-primary font-medium'>
-									{p.price}
-								</span>
-								<button
-									className='w-10 h-10 flex items-center justify-center rounded-full border border-tertiary/30 text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300'
-									onClick={(e) => e.stopPropagation()}
-									type='button'>
-									<span className='material-symbols-outlined text-[20px]'>
-										add_shopping_cart
+								<div className='flex items-center justify-between mt-auto'>
+									<span className='font-sans text-lg text-primary font-medium'>
+										₹{Number(p.price).toLocaleString("en-IN")}
 									</span>
-								</button>
+									<button
+										className='w-10 h-10 flex items-center justify-center rounded-full border border-tertiary/30 text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300'
+										onClick={(e) => e.stopPropagation()}
+										type='button'>
+										<span className='material-symbols-outlined text-[20px]'>
+											add_shopping_cart
+										</span>
+									</button>
+								</div>
 							</div>
-						</div>
-					))}
+						))
+					)}
 				</div>
 			</section>
 
 			{/* Janmashtami Banner */}
 			<section className='py-stack-xl px-8'>
-				<div className='w-full px-8 md:px-16 lg:px-24 relative rounded-tl-[100px] rounded-br-[100px] overflow-hidden min-h-[500px] flex items-center justify-center text-center shadow-[0_20px_40px_rgba(31,31,31,0.04)]'>
+				<div className='w-full px-8 md:px-16 lg:px-24 relative rounded-tl-[100px] rounded-br-[100px] overflow-hidden min-h-125 flex items-center justify-center text-center shadow-[0_20px_40px_rgba(31,31,31,0.04)]'>
 					<div className='absolute inset-0 bg-primary/80 z-10 mix-blend-multiply' />
 					<img
 						className='absolute inset-0 w-full h-full object-cover'
 						alt='Janmashtami banner'
-						src='https://lh3.googleusercontent.com/aida-public/AB6AXuAcFBMRD4hSQYQ0_icI1WYKnHZY_91t1brRa-IRCjJ8BtjQenM-PHByCp8BZmq7UULeu3NXgGrL0s57WAbsQ_a6Ce2wArYXPXDVuFeVYrbSsPqSkiSBeyTaINY7H-iAPRMq5li355_EvnNFwMWQyb3TdikZXWRzw6LMml1fJ5mMjdnzy3EhIDwfiMXI3a-jVnVuzo3U1o-_cKFJkEmmouXOFLXpNrfu1QxDUOmyqYLy7IJjABibFHmJGk8QlpV0jUa1GzYfFfWrqd4I'
+						src={janmashtamiBanner?.imageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuAcFBMRD4hSQYQ0_icI1WYKnHZY_91t1brRa-IRCjJ8BtjQenM-PHByCp8BZmq7UULeu3NXgGrL0s57WAbsQ_a6Ce2wArYXPXDVuFeVYrbSsPqSkiSBeyTaINY7H-iAPRMq5li355_EvnNFwMWQyb3TdikZXWRzw6LMml1fJ5mMjdnzy3EhIDwfiMXI3a-jVnVuzo3U1o-_cKFJkEmmouXOFLXpNrfu1QxDUOmyqYLy7IJjABibFHmJGk8QlpV0jUa1GzYfFfWrqd4I'}
+						onClick={() => janmashtamiBanner?.linkUrl && navigate(janmashtamiBanner.linkUrl)}
+						style={{ cursor: janmashtamiBanner?.linkUrl ? 'pointer' : 'default' }}
 					/>
 
 					<div className='relative z-20 max-w-2xl px-6 py-16'>

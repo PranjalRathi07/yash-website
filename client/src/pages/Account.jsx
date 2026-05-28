@@ -1,11 +1,138 @@
 /** @format */
-
-// AccountSettings.jsx
-import React, { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import api from "../services/api";
+import { supabase } from "../lib/supabase";
 
 export default function AccountSettings() {
 	const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
+
+	const [localUser] = useState(() => {
+		const saved = localStorage.getItem("currentUser");
+		return saved ? JSON.parse(saved) : null;
+	});
+
+	const { data: currentUser } = useQuery({
+		queryKey: ["auth", "me"],
+		queryFn: async () => {
+			const res = await api.get("/api/auth/me");
+			if (res.data?.user) {
+				localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+			}
+			return res.data.user;
+		},
+		initialData: localUser,
+	});
+
+	const [saveSuccess, setSaveSuccess] = useState(false);
+	const [saveError, setSaveError] = useState("");
+
+	const updateProfileMutation = useMutation({
+		mutationFn: async (payload) => {
+			const res = await api.put("/api/auth/profile", payload);
+			return res.data;
+		},
+		onSuccess: (data) => {
+			setSaveSuccess(true);
+			setSaveError("");
+			if (data.user) {
+				localStorage.setItem("currentUser", JSON.stringify(data.user));
+			}
+			setTimeout(() => setSaveSuccess(false), 3000);
+		},
+		onError: (err) => {
+			setSaveError(err.response?.data?.message || "Failed to save sacred changes.");
+			setTimeout(() => setSaveError(""), 5000);
+		}
+	});
+
+	const handleSaveChanges = () => {
+		const name = document.getElementById("full_name").value;
+		const email = document.getElementById("email").value;
+		const phone = document.getElementById("phone").value;
+
+		updateProfileMutation.mutate({ name, email, phone });
+	};
+
+	const uploadProfilePicMutation = useMutation({
+		mutationFn: async (file) => {
+			const formData = new FormData();
+			formData.append("profilePic", file);
+			const res = await api.put("/api/auth/profile/picture", formData, {
+				headers: {
+					"Content-Type": "multipart/form-data",
+				},
+			});
+			return res.data;
+		},
+		onSuccess: (data) => {
+			setSaveSuccess(true);
+			setSaveError("");
+			if (data.user) {
+				localStorage.setItem("currentUser", JSON.stringify(data.user));
+			}
+			setTimeout(() => setSaveSuccess(false), 3000);
+		},
+		onError: (err) => {
+			setSaveError(err.response?.data?.message || "Failed to upload portrait.");
+			setTimeout(() => setSaveError(""), 5000);
+		}
+	});
+
+	const handleProfilePicUpload = (e) => {
+		const file = e.target.files[0];
+		if (file) {
+			uploadProfilePicMutation.mutate(file);
+		}
+	};
+
+	const triggerUpload = () => {
+		document.getElementById("profile_pic_input").click();
+	};
+
+	const [securitySuccess, setSecuritySuccess] = useState(false);
+	const [securityError, setSecurityError] = useState("");
+
+	const updatePasswordMutation = useMutation({
+		mutationFn: async (newPassword) => {
+			const { data, error } = await supabase.auth.updateUser({
+				password: newPassword,
+			});
+			if (error) throw error;
+			return data;
+		},
+		onSuccess: () => {
+			setSecuritySuccess(true);
+			setSecurityError("");
+			document.getElementById("current_password").value = "";
+			document.getElementById("new_password").value = "";
+			document.getElementById("confirm_password").value = "";
+			setTimeout(() => setSecuritySuccess(false), 3000);
+		},
+		onError: (err) => {
+			setSecurityError(err.message || "Failed to update sacred password.");
+			setTimeout(() => setSecurityError(""), 5000);
+		}
+	});
+
+	const handleUpdateSecurity = () => {
+		const newPassword = document.getElementById("new_password").value;
+		const confirmPassword = document.getElementById("confirm_password").value;
+
+		if (!newPassword || newPassword.length < 8) {
+			setSecurityError("New password must be at least 8 characters.");
+			setTimeout(() => setSecurityError(""), 5000);
+			return;
+		}
+
+		if (newPassword !== confirmPassword) {
+			setSecurityError("New passwords do not match.");
+			setTimeout(() => setSecurityError(""), 5000);
+			return;
+		}
+
+		updatePasswordMutation.mutate(newPassword);
+	};
 
 	const [notifications, setNotifications] = useState({
 		email: true,
@@ -55,26 +182,54 @@ export default function AccountSettings() {
 							</h2>
 						</div>
 
+						{saveSuccess && (
+							<div className='mb-6 p-4 bg-green-50 text-green-700 text-sm font-sans rounded-md border border-green-200 flex items-center gap-2 animate-fadeIn'>
+								<span className='material-symbols-outlined text-[18px]'>check_circle</span>
+								Sacred changes saved successfully in the sanctuary registry.
+							</div>
+						)}
+						{saveError && (
+							<div className='mb-6 p-4 bg-red-50 text-red-700 text-sm font-sans rounded-md border border-red-200 flex items-center gap-2 animate-fadeIn'>
+								<span className='material-symbols-outlined text-[18px]'>error</span>
+								{saveError}
+							</div>
+						)}
+
 						<div className='flex flex-col md:flex-row gap-12'>
 							<div className='shrink-0 flex flex-col items-center gap-4'>
-								<div className='relative group'>
-									<img
-										alt='Profile'
-										className='w-32 h-32 rounded-full object-cover border-[3px] border-surface shadow-md'
-										data-alt='A professional high-end studio portrait of a customer with a warm smile.'
-										src='https://lh3.googleusercontent.com/aida-public/AB6AXuALgrIDWXvMFR-znKmXtOSE646fCzZq5eQq-Bv2NhO4Db9r6SrLNxrlGZPpP2hkKm3JeNInfCWMQi_NkP-XgD8nCJe3jjc20qUfDnwxkJvuupB8FHW3gR0CXZ4lsf4u9vF_Zj6FbcCEkYK7XpLEiD-X6PvciH8MrvwY-a2P7-ucM0QeI_5cPMg-xrVJetMbfrP_RPrUjP2KXXzrvcyT4XosSTD-85WFTMTbduiU1Yrlpstz3j-Jc-NhO6IQyxh9p41CWittoA0cyQ3E'
-									/>
+								<div className='relative group cursor-pointer' onClick={triggerUpload}>
+									{currentUser?.profilePic ? (
+										<img
+											alt='Profile'
+											className='w-32 h-32 rounded-full object-cover border-[3px] border-surface shadow-md'
+											src={currentUser.profilePic}
+										/>
+									) : (
+										<div className='w-32 h-32 rounded-full border-[3px] border-surface shadow-md p-1 flex items-center justify-center bg-surface-container-low'>
+											<div className='w-full h-full rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary'>
+												<span className='material-symbols-outlined text-[48px]'>person</span>
+											</div>
+										</div>
+									)}
 									<button
 										type='button'
-										className='absolute bottom-0 right-0 bg-tertiary text-surface p-2 rounded-full shadow-lg hover:bg-tertiary/90 transition-all flex items-center justify-center'>
-										<span
-											className='material-symbols-outlined text-[16px]'>
+										className='absolute bottom-0 right-0 bg-tertiary text-surface p-2 rounded-full shadow-lg hover:bg-tertiary/90 transition-all flex items-center justify-center cursor-pointer'>
+										<span className='material-symbols-outlined text-[16px]'>
 											edit
 										</span>
 									</button>
+									<input
+										id='profile_pic_input'
+										type='file'
+										accept='image/*'
+										className='hidden'
+										onChange={handleProfilePicUpload}
+									/>
 								</div>
-								<span className='font-sans text-xs font-medium text-primary'>
-									Update Portrait
+								<span
+									onClick={triggerUpload}
+									className='font-sans text-xs font-medium text-primary hover:underline cursor-pointer'>
+									{uploadProfilePicMutation.isPending ? "Uploading..." : "Update Portrait"}
 								</span>
 							</div>
 
@@ -87,9 +242,10 @@ export default function AccountSettings() {
 									</label>
 									<input
 										id='full_name'
+										key={currentUser?.id ? `name-${currentUser.id}` : "name-loading"}
 										className='w-full bg-[#fdfaf5] border-[0.5px] border-tertiary/30 rounded-md p-3 text-primary font-sans text-sm focus:outline-none focus:border-tertiary transition-colors'
 										type='text'
-										defaultValue='Arjun Das'
+										defaultValue={currentUser?.name || ""}
 									/>
 								</div>
 								<div className='space-y-2'>
@@ -100,9 +256,10 @@ export default function AccountSettings() {
 									</label>
 									<input
 										id='email'
+										key={currentUser?.id ? `email-${currentUser.id}` : "email-loading"}
 										className='w-full bg-[#fdfaf5] border-[0.5px] border-tertiary/30 rounded-md p-3 text-primary font-sans text-sm focus:outline-none focus:border-tertiary transition-colors'
 										type='email'
-										defaultValue='arjun.das@vrindavan.com'
+										defaultValue={currentUser?.email || ""}
 									/>
 								</div>
 								<div className='space-y-2'>
@@ -113,9 +270,10 @@ export default function AccountSettings() {
 									</label>
 									<input
 										id='phone'
+										key={currentUser?.id ? `phone-${currentUser.id}` : "phone-loading"}
 										className='w-full bg-[#fdfaf5] border-[0.5px] border-tertiary/30 rounded-md p-3 text-primary font-sans text-sm focus:outline-none focus:border-tertiary transition-colors'
 										type='tel'
-										defaultValue='+91 98765 43210'
+										defaultValue={currentUser?.phone || ""}
 									/>
 								</div>
 								<div className='space-y-2'>
@@ -137,8 +295,10 @@ export default function AccountSettings() {
 						<div className='mt-8 flex justify-end'>
 							<button
 								type='button'
-								className='bg-linear-to-r from-tertiary/90 via-tertiary to-tertiary/90 text-primary font-sans text-xs font-bold px-8 py-3 rounded-md uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-sm'>
-								Save Personal Changes
+								onClick={handleSaveChanges}
+								disabled={updateProfileMutation.isPending}
+								className='bg-linear-to-r from-tertiary/90 via-tertiary to-tertiary/90 text-primary font-sans text-xs font-bold px-8 py-3 rounded-md uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-sm disabled:opacity-50 cursor-pointer'>
+								{updateProfileMutation.isPending ? "Saving Changes..." : "Save Personal Changes"}
 							</button>
 						</div>
 					</section>
@@ -155,6 +315,19 @@ export default function AccountSettings() {
 								Security &amp; Access
 							</h2>
 						</div>
+
+						{securitySuccess && (
+							<div className='mb-6 p-4 bg-green-50 text-green-700 text-sm font-sans rounded-md border border-green-200 flex items-center gap-2 animate-fadeIn'>
+								<span className='material-symbols-outlined text-[18px]'>check_circle</span>
+								Sacred password updated successfully.
+							</div>
+						)}
+						{securityError && (
+							<div className='mb-6 p-4 bg-red-50 text-red-700 text-sm font-sans rounded-md border border-red-200 flex items-center gap-2 animate-fadeIn'>
+								<span className='material-symbols-outlined text-[18px]'>error</span>
+								{securityError}
+							</div>
+						)}
 
 						<div className='grid grid-cols-1 md:grid-cols-2 gap-12'>
 							<div className='space-y-6'>
@@ -240,8 +413,10 @@ export default function AccountSettings() {
 						<div className='mt-8 flex justify-end'>
 							<button
 								type='button'
-								className='bg-linear-to-r from-tertiary/90 via-tertiary to-tertiary/90 text-primary font-sans text-xs font-bold px-8 py-3 rounded-md uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-sm'>
-								Update Security
+								onClick={handleUpdateSecurity}
+								disabled={updatePasswordMutation.isPending}
+								className='bg-linear-to-r from-tertiary/90 via-tertiary to-tertiary/90 text-primary font-sans text-xs font-bold px-8 py-3 rounded-md uppercase tracking-widest hover:opacity-90 transition-all active:scale-95 shadow-sm disabled:opacity-50 cursor-pointer'>
+								{updatePasswordMutation.isPending ? "Updating Security..." : "Update Security"}
 							</button>
 						</div>
 					</section>

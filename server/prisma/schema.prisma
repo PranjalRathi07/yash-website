@@ -44,12 +44,13 @@ model User {
   id             String  @id @default(uuid())
   supabaseAuthId String? @unique
 
-  name     String
-  email    String? @unique
-  password String?
-  phone    String?
-  role     Role    @default(CUSTOMER)
-  isActive Boolean @default(true)
+  name       String
+  email      String? @unique
+  password   String?
+  phone      String?
+  role       Role    @default(CUSTOMER)
+  isActive   Boolean @default(true)
+  profilePic String?
 
   addresses Address[]
   orders    Order[]
@@ -367,8 +368,8 @@ model Review {
 
 model Banner {
   id       String  @id @default(uuid())
-  title    String
-  subtitle String?
+  page     String
+  section  String
   imageUrl String
   publicId String?
   linkUrl  String?

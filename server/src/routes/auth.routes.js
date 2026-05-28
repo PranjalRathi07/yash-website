@@ -3,9 +3,12 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { isAdmin } from "../middleware/admin.middleware.js";
+import { upload } from "../config/multer.js";
 import {
 	getAllUsersAdmin,
 	toggleUserStatusAdmin,
+	updateProfile,
+	updateProfilePicture,
 } from "../controllers/auth.controller.js";
 
 const router = express.Router();
@@ -16,6 +19,9 @@ router.get("/me", authMiddleware, (req, res) => {
 		user: req.user,
 	});
 });
+
+router.put("/profile", authMiddleware, updateProfile);
+router.put("/profile/picture", authMiddleware, upload.single("profilePic"), updateProfilePicture);
 
 // Admin User Directory
 router.get("/admin/users", authMiddleware, isAdmin, getAllUsersAdmin);

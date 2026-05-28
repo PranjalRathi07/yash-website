@@ -107,9 +107,12 @@ export const createProduct = async (req, res) => {
 export const getAllProducts = async (req, res) => {
 	try {
 		const { admin } = req.query;
+		const page = req.query.page ? parseInt(req.query.page) : null;
+		const limit = req.query.limit ? parseInt(req.query.limit) : null;
+		
 		const whereClause = admin === "true" ? {} : { isActive: true };
 
-		const products = await prisma.product.findMany({
+		let queryOptions = {
 			where: whereClause,
 			include: {
 				category: true,
@@ -120,11 +123,24 @@ export const getAllProducts = async (req, res) => {
 			orderBy: {
 				createdAt: "desc",
 			},
-		});
+		};
+
+		if (page && limit) {
+			queryOptions.skip = (page - 1) * limit;
+			queryOptions.take = limit;
+		}
+
+		const [products, totalProducts] = await Promise.all([
+			prisma.product.findMany(queryOptions),
+			prisma.product.count({ where: whereClause }),
+		]);
 
 		return res.status(200).json({
 			success: true,
 			count: products.length,
+			totalProducts,
+			totalPages: limit ? Math.ceil(totalProducts / limit) : 1,
+			currentPage: page || 1,
 			products,
 		});
 	} catch (error) {

@@ -8,12 +8,12 @@ const prisma = new PrismaClient();
 
 export const createBanner = async (req, res) => {
 	try {
-		const { title, subtitle, linkUrl, priority, isActive } = req.body;
+		const { page, section, linkUrl, priority, isActive } = req.body;
 
-		if (!title) {
+		if (!page || !section) {
 			return res.status(400).json({
 				success: false,
-				message: "Banner title is required",
+				message: "Banner page and section are required",
 			});
 		}
 
@@ -31,8 +31,8 @@ export const createBanner = async (req, res) => {
 
 		const banner = await prisma.banner.create({
 			data: {
-				title,
-				subtitle: subtitle || null,
+				page,
+				section,
 				imageUrl: result.secure_url,
 				publicId: result.public_id,
 				linkUrl: linkUrl || null,
@@ -103,7 +103,7 @@ export const getAllBannersAdmin = async (req, res) => {
 export const updateBanner = async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { title, subtitle, linkUrl, priority, isActive } = req.body;
+		const { page, section, linkUrl, priority, isActive } = req.body;
 
 		const banner = await prisma.banner.findUnique({
 			where: { id },
@@ -132,8 +132,8 @@ export const updateBanner = async (req, res) => {
 		const updatedBanner = await prisma.banner.update({
 			where: { id },
 			data: {
-				title: title ?? banner.title,
-				subtitle: subtitle ?? banner.subtitle,
+				page: page ?? banner.page,
+				section: section ?? banner.section,
 				linkUrl: linkUrl ?? banner.linkUrl,
 				priority: priority ? Number(priority) : banner.priority,
 				isActive:

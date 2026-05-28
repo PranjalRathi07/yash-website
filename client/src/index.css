@@ -117,3 +117,38 @@
 .text-soft-gold {
 	color: #e7c96f;
 }
+
+/* Premium Skeleton Shimmer Effect */
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+.shimmer-bg {
+	position: relative;
+	overflow: hidden;
+	background-color: #e5dabf;
+	border-radius: var(--radius-md);
+}
+
+.shimmer-bg::after {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	transform: translateX(-100%);
+	background-image: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0) 0%,
+		rgba(255, 255, 255, 0.3) 20%,
+		rgba(255, 255, 255, 0.5) 60%,
+		rgba(255, 255, 255, 0) 100%
+	);
+	animation: shimmer 1.6s infinite;
+	content: '';
+}
