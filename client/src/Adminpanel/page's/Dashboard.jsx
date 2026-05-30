@@ -4,15 +4,6 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import api from "../../services/api";
 
-const SALES_DATA = [
-	{ month: "Jan", amount: "₹12k", height: "h-[40%]", hoverHeight: "hover:h-[50%]" },
-	{ month: "Feb", amount: "₹18k", height: "h-[65%]", hoverHeight: "hover:h-[75%]" },
-	{ month: "Mar", amount: "₹15k", height: "h-[55%]", hoverHeight: "hover:h-[65%]" },
-	{ month: "Apr", amount: "₹24k", height: "h-[85%]", hoverHeight: "hover:h-[95%]" },
-	{ month: "May", amount: "₹31k", height: "h-[100%]", hoverHeight: "h-[100%]", special: true },
-	{ month: "Jun", amount: "₹20k", height: "h-[70%]", hoverHeight: "hover:h-[80%]" },
-	{ month: "Jul", amount: "₹13k", height: "h-[45%]", hoverHeight: "hover:h-[55%]" },
-];
 
 export default function Dashboard() {
 	const navigate = useNavigate();
@@ -124,16 +115,12 @@ export default function Dashboard() {
 					strokeColor: defaultColor.strokeColor
 				};
 		  })
-		: [
-				{ label: "Banarasi Silks", percent: 68, value: "₹1.8L", color: "bg-[#E7C96F]", strokeColor: "#E7C96F" },
-				{ label: "Temple Jewelry", percent: 22, value: "₹85K", color: "bg-[#b88a0e]", strokeColor: "#b88a0e" },
-				{ label: "Murti Art", percent: 10, value: "₹42K", color: "bg-[#102A66]", strokeColor: "#102A66" }
-		  ];
+		: [];
 
 	const mainPillarPercent = dynamicPillars[0]?.percent || 0;
-	const c1Length = (dynamicPillars[0]?.percent / 100) * 251.2;
-	const c2Length = (dynamicPillars[1]?.percent / 100) * 251.2;
-	const c3Length = (dynamicPillars[2]?.percent / 100) * 251.2;
+	const c1Length = (dynamicPillars[0]?.percent / 100) * 251.2 || 0;
+	const c2Length = (dynamicPillars[1]?.percent / 100) * 251.2 || 0;
+	const c3Length = (dynamicPillars[2]?.percent / 100) * 251.2 || 0;
 
 	return (
 		<div className='min-h-screen bg-surface font-sans text-on-surface flex'>
@@ -205,141 +192,191 @@ export default function Dashboard() {
 
 					{/* Charts and Visualization (Bento Style) */}
 					<div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12'>
-						{/* Sales Growth Chart */}
-						<div className='lg:col-span-2 bg-surface p-8 rounded-2xl border border-outline-variant/20 shadow-sm'>
-							<div className='flex justify-between items-center mb-8'>
-								<h4 className='font-serif text-2xl font-bold text-primary'>
-									Sales Growth Narrative
-								</h4>
-								<div className='flex gap-2 bg-surface-container p-1 rounded-full border border-outline-variant/10'>
-									<button className='px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-tertiary-fixed shadow-sm cursor-pointer'>
-										Monthly
-									</button>
-									<button className='px-4 py-1.5 rounded-full text-xs font-bold text-on-surface-variant/80 hover:bg-surface-container-high transition-colors cursor-pointer'>
-										Yearly
-									</button>
-								</div>
-							</div>
-
-							{/* Chart Live Visualization */}
-							<div className='h-75 w-full flex items-end gap-3 md:gap-5 px-4 relative'>
-								{(stats?.salesGrowth || SALES_DATA).map((bar, idx) => {
-									const heightVal = bar.heightPercent !== undefined ? `${bar.heightPercent}%` : bar.height;
-									const amountVal = bar.amount;
-									
-									return (
-										<div
-											key={idx}
-											onMouseEnter={() => setHoveredBar(idx)}
-											onMouseLeave={() => setHoveredBar(null)}
-											style={bar.heightPercent !== undefined ? { height: heightVal } : {}}
-											className={`flex-1 rounded-t-xl group relative cursor-pointer transition-all duration-500 bg-surface-container-high hover:bg-secondary-container ${
-												bar.heightPercent === undefined ? bar.height : ""
-											} ${bar.heightPercent === undefined ? bar.hoverHeight : ""}`}>
-											{/* Floating Tooltip */}
-											<div
-												className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-tertiary-fixed text-[10px] py-1 px-2.5 rounded-lg shadow-md font-bold whitespace-nowrap transition-all duration-300 ${
-													hoveredBar === idx ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
-												}`}>
-												{amountVal}
-											</div>
-										</div>
-									);
-								})}
-							</div>
-
-							{/* Months labels */}
-							<div className='flex justify-between mt-4 px-4 text-xs font-semibold tracking-wider text-on-surface-variant/80 uppercase font-sans'>
-								{(stats?.salesGrowth || SALES_DATA).map((bar, idx) => (
-									<span key={idx} className='w-full text-center'>
-										{bar.month}
-									</span>
-								))}
-							</div>
-						</div>
-
-						{/* Top Selling Categories (Sacred Pillars) */}
-						<div className='bg-primary p-8 rounded-2xl border border-outline-variant/10 shadow-lg flex flex-col items-center text-center justify-between'>
-							<h4 className='font-serif text-2xl font-bold text-tertiary-fixed mb-4 tracking-wide'>
-								Sacred Pillars
-							</h4>
-
-							{/* Custom Interactive SVG Donut */}
-							<div className='relative w-48 h-48 my-4'>
-								<svg className='w-full h-full transform -rotate-90' viewBox='0 0 100 100'>
-									<circle
-										cx='50'
-										cy='50'
-										fill='transparent'
-										r='40'
-										stroke='#102A66'
-										strokeWidth='10'
-										className='opacity-10'
-									/>
-									{dynamicPillars[0] && (
-										<circle
-											cx='50'
-											cy='50'
-											fill='transparent'
-											r='40'
-											stroke={dynamicPillars[0].strokeColor}
-											strokeDasharray={`${c1Length} 251.2`}
-											strokeDashoffset='0'
-											strokeLinecap='round'
-											strokeWidth='10'
-											className='transition-all duration-500 hover:stroke-width-[12px]'
-										/>
-									)}
-									{dynamicPillars[1] && (
-										<circle
-											cx='50'
-											cy='50'
-											fill='transparent'
-											r='40'
-											stroke={dynamicPillars[1].strokeColor}
-											strokeDasharray={`${c2Length} 251.2`}
-											strokeDashoffset={`-${c1Length}`}
-											strokeLinecap='round'
-											strokeWidth='10'
-											className='transition-all duration-500 hover:stroke-width-[12px]'
-										/>
-									)}
-									{dynamicPillars[2] && (
-										<circle
-											cx='50'
-											cy='50'
-											fill='transparent'
-											r='40'
-											stroke={dynamicPillars[2].strokeColor}
-											strokeDasharray={`${c3Length} 251.2`}
-											strokeDashoffset={`-${c1Length + c2Length}`}
-											strokeLinecap='round'
-											strokeWidth='10'
-											className='transition-all duration-500 hover:stroke-width-[12px]'
-										/>
-									)}
-								</svg>
-								<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center'>
-									<p className='font-serif text-4xl font-bold text-white tracking-wide'>{mainPillarPercent}%</p>
-									<p className='text-[10px] text-tertiary-fixed uppercase font-bold tracking-widest mt-1 truncate max-w-30'>
-										{dynamicPillars[0]?.label || "Silks"}
-									</p>
-								</div>
-							</div>
-
-							{/* Pillars Legend */}
-							<div className='w-full space-y-3 mt-4'>
-								{dynamicPillars.map((pillar, idx) => (
-									<div key={idx} className='flex justify-between items-center text-xs'>
-										<div className='flex items-center gap-2.5'>
-											<span className={`w-2.5 h-2.5 rounded-full ${pillar.color}`} />
-											<span className='text-white/80 font-medium truncate max-w-37.5'>{pillar.label}</span>
-										</div>
-										<span className='text-tertiary-fixed font-bold tracking-wide'>{pillar.value}</span>
+						{loading ? (
+							<>
+								{/* Sales Growth Chart Skeleton */}
+								<div className='lg:col-span-2 bg-surface p-8 rounded-2xl border border-outline-variant/20 shadow-sm'>
+									<div className='flex justify-between items-center mb-8'>
+										<div className='h-8 w-48 shimmer-bg rounded-lg' />
+										<div className='h-8 w-32 shimmer-bg rounded-full' />
 									</div>
-								))}
-							</div>
-						</div>
+									<div className='h-75 w-full flex items-end gap-3 md:gap-5 px-4'>
+										{[...Array(12)].map((_, idx) => (
+											<div key={idx} className='flex-1 rounded-t-xl shimmer-bg' style={{ height: `${25 + (idx % 3) * 20}%` }} />
+										))}
+									</div>
+									<div className='flex justify-between mt-4 px-4'>
+										{["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, idx) => (
+											<span key={idx} className='w-full text-center text-xs font-semibold tracking-wider text-on-surface-variant/40 uppercase font-sans'>
+												{m}
+											</span>
+										))}
+									</div>
+								</div>
+
+								{/* Top Selling Categories (Sacred Pillars) Skeleton */}
+								<div className='bg-primary p-8 rounded-2xl border border-outline-variant/10 shadow-lg flex flex-col items-center justify-between min-h-95'>
+									<div className='h-8 w-32 bg-white/20 shimmer-bg rounded-lg mb-4' />
+									<div className='w-48 h-48 my-4 rounded-full border-10 border-white/10 flex items-center justify-center relative bg-white/5 shimmer-bg'>
+										<div className='text-center space-y-2'>
+											<div className='h-6 w-12 bg-white/20 shimmer-bg rounded mx-auto' />
+											<div className='h-3 w-16 bg-white/20 shimmer-bg rounded mx-auto' />
+										</div>
+									</div>
+									<div className='w-full space-y-3 mt-4'>
+										{[...Array(3)].map((_, idx) => (
+											<div key={idx} className='flex justify-between items-center'>
+												<div className='flex items-center gap-2.5'>
+													<span className='w-2.5 h-2.5 rounded-full bg-white/20 shimmer-bg' />
+													<div className='h-3 w-20 bg-white/20 shimmer-bg rounded' />
+												</div>
+												<div className='h-3 w-10 bg-white/20 shimmer-bg rounded' />
+											</div>
+										))}
+									</div>
+								</div>
+							</>
+						) : (
+							<>
+								{/* Sales Growth Chart */}
+								<div className='lg:col-span-2 bg-surface p-8 rounded-2xl border border-outline-variant/20 shadow-sm'>
+									<div className='flex justify-between items-center mb-8'>
+										<h4 className='font-serif text-2xl font-bold text-primary'>
+											Sales Growth Narrative
+										</h4>
+										<div className='flex gap-2 bg-surface-container p-1 rounded-full border border-outline-variant/10'>
+											<button className='px-4 py-1.5 rounded-full text-xs font-bold bg-primary text-tertiary-fixed shadow-sm cursor-pointer'>
+												Monthly
+											</button>
+											<button className='px-4 py-1.5 rounded-full text-xs font-bold text-on-surface-variant/80 hover:bg-surface-container-high transition-colors cursor-pointer'>
+												Yearly
+											</button>
+										</div>
+									</div>
+
+									{/* Chart Live Visualization */}
+									<div className='h-75 w-full flex items-end gap-3 md:gap-5 px-4 relative'>
+										{(stats?.salesGrowth || []).map((bar, idx) => {
+											const heightVal = bar.heightPercent !== undefined ? `${bar.heightPercent}%` : "0%";
+											const amountVal = bar.amount;
+											
+											return (
+												<div
+													key={idx}
+													onMouseEnter={() => setHoveredBar(idx)}
+													onMouseLeave={() => setHoveredBar(null)}
+													style={{ height: heightVal }}
+													className="flex-1 rounded-t-xl group relative cursor-pointer transition-all duration-500 bg-surface-container-high hover:bg-secondary-container">
+													{/* Floating Tooltip */}
+													<div
+														className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-primary text-tertiary-fixed text-[10px] py-1 px-2.5 rounded-lg shadow-md font-bold whitespace-nowrap transition-all duration-300 ${
+															hoveredBar === idx ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
+														}`}>
+														{amountVal}
+													</div>
+												</div>
+											);
+										})}
+									</div>
+
+									{/* Months labels */}
+									<div className='flex justify-between mt-4 px-4 text-xs font-semibold tracking-wider text-on-surface-variant/80 uppercase font-sans'>
+										{(stats?.salesGrowth || []).map((bar, idx) => (
+											<span key={idx} className='w-full text-center'>
+												{bar.month}
+											</span>
+										))}
+									</div>
+								</div>
+
+								{/* Top Selling Categories (Sacred Pillars) */}
+								<div className='bg-primary p-8 rounded-2xl border border-outline-variant/10 shadow-lg flex flex-col items-center text-center justify-between'>
+									<h4 className='font-serif text-2xl font-bold text-tertiary-fixed mb-4 tracking-wide'>
+										Sacred Pillars
+									</h4>
+
+									{/* Custom Interactive SVG Donut */}
+									<div className='relative w-48 h-48 my-4'>
+										<svg className='w-full h-full transform -rotate-90' viewBox='0 0 100 100'>
+											<circle
+												cx='50'
+												cy='50'
+												fill='transparent'
+												r='40'
+												stroke='#102A66'
+												strokeWidth='10'
+												className='opacity-10'
+											/>
+											{dynamicPillars[0] && (
+												<circle
+													cx='50'
+													cy='50'
+													fill='transparent'
+													r='40'
+													stroke={dynamicPillars[0].strokeColor}
+													strokeDasharray={`${c1Length} 251.2`}
+													strokeDashoffset='0'
+													strokeLinecap='round'
+													strokeWidth='10'
+													className='transition-all duration-500 hover:stroke-width-[12px]'
+												/>
+											)}
+											{dynamicPillars[1] && (
+												<circle
+													cx='50'
+													cy='50'
+													fill='transparent'
+													r='40'
+													stroke={dynamicPillars[1].strokeColor}
+													strokeDasharray={`${c2Length} 251.2`}
+													strokeDashoffset={`-${c1Length}`}
+													strokeLinecap='round'
+													strokeWidth='10'
+													className='transition-all duration-500 hover:stroke-width-[12px]'
+												/>
+											)}
+											{dynamicPillars[2] && (
+												<circle
+													cx='50'
+													cy='50'
+													fill='transparent'
+													r='40'
+													stroke={dynamicPillars[2].strokeColor}
+													strokeDasharray={`${c3Length} 251.2`}
+													strokeDashoffset={`-${c1Length + c2Length}`}
+													strokeLinecap='round'
+													strokeWidth='10'
+													className='transition-all duration-500 hover:stroke-width-[12px]'
+												/>
+											)}
+										</svg>
+										<div className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center'>
+											<p className='font-serif text-4xl font-bold text-white tracking-wide'>{mainPillarPercent}%</p>
+											<p className='text-[10px] text-tertiary-fixed uppercase font-bold tracking-widest mt-1 truncate max-w-30'>
+												{dynamicPillars[0]?.label || "No Sales"}
+											</p>
+										</div>
+									</div>
+
+									{/* Pillars Legend */}
+									<div className='w-full space-y-3 mt-4'>
+										{dynamicPillars.length === 0 ? (
+											<p className='text-white/60 text-xs italic mt-2'>No category sales logged yet.</p>
+										) : (
+											dynamicPillars.map((pillar, idx) => (
+												<div key={idx} className='flex justify-between items-center text-xs'>
+													<div className='flex items-center gap-2.5'>
+														<span className={`w-2.5 h-2.5 rounded-full ${pillar.color}`} />
+														<span className='text-white/80 font-medium truncate max-w-37.5'>{pillar.label}</span>
+													</div>
+													<span className='text-tertiary-fixed font-bold tracking-wide'>{pillar.value}</span>
+												</div>
+											))
+										)}
+									</div>
+								</div>
+							</>
+						)}
 					</div>
 
 					{/* Recent Orders Table */}
