@@ -22,6 +22,29 @@ export default function ProfileDashboard() {
 		initialData: localUser,
 	});
 
+	const { data: ordersData } = useQuery({
+		queryKey: ["orders", "my-orders"],
+		queryFn: async () => {
+			const res = await api.get("/api/orders/my-orders");
+			return res.data;
+		},
+	});
+
+	const orders = ordersData?.orders || [];
+
+	// Compute metrics dynamically from actual orders
+	const totalPieces = orders.reduce((sum, order) => {
+		return sum + (order.items?.reduce((itemSum, item) => itemSum + item.quantity, 0) || 0);
+	}, 0);
+
+	const activeOrdersCount = orders.filter(o => 
+		["PENDING", "CONFIRMED", "PROCESSING", "SHIPPED"].includes(o.orderStatus)
+	).length;
+
+	const totalAmountSpent = orders.reduce((sum, order) => sum + Number(order.finalAmount || 0), 0);
+	// Rewards points: e.g., 10% of total spent
+	const rewardPoints = Math.round(totalAmountSpent / 10);
+
 	return (
 		<div className='space-y-12'>
 			<div className='mb-12'>
@@ -67,7 +90,9 @@ export default function ProfileDashboard() {
 						<span className='material-symbols-outlined text-[18px]'>
 							calendar_today
 						</span>
-						Member since Jan 2026
+						Member since {currentUser?.createdAt 
+							? new Date(currentUser.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })
+							: "Jan 2026"}
 					</p>
 				</div>
 
@@ -82,12 +107,12 @@ export default function ProfileDashboard() {
 			{/* Quick Stats Grid */}
 			<section className='grid grid-cols-1 md:grid-cols-3 gap-6'>
 				{[
-					{ icon: "apparel", label: "Divine Pieces Owned", value: "12" },
-					{ icon: "local_shipping", label: "Active Orders", value: "02" },
+					{ icon: "apparel", label: "Divine Pieces Owned", value: totalPieces.toString().padStart(2, '0') },
+					{ icon: "local_shipping", label: "Active Orders", value: activeOrdersCount.toString().padStart(2, '0') },
 					{
 						icon: "token",
 						label: "Sacred Rewards Points",
-						value: "2,450",
+						value: rewardPoints.toLocaleString("en-IN"),
 					},
 				].map((stat) => (
 					<div
@@ -110,85 +135,90 @@ export default function ProfileDashboard() {
 					<h3 className='font-serif text-3xl text-primary'>
 						Recent Divine Acquisitions
 					</h3>
-					<a
-						className='text-primary font-sans text-xs uppercase tracking-[0.15em] font-semibold hover:text-tertiary transition-colors pb-1'
-						href='#'>
+					<button
+						onClick={() => navigate("/profile/orders")}
+						className='text-primary font-sans text-xs uppercase tracking-[0.15em] font-semibold hover:text-tertiary transition-colors pb-1 bg-transparent border-none cursor-pointer'>
 						View All
-					</a>
+					</button>
 				</div>
 
 				<div className='space-y-6'>
-					{/* Order Card 1 */}
-					<div className='bg-surface-container-low rounded-md p-6 border-[0.5px] border-tertiary/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-tertiary transition-colors'>
-						<div className='flex gap-6 items-center'>
-							<div className='w-20 h-24 bg-surface rounded-md overflow-hidden shrink-0'>
-								<img
-									alt='Product Thumb'
-									className='object-cover w-full h-full'
-									src='https://lh3.googleusercontent.com/aida-public/AB6AXuC9HoxunAenRs3kCR-ZdlzumjSUjXAPhJM3ogngAy4nsn5Ux-BBKIcawyVKshYuoiLCQ4Ep1VOIt4bNUT42VSbHO8kwFTExTMdsKfZLvz3mGaWPKWUGgut833MF0vnBtS_DWpo9d09pqprCXKV9E7LWSqFF3-kxpH-s66ZF2yUj7WhnE5gkToZPwTsazTX7u9n3RriWbPJnGxTA2ALL7-L6Sets2HnFfxGj5koI7R2mzXnjPfWex-nchjStnHtCKOfejjeaFS1rcZDP'
-								/>
-							</div>
-							<div>
-								<p className='font-serif text-2xl text-primary mb-1'>
-									Order #KV-8924
-								</p>
-								<p className='text-on-surface-variant font-sans text-sm mb-2'>
-									Placed on Oct 12, 2023
-								</p>
-								<span className='inline-block bg-tertiary/10 text-tertiary border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold'>
-									Processing - Expected Oct 18
-								</span>
-							</div>
+					{orders.length === 0 ? (
+						<div className='text-center py-12 text-on-surface-variant font-sans bg-surface-container-low rounded-md border border-dashed border-tertiary/20'>
+							<span className='material-symbols-outlined text-[48px] text-tertiary/40 mb-3 block'>
+								shopping_bag
+							</span>
+							No purchases yet. Start your sacred style journey!
 						</div>
+					) : (
+						orders.slice(0, 2).map((order) => {
+							const orderDate = new Date(order.createdAt).toLocaleDateString("en-US", {
+								month: "short",
+								day: "numeric",
+								year: "numeric"
+							});
 
-						<div className='w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end md:gap-3'>
-							<p className='font-sans text-2xl text-primary font-medium'>
-								₹ 14,999
-							</p>
-							<button className='text-tertiary font-sans text-xs uppercase tracking-widest font-semibold hover:text-primary transition-colors flex items-center gap-1'>
-								Track Order
-								<span className='material-symbols-outlined text-[16px]'>
-									arrow_right_alt
-								</span>
-							</button>
-						</div>
-					</div>
+							const displayImg = order.items?.[0]?.productImage || "https://placehold.co/400x500?text=No+Image";
 
-					{/* Order Card 2 */}
-					<div className='bg-surface-container-low rounded-md p-6 border-[0.5px] border-tertiary/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-tertiary transition-colors'>
-						<div className='flex gap-6 items-center'>
-							<div className='w-20 h-24 bg-surface rounded-md overflow-hidden shrink-0'>
-								<img
-									alt='Product Thumb'
-									className='object-cover w-full h-full'
-									src='https://lh3.googleusercontent.com/aida-public/AB6AXuBjxVoKsvxtZUC2T4RejwuEsiJ6P3t_3YgK-16u-l1zziEwRM0rWP3vHcmBaDEDEQruSB87ArUrmzTmd_ihE2BrfFuC-vWhDMA3OCkJW-4h-QEfj5QZbyDWy6VBsa7iqp1DlX_fdm_b9lbnVFYQyidVZRUR2dNRMj8P1K55TDUi6kfrvmnszAW01WTgdBkyv315gbS6xlC2vyYHVmXiR0-jAJdtnB3I8cAJ2pm0yVUZ2D3XvBSOMnfVkgRwOqRvDYEjh4UeRsqpcBMC'
-								/>
-							</div>
-							<div>
-								<p className='font-serif text-2xl text-primary mb-1'>
-									Order #KV-7210
-								</p>
-								<p className='text-on-surface-variant font-sans text-sm mb-2'>
-									Placed on Sep 28, 2023
-								</p>
-								<span className='inline-block bg-surface-container-highest text-on-surface-variant px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold border border-tertiary/10'>
-									Delivered - Oct 04
-								</span>
-							</div>
-						</div>
+							let statusText = "Processing";
+							let statusClass = "bg-tertiary/10 text-tertiary border-tertiary/20";
+							if (order.orderStatus === "DELIVERED") {
+								statusText = `Delivered`;
+								statusClass = "bg-secondary-container/20 text-secondary border-secondary-container/10";
+							} else if (order.orderStatus === "CANCELLED") {
+								statusText = "Cancelled";
+								statusClass = "bg-surface-container-highest text-on-surface-variant border-tertiary/10";
+							} else if (order.orderStatus === "RETURNED") {
+								statusText = "Returned";
+								statusClass = "bg-tertiary/10 text-tertiary border-tertiary/20";
+							} else if (order.orderStatus === "SHIPPED") {
+								statusText = "Shipped";
+								statusClass = "bg-primary/10 text-primary border-primary/20";
+							} else if (order.orderStatus === "CONFIRMED") {
+								statusText = "Confirmed";
+								statusClass = "bg-primary/10 text-primary border-primary/20";
+							}
 
-						<div className='w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end md:gap-3'>
-							<p className='font-sans text-2xl text-primary font-medium'>
-								₹ 8,450
-							</p>
-							<button className='text-tertiary font-sans text-xs uppercase tracking-widest font-semibold hover:text-primary transition-colors flex items-center gap-1'>
-								View Details
-								<span className='material-symbols-outlined text-[16px]'>
-									arrow_right_alt
-								</span>
-							</button>
-						</div>
-					</div>
+							return (
+								<div key={order.id} className='bg-surface-container-low rounded-md p-6 border-[0.5px] border-tertiary/20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-tertiary transition-colors'>
+									<div className='flex gap-6 items-center'>
+										<div className='w-20 h-24 bg-surface rounded-md overflow-hidden shrink-0'>
+											<img
+												alt='Product Thumb'
+												className='object-cover w-full h-full'
+												src={displayImg}
+											/>
+										</div>
+										<div>
+											<p className='font-serif text-2xl text-primary mb-1'>
+												Order #{order.orderNumber}
+											</p>
+											<p className='text-on-surface-variant font-sans text-sm mb-2'>
+												Placed on {orderDate}
+											</p>
+											<span className={`inline-block border px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold ${statusClass}`}>
+												{statusText}
+											</span>
+										</div>
+									</div>
+
+									<div className='w-full md:w-auto flex flex-row md:flex-col justify-between items-center md:items-end md:gap-3'>
+										<p className='font-sans text-2xl text-primary font-medium'>
+											₹ {Number(order.finalAmount).toLocaleString("en-IN")}
+										</p>
+										<button 
+											onClick={() => navigate("/profile/orders")}
+											className='text-tertiary font-sans text-xs uppercase tracking-widest font-semibold hover:text-primary transition-colors flex items-center gap-1 bg-transparent border-none cursor-pointer'>
+											Track Order
+											<span className='material-symbols-outlined text-[16px]'>
+												arrow_right_alt
+											</span>
+										</button>
+									</div>
+								</div>
+							);
+						})
+					)}
 				</div>
 			</section>
 

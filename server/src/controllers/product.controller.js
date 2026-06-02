@@ -106,11 +106,18 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
 	try {
-		const { admin } = req.query;
+		const { admin, isNewArrival, isFestivalWear } = req.query;
 		const page = req.query.page ? parseInt(req.query.page) : null;
 		const limit = req.query.limit ? parseInt(req.query.limit) : null;
 		
 		const whereClause = admin === "true" ? {} : { isActive: true };
+
+		if (isNewArrival === "true") {
+			whereClause.isNewArrival = true;
+		}
+		if (isFestivalWear === "true") {
+			whereClause.isFestivalWear = true;
+		}
 
 		let queryOptions = {
 			where: whereClause,

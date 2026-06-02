@@ -1,15 +1,31 @@
 /** @format */
 
-import React, { useState, useRef, useEffect } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+
+import { useState, useRef, useEffect } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import Logo from "../assets/logo.jpeg";
 import gsap from "gsap";
+import api from "../services/api";
 
 const Navbar = () => {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const searchContainerRef = useRef(null);
 	const searchInputRef = useRef(null);
-	const navigate = useNavigate();
+
+	const isAuthenticated = !!localStorage.getItem("supabaseToken");
+
+	const { data: cartData } = useQuery({
+		queryKey: ["cart"],
+		queryFn: async () => {
+			const res = await api.get("/api/cart");
+			return res.data?.cart || { items: [] };
+		},
+		enabled: isAuthenticated,
+	});
+
+	const cartItems = cartData?.items || [];
+	const cartItemsCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
 	const toggleSearch = (e) => {
 		e.preventDefault();
@@ -116,7 +132,7 @@ const Navbar = () => {
 							{/* Animated Expandable Search */}
 							<div
 								ref={searchContainerRef}
-								className={`flex items-center h-[34px] rounded-full transition-colors duration-300 ${
+								className={`flex items-center h-8.5 rounded-full transition-colors duration-300 ${
 									isSearchOpen
 										? "bg-surface-container-low/10 border-[0.5px] border-tertiary/50 pl-2"
 										: "bg-transparent border-transparent"
@@ -124,7 +140,7 @@ const Navbar = () => {
 								style={{ width: "22px", overflow: "hidden" }}>
 								<button
 									onClick={toggleSearch}
-									className='text-tertiary/80 hover:text-tertiary transition-colors flex items-center justify-center shrink-0 w-[22px] h-full'
+									className='text-tertiary/80 hover:text-tertiary transition-colors flex items-center justify-center shrink-0 w-5.5 h-full'
 									aria-label='Toggle Search'>
 									<span className='material-symbols-outlined text-[22px]'>
 										{isSearchOpen ? "close" : "search"}
@@ -135,7 +151,7 @@ const Navbar = () => {
 									ref={searchInputRef}
 									type='text'
 									placeholder='Search collection...'
-									className='bg-transparent border-none outline-none text-surface placeholder:text-surface/60 font-sans text-sm w-[180px] pl-2 opacity-0'
+									className='bg-transparent border-none outline-none text-surface placeholder:text-surface/60 font-sans text-sm w-45 pl-2 opacity-0'
 								/>
 							</div>
 
@@ -147,6 +163,7 @@ const Navbar = () => {
 								</span>
 							</Link>
 
+
 							<Link
 								className='text-tertiary/80 hover:text-tertiary transition-all relative flex items-center'
 								to='/cart'>
@@ -154,8 +171,8 @@ const Navbar = () => {
 									shopping_bag
 								</span>
 
-								<span className='absolute -top-1.5 -right-2 bg-tertiary text-primary text-[9px] font-bold h-[18px] w-[18px] rounded-full flex items-center justify-center border border-primary'>
-									0
+								<span className='absolute -top-1.5 -right-2 bg-tertiary text-primary text-[9px] font-bold h-4.5 w-4.5 rounded-full flex items-center justify-center border border-primary'>
+									{cartItemsCount}
 								</span>
 							</Link>
 						</div>

@@ -204,7 +204,7 @@ export default function ShopKrishnaVastra() {
 												/>
 												{/* Hover overlay */}
 												<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
-												<LikeButton />
+												<LikeButton productId={p.id} />
 											</div>
 
 											<div className='grow flex flex-col'>

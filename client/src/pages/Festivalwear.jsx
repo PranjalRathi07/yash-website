@@ -1,11 +1,52 @@
 /** @format */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import LikeButton from "../components/LikeButton";
+import api from "../services/api";
+
+const ProductSkeleton = () => (
+	<div className='flex flex-col group relative overflow-hidden bg-transparent'>
+		{/* Image Container Skeleton */}
+		<div className='aspect-4/5 shimmer-bg mb-6 relative overflow-hidden' />
+		
+		{/* Info Section Skeleton */}
+		<div className='grow flex flex-col'>
+			{/* Category Skeleton */}
+			<div className='h-3.5 w-1/4 shimmer-bg mb-2' />
+			{/* Title Skeleton */}
+			<div className='h-7 w-3/4 shimmer-bg mb-2.5' />
+			{/* Description lines Skeleton */}
+			<div className='h-4 w-full shimmer-bg mb-2' />
+			<div className='h-4 w-5/6 shimmer-bg mb-6' />
+
+			{/* Price & Add to Cart Skeleton */}
+			<div className='mt-auto flex items-center justify-between'>
+				<div className='h-6 w-1/3 shimmer-bg' />
+				<div className='h-10 w-10 rounded-full shimmer-bg' />
+			</div>
+		</div>
+	</div>
+);
 
 export default function FestivalWear() {
 	const navigate = useNavigate();
+	const [page, setPage] = useState(1);
+
+	const { data, isLoading, isError, isFetching } = useQuery({
+		queryKey: ["festivalWear", page],
+		queryFn: async () => {
+			const res = await api.get(`/api/products?isFestivalWear=true&page=${page}&limit=9`);
+			return res.data;
+		},
+		placeholderData: keepPreviousData,
+	});
+
+	const products = data?.products || [];
+	const totalPages = data?.totalPages || 1;
+	const showSkeleton = isLoading || isFetching;
+
 	return (
 		<div className='bg-surface text-on-surface min-h-screen flex flex-col font-sans antialiased selection:bg-tertiary/20 selection:text-primary'>
 			<main className='grow w-full px-8 md:px-16 lg:px-24 py-stack-xl'>
@@ -31,7 +72,7 @@ export default function FestivalWear() {
 							<div className='space-y-6'>
 								<input
 									type='range'
-									className='w-full h-[2px] bg-tertiary/20 rounded-full appearance-none cursor-pointer accent-primary'
+									className='w-full h-0.5 bg-tertiary/20 rounded-full appearance-none cursor-pointer accent-primary'
 								/>
 								<div className='flex items-center justify-between gap-4'>
 									<input
@@ -93,234 +134,133 @@ export default function FestivalWear() {
 
 						{/* Product Grid */}
 						<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16'>
-							{/* Product Card 1 */}
-							<div onClick={() => navigate('/product/1')} className='flex flex-col group relative overflow-hidden bg-transparent cursor-pointer'>
-								<div className='aspect-4/5 bg-surface-container-low rounded-md mb-6 overflow-hidden relative'>
-									<div className='absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold z-10'>
-										New Arrival
-									</div>
-									<img
-										alt='Product Image'
-										className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-										src='https://lh3.googleusercontent.com/aida-public/AB6AXuDxnQaBSciQLuxnJ06BC0Znz6CmpdTDHJDprPtQoMETW0-o_Mj59ZXt1uiKIvl9ScHcuKeIK55odmzwQfzbya0uXMFQ2a3Yn9mzBRORRcssL1ukEQCUAHVc7_6Ptpek2DUYihMKr2vXBkQ8XJAWO92f9YaOyadQZTnIEzrwQOEqZunt25U5UDd-g7fsvyvQtZMcEcTPxlL0wKaNr8VQ4nvS7fO2APffG6e7x55WPUoKBT0VVm64TfCNBwDMPnZA3By9dXyGwsK3oxpl'
-									/>
-									{/* Hover overlay */}
-									<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
-									<LikeButton />
+							{showSkeleton ? (
+								Array.from({ length: 9 }).map((_, idx) => (
+									<ProductSkeleton key={idx} />
+								))
+							) : isError ? (
+								<div className="col-span-full py-20 text-center text-red-500 flex flex-col items-center justify-center gap-4">
+									<span className="material-symbols-outlined text-[32px]">error</span>
+									<span className="font-serif text-lg">Failed to retrieve festival wear. Please try again.</span>
 								</div>
+							) : products.length === 0 ? (
+								<div className="col-span-full py-20 text-center text-on-surface-variant">No festival wear found.</div>
+							) : (
+								products.map((p) => {
+									const discountPercent = (p.oldPrice && p.oldPrice > p.price) ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+									
+									return (
+										<div key={p.id} onClick={() => navigate(`/product/${p.slug}`)} className='flex flex-col group relative overflow-hidden bg-transparent cursor-pointer'>
+											<div className='aspect-4/5 bg-surface-container-low rounded-md mb-6 overflow-hidden relative'>
+												{p.isNewArrival && (
+													<div className='absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold z-10'>
+														New Arrival
+													</div>
+												)}
+												{!p.isNewArrival && discountPercent > 0 && (
+													<div className='absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold z-10'>
+														{discountPercent}% OFF
+													</div>
+												)}
+												<img
+													alt={p.title}
+													className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
+													src={p.images?.[0]?.url || "https://placehold.co/400x500?text=No+Image"}
+												/>
+												{/* Hover overlay */}
+												<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
+												<LikeButton productId={p.id} />
+											</div>
 
-								<div className='grow flex flex-col'>
-									<p className='font-sans text-[10px] text-tertiary mb-2 uppercase tracking-widest font-semibold'>
-										Festive Wear
-									</p>
-									<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium'>
-										Crimson Zari Poshak Set
-									</h3>
-									<p className='font-sans text-sm text-on-surface-variant mb-6 line-clamp-2 leading-relaxed'>
-										Intricately woven silk with heavy gold threadwork, complete
-										with matching patka.
-									</p>
+											<div className='grow flex flex-col'>
+												<p className='font-sans text-[10px] text-tertiary mb-2 uppercase tracking-widest font-semibold truncate'>
+													{p.category?.name || "Divine Attire"}
+												</p>
+												<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium truncate'>
+													{p.title}
+												</h3>
+												<p className='font-sans text-sm text-on-surface-variant mb-6 line-clamp-2 leading-relaxed'>
+													{p.description}
+												</p>
 
-									<div className='mt-auto flex items-center justify-between'>
-										<span className='font-sans text-xl font-medium text-primary'>
-											₹4,500
-										</span>
-										<button
-											type='button'
-											onClick={(e) => e.stopPropagation()}
-											className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform'>
-											<span className='material-symbols-outlined text-[20px]'>
-												add_shopping_cart
-											</span>
-										</button>
-									</div>
-								</div>
-							</div>
-
-							{/* Product Card 2 */}
-							<div onClick={() => navigate('/product/1')} className='flex flex-col group relative overflow-hidden bg-transparent cursor-pointer'>
-								<div className='aspect-4/5 bg-surface-container-low rounded-md mb-6 overflow-hidden relative'>
-									<img
-										alt='Product Image'
-										className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-										src='https://lh3.googleusercontent.com/aida-public/AB6AXuBRjijKr8UE6dBndNh4FTDLJSLEcYUsv2vIBhfcFZaTshN0N7SNnJDIQhDgWXNQcgHkaRIyBri_ZpSd6Vg_sTkX4pWV15NY4eXAwj6n1ebCp0MXFN63Mvx5TYuPBBYZatNBXik2AZ47y7mNNh2-f1yPM9FQgOni62oLbBYgBrvcX55moIL92HnEVLFCIKGFiwNQU_0Q77xlXXUiX6Dc9ZKuFHZNrfdt7YlAqcQO3BlrXjzRu0dBbuFuHTd44lPBoacpSJffrJ3ZoJ3n'
-									/>
-									<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
-									<LikeButton />
-								</div>
-
-								<div className='grow flex flex-col'>
-									<p className='font-sans text-[10px] text-tertiary mb-2 uppercase tracking-widest font-semibold'>
-										Bansuri
-									</p>
-									<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium'>
-										Swarna Peacock Flute
-									</h3>
-									<p className='font-sans text-sm text-on-surface-variant mb-6 line-clamp-2 leading-relaxed'>
-										Golden flute accented with Austrian crystals and detailed
-										peacock enamel work.
-									</p>
-
-									<div className='mt-auto flex items-center justify-between'>
-										<span className='font-sans text-xl font-medium text-primary'>
-											₹1,200
-										</span>
-										<button
-											type='button'
-											onClick={(e) => e.stopPropagation()}
-											className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform'>
-											<span className='material-symbols-outlined text-[20px]'>
-												add_shopping_cart
-											</span>
-										</button>
-									</div>
-								</div>
-							</div>
-
-							{/* Product Card 3 */}
-							<div onClick={() => navigate('/product/1')} className='flex flex-col group relative overflow-hidden bg-transparent cursor-pointer'>
-								<div className='aspect-4/5 bg-surface-container-low rounded-md mb-6 overflow-hidden relative'>
-									<div className='absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold z-10'>
-										15% OFF
-									</div>
-									<img
-										alt='Product Image'
-										className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-										src='https://lh3.googleusercontent.com/aida-public/AB6AXuDpgm-VJ4RSekVfcdo6dJ1efxKoFXY6kMKTpVzd8yOZEWK5De-Itduk2IoCG9Fi4TE1nKlQeCl0s0m9A1m5q5CLptzqOsM3DNJvlmtt88P7xAiHAa4qdHArPkH_GD6LQGA7T3kHBMIMJOIZ-0y4RgBO9cNXHlHRnnADvtr_bkSQEDzEQmHVjQ1r32ku9BVVPGfhxy4d_Vb8prP4nem5GeWn4CEP9G0mEi7FsR0tGJ_p0E7O5yN7eCygAfPSo9oszUB_-e9nZHJphGkB'
-									/>
-									<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
-									<LikeButton />
-								</div>
-
-								<div className='grow flex flex-col'>
-									<p className='font-sans text-[10px] text-tertiary mb-2 uppercase tracking-widest font-semibold'>
-										Jewelry
-									</p>
-									<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium'>
-										Navratna Haar Set
-									</h3>
-									<p className='font-sans text-sm text-on-surface-variant mb-6 line-clamp-2 leading-relaxed'>
-										Nine precious stones embedded in a traditional gold-plated
-										brass base.
-									</p>
-
-									<div className='mt-auto flex items-center justify-between'>
-										<div className='flex items-baseline gap-3'>
-											<span className='font-sans text-xl font-medium text-primary'>
-												₹3,825
-											</span>
-											<span className='text-xs text-on-surface-variant line-through'>
-												₹4,500
-											</span>
+												<div className='mt-auto flex items-center justify-between'>
+													<div className='flex items-baseline gap-3'>
+														<span className='font-sans text-xl font-medium text-primary'>
+															₹{Number(p.price).toLocaleString("en-IN")}
+														</span>
+														{discountPercent > 0 && (
+															<span className='text-xs text-on-surface-variant line-through'>
+																₹{Number(p.oldPrice).toLocaleString("en-IN")}
+															</span>
+														)}
+													</div>
+													<button
+														type='button'
+														onClick={(e) => e.stopPropagation()}
+														className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform'>
+														<span className='material-symbols-outlined text-[20px]'>
+															add_shopping_cart
+														</span>
+													</button>
+												</div>
+											</div>
 										</div>
-										<button
-											type='button'
-											onClick={(e) => e.stopPropagation()}
-											className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform'>
-											<span className='material-symbols-outlined text-[20px]'>
-												add_shopping_cart
-											</span>
-										</button>
-									</div>
-								</div>
-							</div>
-
-							{/* Product Card 4 */}
-							<div onClick={() => navigate('/product/1')} className='flex flex-col group relative overflow-hidden bg-transparent cursor-pointer'>
-								<div className='aspect-4/5 bg-surface-container-low rounded-md mb-6 overflow-hidden relative'>
-									<img
-										alt='Product Image'
-										className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-										src='https://lh3.googleusercontent.com/aida-public/AB6AXuAtw8CYVGGcxfsBGv0HF7LPve437sUbAceQYQhHj6AXkvEFU_q8Fgl6_UwVjSGZNMMdEIINjmFbnoEJ-imxO7U4oryRykjiQiIp7oibMkV10cHlW3m6QU-_wbPcML_M-cPDImAlYB_5vNg5N9RluE92_lnV89iss302C5eHpSHhMYlLeYfAheu6rHtdCB94dHtdPiubO6wLOLF7dyI9l-uKfMUvJNgmhhGtSU6MjvR-fIaTjezauDDfN9lxpj4a5X4ap59pfTKddBh2'
-									/>
-									<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
-									<LikeButton />
-								</div>
-
-								<div className='grow flex flex-col'>
-									<p className='font-sans text-[10px] text-tertiary mb-2 uppercase tracking-widest font-semibold'>
-										Mukut
-									</p>
-									<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium'>
-										Pitambar Pearl Crown
-									</h3>
-									<p className='font-sans text-sm text-on-surface-variant mb-6 line-clamp-2 leading-relaxed'>
-										Yellow silk base decorated with faux pearls and a central
-										ruby-colored stone.
-									</p>
-
-									<div className='mt-auto flex items-center justify-between'>
-										<span className='font-sans text-xl font-medium text-primary'>
-											₹1,800
-										</span>
-										<button
-											type='button'
-											onClick={(e) => e.stopPropagation()}
-											className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform'>
-											<span className='material-symbols-outlined text-[20px]'>
-												add_shopping_cart
-											</span>
-										</button>
-									</div>
-								</div>
-							</div>
-
-							{/* Placeholders */}
-							{Array.from({ length: 2 }).map((_, i) => (
-								<div
-									key={i}
-									className='flex flex-col justify-center items-center text-center opacity-60 bg-surface-container-low aspect-4/5 rounded-md border-[0.5px] border-tertiary/20 border-dashed'>
-									<span className='material-symbols-outlined text-[48px] text-tertiary/50 mb-6'>
-										auto_awesome
-									</span>
-									<h3 className='font-serif text-xl text-primary mb-2'>
-										More Divine Attire
-									</h3>
-									<p className='font-sans text-sm text-on-surface-variant'>
-										Loading collection...
-									</p>
-								</div>
-							))}
+									);
+								})
+							)}
 						</div>
 
 						{/* Pagination */}
-						<div className='mt-stack-xl flex justify-center items-center gap-4'>
-							<button
-								type='button'
-								className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary transition-colors'>
-								<span className='material-symbols-outlined'>chevron_left</span>
-							</button>
+						{totalPages > 1 && (
+							<div className='mt-stack-xl flex justify-center items-center gap-4'>
+								<button
+									type='button'
+									disabled={page === 1 || showSkeleton}
+									onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+									className={`h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center transition-all duration-300 ${
+										page === 1 || showSkeleton
+											? "opacity-30 cursor-not-allowed text-on-surface-variant"
+											: "text-on-surface-variant hover:border-primary hover:text-primary hover:bg-primary/5 active:scale-90 cursor-pointer"
+									}`}>
+									<span className='material-symbols-outlined'>chevron_left</span>
+								</button>
 
-							<button
-								type='button'
-								className='h-10 w-10 rounded-full bg-primary text-surface font-sans text-sm flex items-center justify-center shadow-[0_4px_14px_rgba(79,55,138,0.3)]'>
-								1
-							</button>
+								{Array.from({ length: totalPages }, (_, idx) => {
+									const pageNum = idx + 1;
+									return (
+										<button
+											key={pageNum}
+											type='button'
+											disabled={showSkeleton}
+											onClick={() => setPage(pageNum)}
+											className={`h-10 w-10 rounded-full flex items-center justify-center font-sans text-sm transition-all duration-300 ${
+												showSkeleton
+													? "opacity-50 cursor-not-allowed text-on-surface-variant"
+													: page === pageNum
+														? "bg-primary text-surface font-bold shadow-[0_4px_14px_rgba(79,55,138,0.3)] scale-110 cursor-pointer"
+														: "text-on-surface-variant hover:text-primary hover:bg-primary/5 active:scale-95 cursor-pointer"
+											}`}>
+											{pageNum}
+										</button>
+									);
+								})}
 
-							<button
-								type='button'
-								className='h-10 w-10 rounded-full flex items-center justify-center text-on-surface-variant font-sans text-sm hover:text-primary transition-colors'>
-								2
-							</button>
-
-							<button
-								type='button'
-								className='h-10 w-10 rounded-full flex items-center justify-center text-on-surface-variant font-sans text-sm hover:text-primary transition-colors'>
-								3
-							</button>
-
-							<span className='text-on-surface-variant px-2'>...</span>
-
-							<button
-								type='button'
-								className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-on-surface-variant hover:border-primary hover:text-primary transition-colors'>
-								<span className='material-symbols-outlined'>chevron_right</span>
-							</button>
-						</div>
+								<button
+									type='button'
+									disabled={page === totalPages || showSkeleton}
+									onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+									className={`h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center transition-all duration-300 ${
+										page === totalPages || showSkeleton
+											? "opacity-30 cursor-not-allowed text-on-surface-variant"
+											: "text-on-surface-variant hover:border-primary hover:text-primary hover:bg-primary/5 active:scale-90 cursor-pointer"
+									}`}>
+									<span className='material-symbols-outlined'>chevron_right</span>
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 			</main>
 		</div>
 	);
 }
-
