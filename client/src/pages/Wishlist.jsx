@@ -108,6 +108,8 @@ export default function Wishlist() {
 						
 						const displayImg = p.images?.[0]?.url || "https://placehold.co/400x500?text=No+Image";
 
+						const discountPercent = (p.oldPrice && p.oldPrice > p.price) ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+
 						return (
 							<div
 								key={item.id}
@@ -132,9 +134,21 @@ export default function Wishlist() {
 									</p>
 
 									<div className='mt-auto flex items-center justify-between'>
-										<span className='font-sans text-xl font-medium text-primary'>
-											₹{Number(p.price).toLocaleString("en-IN")}
-										</span>
+										<div className='flex items-baseline gap-3'>
+											<span className='font-sans text-xl font-medium text-primary'>
+												₹{Number(p.price).toLocaleString("en-IN")}
+											</span>
+											{discountPercent > 0 && (
+												<>
+													<span className='text-xs text-on-surface-variant line-through'>
+														₹{Number(p.oldPrice).toLocaleString("en-IN")}
+													</span>
+													<span className='text-xs text-tertiary font-semibold'>
+														({discountPercent}% OFF)
+													</span>
+												</>
+											)}
+										</div>
 										<button
 											type='button'
 											disabled={cartMutation.isPending}

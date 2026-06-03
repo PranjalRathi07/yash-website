@@ -224,9 +224,14 @@ export default function ShopKrishnaVastra() {
 															₹{Number(p.price).toLocaleString("en-IN")}
 														</span>
 														{discountPercent > 0 && (
-															<span className='text-xs text-on-surface-variant line-through'>
-																₹{Number(p.oldPrice).toLocaleString("en-IN")}
-															</span>
+															<>
+																<span className='text-xs text-on-surface-variant line-through'>
+																	₹{Number(p.oldPrice).toLocaleString("en-IN")}
+																</span>
+																<span className='text-xs text-tertiary font-semibold'>
+																	({discountPercent}% OFF)
+																</span>
+															</>
 														)}
 													</div>
 													<button

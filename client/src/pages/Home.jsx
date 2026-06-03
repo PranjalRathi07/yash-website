@@ -210,44 +210,60 @@ export default function KrishnaVasanam() {
 					) : newArrivals.length === 0 ? (
 						<div className="col-span-full py-10 text-center text-on-surface-variant">No new arrivals found.</div>
 					) : (
-						newArrivals.map((p) => (
-							<div
-								key={p.id}
-								onClick={() => navigate(`/product/${p.slug}`)}
-								className='group relative flex flex-col transition-all duration-500 rounded-md overflow-hidden cursor-pointer'>
-								<div className='aspect-4/5 overflow-hidden rounded-md mb-6 relative'>
-									<img
-										className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-										alt={p.title}
-										src={p.images?.[0]?.url || "https://placehold.co/400x500?text=No+Image"}
-									/>
-									<span className='absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold'>
-										New
-									</span>
-								</div>
-
-								<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium truncate'>
-									{p.title}
-								</h3>
-								<p className='font-sans text-sm text-on-surface-variant mb-4 truncate'>
-									{p.category?.name || "Divine Attire"}
-								</p>
-
-								<div className='flex items-center justify-between mt-auto'>
-									<span className='font-sans text-lg text-primary font-medium'>
-										₹{Number(p.price).toLocaleString("en-IN")}
-									</span>
-									<button
-										className='w-10 h-10 flex items-center justify-center rounded-full border border-tertiary/30 text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300'
-										onClick={(e) => e.stopPropagation()}
-										type='button'>
-										<span className='material-symbols-outlined text-[20px]'>
-											add_shopping_cart
+						newArrivals.map((p) => {
+							const discountPercent = (p.oldPrice && p.oldPrice > p.price) ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
+							
+							return (
+								<div
+									key={p.id}
+									onClick={() => navigate(`/product/${p.slug}`)}
+									className='group relative flex flex-col transition-all duration-500 rounded-md overflow-hidden cursor-pointer'>
+									<div className='aspect-4/5 overflow-hidden rounded-md mb-6 relative'>
+										<img
+											className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
+											alt={p.title}
+											src={p.images?.[0]?.url || "https://placehold.co/400x500?text=No+Image"}
+										/>
+										<span className='absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold'>
+											New
 										</span>
-									</button>
+									</div>
+
+									<h3 className='font-serif text-2xl text-on-surface mb-2 font-medium truncate'>
+										{p.title}
+									</h3>
+									<p className='font-sans text-sm text-on-surface-variant mb-4 truncate'>
+										{p.category?.name || "Divine Attire"}
+									</p>
+
+									<div className='flex items-center justify-between mt-auto'>
+										<div className='flex items-baseline gap-2'>
+											<span className='font-sans text-lg text-primary font-medium'>
+												₹{Number(p.price).toLocaleString("en-IN")}
+											</span>
+											{discountPercent > 0 && (
+												<>
+													<span className='text-xs text-on-surface-variant line-through'>
+														₹{Number(p.oldPrice).toLocaleString("en-IN")}
+													</span>
+													<span className='text-xs text-tertiary font-semibold'>
+														({discountPercent}% OFF)
+													</span>
+												</>
+											)}
+										</div>
+										<button
+											className='w-10 h-10 flex items-center justify-center rounded-full border border-tertiary/30 text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300'
+											onClick={(e) => e.stopPropagation()}
+											type='button'>
+											<span className='material-symbols-outlined text-[20px]'>
+												add_shopping_cart
+											</span>
+										</button>
+									</div>
 								</div>
-							</div>
-						))
+							);
+						})
 					)}
 				</div>
 			</section>
