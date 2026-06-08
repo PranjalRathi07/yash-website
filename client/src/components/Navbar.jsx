@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import Logo from "../assets/logo.jpeg";
+import Logo from "../assets/Logo.png";
 import gsap from "gsap";
 import api from "../services/api";
 
@@ -111,7 +111,7 @@ const Navbar = () => {
 						<Link to='/' className='flex items-center justify-center'>
 							<img
 								alt='Krishna Vasanam Logo'
-								className='h-12 md:h-14 scale-95 active:scale-90 transition-transform object-contain rounded-full'
+								className='h-12 md:h-16 scale-120 active:scale-95 transition-transform object-contain rounded-full'
 								src={Logo}
 							/>
 						</Link>
