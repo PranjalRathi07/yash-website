@@ -50,7 +50,7 @@ export default function UserProfile() {
 
 								{[
 									{
-										icon: "shopping_cart",
+										icon: "shopping_bag",
 										label: "My Orders",
 										path: "/profile/my-orders",
 									},

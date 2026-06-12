@@ -1,6 +1,5 @@
 /** @format */
 
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function FAQKrishnaVasanam() {
@@ -8,7 +7,7 @@ export default function FAQKrishnaVasanam() {
 
 	const sections = [
 		{
-			icon: "shopping_cart",
+			icon: "shopping_bag",
 			title: "Orders & Payment",
 			items: [
 				{
@@ -62,7 +61,7 @@ export default function FAQKrishnaVasanam() {
 						concierge is ready to help.
 					</p>
 					<div className='mt-8 flex justify-center'>
-						<div className='flex items-center justify-center w-full max-w-[120px]'>
+						<div className='flex items-center justify-center w-full max-w-30'>
 							<div className='flex-1 h-[0.5px] bg-linear-to-r from-transparent to-tertiary/50'></div>
 							<div className='w-1.5 h-1.5 rotate-45 bg-tertiary mx-3'></div>
 							<div className='flex-1 h-[0.5px] bg-linear-to-l from-transparent to-tertiary/50'></div>

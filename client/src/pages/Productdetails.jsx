@@ -1,7 +1,42 @@
 /** @format */
-import React from "react";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import api from "../services/api";
 
 export default function Productdetails() {
+	const { id: slug } = useParams();
+	const queryClient = useQueryClient();
+	const navigate = useNavigate();
+	const [quantity, setQuantity] = useState(1);
+	const [selectedSize, setSelectedSize] = useState("");
+
+	const { data: product, isLoading, isError } = useQuery({
+		queryKey: ["product", slug],
+		queryFn: async () => {
+			const res = await api.get(`/api/products/${slug}`);
+			return res.data?.product;
+		},
+	});
+
+	const cartMutation = useMutation({
+		mutationFn: async () => {
+			if (!product) return;
+			const selectedVariant = product.variants?.find(v => v.size === selectedSize);
+			return await api.post("/api/cart", {
+				productId: product.id,
+				variantId: selectedVariant?.id || null,
+				quantity: quantity,
+			});
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["cart"] });
+		},
+		onError: (err) => {
+			console.error("Add to cart failed:", err);
+		}
+	});
+
 	const related = [
 		{
 			title: "Ivory Ananta Drape",
@@ -29,31 +64,71 @@ export default function Productdetails() {
 		},
 	];
 
+	if (isLoading) {
+		return (
+			<div className='flex justify-center items-center min-h-[50vh] text-primary'>
+				<span className='material-symbols-outlined text-[48px] animate-spin'>
+					progress_activity
+				</span>
+			</div>
+		);
+	}
+
+	if (isError || !product) {
+		return (
+			<div className='text-center py-20 font-serif text-2xl text-red-500'>
+				Product not found
+			</div>
+		);
+	}
+
+	const sizes = product.variants ? [...new Set(product.variants.map(v => v.size).filter(Boolean))] : [];
+	const selectedVariant = product.variants?.find(v => v.size === selectedSize);
+	const displayPrice = selectedVariant?.price ? Number(selectedVariant.price) : Number(product.price);
+	const displayOldPrice = product.oldPrice ? Number(product.oldPrice) : null;
+	const discountPercent = (displayOldPrice && displayOldPrice > displayPrice) ? Math.round((1 - displayPrice / displayOldPrice) * 100) : 0;
+
+	const images = product.images?.length > 0
+		? product.images.map(img => img.url)
+		: ["https://placehold.co/600x800?text=No+Image"];
+
+	const handleAddToCart = () => {
+		if (!localStorage.getItem("supabaseToken")) {
+			navigate("/login");
+			return;
+		}
+		if (sizes.length > 0 && !selectedSize) {
+			alert("Please select a size first!");
+			return;
+		}
+		cartMutation.mutate();
+	};
+
 	return (
 		<div className='bg-surface text-on-surface min-h-screen flex flex-col font-sans antialiased selection:bg-tertiary/20 selection:text-primary'>
 			<main className='flex-1 w-full px-8 md:px-16 lg:px-24 py-10 flex flex-col gap-12'>
 				{/* Breadcrumbs */}
 				<nav className='flex items-center gap-3 font-sans text-xs uppercase tracking-widest text-on-surface-variant w-full'>
-					<a className='hover:text-primary transition-colors' href='#'>
+					<a className='hover:text-primary transition-colors' href='/'>
 						Home
 					</a>
 					<span className='material-symbols-outlined text-[14px] opacity-50'>
 						chevron_right
 					</span>
-					<a className='hover:text-primary transition-colors' href='#'>
+					<a className='hover:text-primary transition-colors' href='/collection'>
 						Shop
 					</a>
 					<span className='material-symbols-outlined text-[14px] opacity-50'>
 						chevron_right
 					</span>
-					<a className='hover:text-primary transition-colors' href='#'>
-						Lehengas
-					</a>
+					<span className='hover:text-primary transition-colors'>
+						{product.category?.name || "Divine Attire"}
+					</span>
 					<span className='material-symbols-outlined text-[14px] opacity-50'>
 						chevron_right
 					</span>
 					<span className='text-primary font-semibold'>
-						Devotional Lotus Silk Set
+						{product.title}
 					</span>
 				</nav>
 
@@ -64,88 +139,96 @@ export default function Productdetails() {
 						<div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
 							<div className='md:col-span-2 aspect-4/5 bg-surface-container-low rounded-md overflow-hidden relative group'>
 								<img
-									alt='Main Product Image'
+									alt={product.title}
 									className='w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105'
-									src='https://lh3.googleusercontent.com/aida-public/AB6AXuCTCoTv8qBHLQZe9WJf1JyimsaxkVvY4wwSGS16GoBEA2Vii1-dDZN95GSBYaXlKAVAKZeDtWIsmDU20HhmpK1IAMBxri0W1c-_vbtUBP2Umq-gSbuPyxeMptbyXx0zieehnbJHhg6V62xj-qZTLuXWu6YnOdiaXLPzdiB0YJF4ArtlS3_su5WitPitBp2QJrTEYhYYfoBo9PRAPwKTBDI_7yS_RsIpKBrLfIW8yhx2Uk2-4rnVnE1M2iN7Adt2oo5vKpp419_yr2ea'
+									src={images[0]}
 								/>
 							</div>
 
-							<div className='aspect-square bg-surface-container-low rounded-md overflow-hidden relative group'>
-								<img
-									alt='Detail View 1'
-									className='w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105'
-									src='https://lh3.googleusercontent.com/aida-public/AB6AXuD6HI5rJPlDc46YUvX3gAZS4shoghlNVt2aHioZ5LGsHczct7IifaVpZarO1FHNT2Bh0AM7y8ACAdYNrAyuouaIKuvApvOIn_VHK0nzQAzX7ZW0Mh0isSbMwiZUFtOuFoYuHgaCAbuUFATJ_sZ2TGVxJKrktUijx-DI1k-m1LFp3lda6V8Xvx7gzslstcrckPpA39R1ZJjw7I7rN81M5t30kQZ5M0NmqEQhCpv4cgv62iT2zhHszon8hWXSil6x9LEzfZve1BTXMjZi'
-								/>
-							</div>
+							{images[1] && (
+								<div className='aspect-square bg-surface-container-low rounded-md overflow-hidden relative group'>
+									<img
+										alt={`${product.title} Detail 1`}
+										className='w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105'
+										src={images[1]}
+									/>
+								</div>
+							)}
 
-							<div className='aspect-square bg-surface-container-low rounded-md overflow-hidden relative group'>
-								<img
-									alt='Detail View 2'
-									className='w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105'
-									src='https://lh3.googleusercontent.com/aida-public/AB6AXuB1oiZK0kXT_JZj4OJIFv_BaJEKFjG06xnOFyWo1qRczbNx_iyYjMINsvluFfmKxXn30b7ialVqAr66cx0hqZIhy4sjsk-1IoAFTi0wxee8yjGVUeqVAU0ba7ApWMtPCgRRok2bULdIkULMhsTfHUO13HgOCHVGvdgaZUxEGuDJ1SXMKhAFoLTRuGRbop4vT2BE1wExci98HcbC_8J8d71XmZH0KbDzKvUHXzIeor4MhRN0qsnWEYgxDG0Ru1K1qoLIYI-fqA842pMf'
-								/>
-							</div>
+							{images[2] && (
+								<div className='aspect-square bg-surface-container-low rounded-md overflow-hidden relative group'>
+									<img
+										alt={`${product.title} Detail 2`}
+										className='w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105'
+										src={images[2]}
+									/>
+								</div>
+							)}
 						</div>
 					</div>
 
 					{/* Right: Product Details */}
-					<div className='md:col-span-5 flex flex-col gap-10 sticky top-[140px]'>
+					<div className='md:col-span-5 flex flex-col gap-10 sticky top-35'>
 						{/* Title & Price Block */}
 						<div className='flex flex-col gap-4 border-b-[0.5px] border-tertiary/20 pb-10'>
 							<h1 className='font-serif text-6xl text-primary leading-tight font-medium'>
-								Devotional Lotus Silk Set
+								{product.title}
 							</h1>
 
 							<div className='flex items-center gap-4 mt-2'>
 								<span className='font-sans text-2xl text-on-surface font-medium'>
-									₹32,500
+									₹{displayPrice.toLocaleString("en-IN")}
 								</span>
-								<span className='font-sans text-lg text-on-surface-variant/60 line-through'>
-									₹40,000
-								</span>
-								<span className='bg-tertiary/10 text-tertiary border border-tertiary/20 font-sans text-[10px] uppercase tracking-widest px-3 py-1 rounded-full ml-2 font-bold'>
-									New Arrival
-								</span>
+								{displayOldPrice && (
+									<span className='font-sans text-lg text-on-surface-variant/60 line-through'>
+										₹{displayOldPrice.toLocaleString("en-IN")}
+									</span>
+								)}
+								{discountPercent > 0 && (
+									<span className='bg-tertiary/10 text-tertiary border border-tertiary/20 font-sans text-[10px] uppercase tracking-widest px-3 py-1 rounded-full ml-2 font-bold'>
+										{discountPercent}% OFF
+									</span>
+								)}
 							</div>
 
 							<p className='font-sans text-base text-on-surface-variant mt-6 leading-relaxed'>
-								Woven with reverence, this opulent silk ensemble features
-								hand-crafted Zari lotus motifs across a canvas of midnight blue.
-								A masterpiece of tactile luxury designed for spiritual
-								gatherings and festive celebrations.
+								{product.description}
 							</p>
 						</div>
 
 						{/* Selectors Block */}
 						<div className='flex flex-col gap-8'>
 							{/* Size Selector */}
-							<div className='flex flex-col gap-4'>
-								<div className='flex justify-between items-center'>
-									<span className='font-sans text-sm uppercase tracking-widest text-primary font-semibold'>
-										Select Size
-									</span>
-									<a
-										className='font-sans text-xs uppercase tracking-widest text-on-surface-variant border-b border-on-surface-variant hover:text-primary hover:border-primary transition-colors pb-0.5'
-										href='#'>
-										Size Guide
-									</a>
-								</div>
+							{sizes.length > 0 && (
+								<div className='flex flex-col gap-4'>
+									<div className='flex justify-between items-center'>
+										<span className='font-sans text-sm uppercase tracking-widest text-primary font-semibold'>
+											Select Size
+										</span>
+										<a
+											className='font-sans text-xs uppercase tracking-widest text-on-surface-variant border-b border-on-surface-variant hover:text-primary hover:border-primary transition-colors pb-0.5'
+											href='#'>
+											Size Guide
+										</a>
+									</div>
 
-								<div className='flex flex-wrap gap-4'>
-									{["XS", "S", "M", "L", "XL"].map((s) => (
-										<button
-											key={s}
-											type='button'
-											className={
-												s === "S"
-													? "w-12 h-12 flex items-center justify-center font-sans text-sm border-[1.5px] border-primary rounded-full bg-primary text-surface transition-colors"
-													: "w-12 h-12 flex items-center justify-center font-sans text-sm border-[0.5px] border-tertiary/30 rounded-full bg-transparent text-on-surface hover:border-primary hover:text-primary transition-colors"
-											}>
-											{s}
-										</button>
-									))}
+									<div className='flex flex-wrap gap-4'>
+										{sizes.map((s) => (
+											<button
+												key={s}
+												onClick={() => setSelectedSize(s)}
+												type='button'
+												className={
+													s === selectedSize
+														? "w-12 h-12 flex items-center justify-center font-sans text-sm border-[1.5px] border-primary rounded-full bg-primary text-surface transition-colors cursor-pointer"
+														: "w-12 h-12 flex items-center justify-center font-sans text-sm border-[0.5px] border-tertiary/30 rounded-full bg-transparent text-on-surface hover:border-primary hover:text-primary transition-colors cursor-pointer"
+												}>
+												{s}
+											</button>
+										))}
+									</div>
 								</div>
-							</div>
+							)}
 
 							{/* Quantity */}
 							<div className='flex flex-col gap-4'>
@@ -156,19 +239,21 @@ export default function Productdetails() {
 								<div className='flex items-center border-[0.5px] border-tertiary/30 rounded-full w-fit bg-transparent'>
 									<button
 										type='button'
-										className='w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors'>
+										onClick={() => setQuantity(prev => Math.max(prev - 1, 1))}
+										className='w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer'>
 										<span className='material-symbols-outlined text-lg'>
 											remove
 										</span>
 									</button>
 
 									<span className='w-8 text-center font-sans text-base text-on-surface'>
-										1
+										{quantity}
 									</span>
 
 									<button
 										type='button'
-										className='w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors'>
+										onClick={() => setQuantity(prev => prev + 1)}
+										className='w-12 h-12 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors cursor-pointer'>
 										<span className='material-symbols-outlined text-lg'>
 											add
 										</span>
@@ -181,16 +266,26 @@ export default function Productdetails() {
 						<div className='flex flex-col gap-4 mt-4'>
 							<button
 								type='button'
-								className='w-full py-4 rounded-full font-sans text-sm uppercase tracking-widest bg-primary text-surface shadow-[0_4px_20px_rgba(79,55,138,0.2)] hover:shadow-[0_4px_25px_rgba(79,55,138,0.3)] transition-all duration-300 flex justify-center items-center gap-3'>
+								onClick={handleAddToCart}
+								disabled={cartMutation.isPending}
+								className='w-full py-4 rounded-full font-sans text-sm uppercase tracking-widest bg-primary text-surface shadow-[0_4px_20px_rgba(79,55,138,0.2)] hover:shadow-[0_4px_25px_rgba(79,55,138,0.3)] transition-all duration-300 flex justify-center items-center gap-3 cursor-pointer disabled:opacity-50'>
 								<span className='material-symbols-outlined text-[18px]'>
 									shopping_bag
 								</span>
-								Add to Cart
+								{cartMutation.isPending ? "Adding..." : "Add to Cart"}
 							</button>
 
 							<button
 								type='button'
-								className='w-full py-4 rounded-full font-sans text-sm uppercase tracking-widest border-[0.5px] border-tertiary/30 text-primary bg-transparent hover:border-primary transition-all duration-300'>
+								onClick={() => {
+									if (!localStorage.getItem("supabaseToken")) {
+										navigate("/login");
+										return;
+									}
+									handleAddToCart();
+									navigate("/cart");
+								}}
+								className='w-full py-4 rounded-full font-sans text-sm uppercase tracking-widest border-[0.5px] border-tertiary/30 text-primary bg-transparent hover:border-primary transition-all duration-300 cursor-pointer'>
 								Buy Now
 							</button>
 						</div>
@@ -237,9 +332,9 @@ export default function Productdetails() {
 
 				{/* Decorative Divider */}
 				<div className='w-full flex items-center justify-center my-16 opacity-50'>
-					<div className='h-[0.5px] w-full max-w-[200px] bg-linear-to-r from-transparent to-tertiary/50' />
+					<div className='h-[0.5px] w-full max-w-50 bg-linear-to-r from-transparent to-tertiary/50' />
 					<div className='w-1.5 h-1.5 rotate-45 bg-tertiary mx-4' />
-					<div className='h-[0.5px] w-full max-w-[200px] bg-linear-to-l from-transparent to-tertiary/50' />
+					<div className='h-[0.5px] w-full max-w-50 bg-linear-to-l from-transparent to-tertiary/50' />
 				</div>
 
 				{/* You May Also Like */}
@@ -278,4 +373,3 @@ export default function Productdetails() {
 		</div>
 	);
 }
-

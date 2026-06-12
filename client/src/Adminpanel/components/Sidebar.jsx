@@ -28,7 +28,7 @@ export default function Sidebar({ activeTab }) {
 	const menuItems = [
 		{ id: "dashboard", label: "Dashboard", icon: "dashboard", path: "/admin/dashboard" },
 		{ id: "products", label: "Products", icon: "inventory_2", path: "/admin/products" },
-		{ id: "orders", label: "Orders", icon: "shopping_cart", path: "/admin/orders" },
+		{ id: "orders", label: "Orders", icon: "shopping_bag", path: "/admin/orders" },
 		{ id: "users", label: "Users", icon: "group", path: "/admin/users" },
 		{ id: "banners", label: "Banners", icon: "branding_watermark", path: "/admin/banners" },
 	];

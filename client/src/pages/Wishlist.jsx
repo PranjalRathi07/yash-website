@@ -158,7 +158,7 @@ export default function Wishlist() {
 											}}
 											className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform'>
 											<span className='material-symbols-outlined text-[20px]'>
-												add_shopping_cart
+												shopping_bag
 											</span>
 										</button>
 									</div>

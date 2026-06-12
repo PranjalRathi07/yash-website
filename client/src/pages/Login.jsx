@@ -211,12 +211,11 @@ export default function LoginPage() {
 					/>
 
 					<h1 className='font-serif text-[2.5rem] font-bold text-white tracking-[-0.02em] leading-[1.15] mb-5'>
-						Divine Elegance
+						Krishna Vasanam
 					</h1>
 
 					<p className='text-[0.9rem] text-[rgba(200,215,255,0.75)] leading-[1.75] text-center'>
-						Step into a sanctuary of sacred textiles and ancient craftsmanship.
-						Experience the tranquility of timeless luxury.
+						Dressing the Divine, Honouring the Faith
 					</p>
 
 					<div className='mt-8 flex items-center justify-center gap-3.5'>

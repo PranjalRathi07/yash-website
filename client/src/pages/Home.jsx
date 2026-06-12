@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import logoIcon from "../assets/Logo.jpeg";
 import api from "../services/api";
 
@@ -15,7 +15,6 @@ const ProductSkeleton = () => (
 			<div className='h-7 w-3/4 shimmer-bg mb-2' />
 			{/* Category Skeleton */}
 			<div className='h-3.5 w-1/3 shimmer-bg mb-4' />
-
 			{/* Price & Add to Cart Skeleton */}
 			<div className='mt-auto flex items-center justify-between'>
 				<div className='h-6 w-1/4 shimmer-bg' />
@@ -27,7 +26,26 @@ const ProductSkeleton = () => (
 
 export default function KrishnaVasanam() {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [banners, setBanners] = useState([]);
+
+	const cartMutation = useMutation({
+		mutationFn: async (productId) => {
+			return await api.post("/api/cart", { productId, quantity: 1 });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["cart"] });
+		},
+	});
+
+	const handleAddToCart = (e, productId) => {
+		e.stopPropagation();
+		if (!localStorage.getItem("supabaseToken")) {
+			navigate("/login");
+			return;
+		}
+		cartMutation.mutate(productId);
+	};
 
 	const { data: productsData, isLoading: productsLoading } = useQuery({
 		queryKey: ["products", "new-arrivals"],
@@ -91,8 +109,8 @@ export default function KrishnaVasanam() {
 						HANDCRAFTED WITH DEVOTION
 					</span>
 					<h1 className='font-serif text-6xl leading-[1.1] text-surface mb-8 max-w-2xl font-normal tracking-[-0.02em]'>
-						Divine Vastra for Your Beloved{" "}
-						<span className='italic text-tertiary'>Kanha Ji</span>
+						Dressing the Divine, Honouring the{" "}
+						<span className='italic text-tertiary'>Faith</span>
 					</h1>
 					<p className='font-sans text-lg text-surface/80 max-w-xl mb-12 leading-relaxed'>
 						Experience the sacred artisanal journey of dressing your deity. Each
@@ -253,11 +271,12 @@ export default function KrishnaVasanam() {
 											)}
 										</div>
 										<button
-											className='w-10 h-10 flex items-center justify-center rounded-full border border-tertiary/30 text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300'
-											onClick={(e) => e.stopPropagation()}
+											className='w-10 h-10 flex items-center justify-center rounded-full border border-tertiary/30 text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 disabled:opacity-50'
+											onClick={(e) => handleAddToCart(e, p.id)}
+											disabled={cartMutation.isPending}
 											type='button'>
 											<span className='material-symbols-outlined text-[20px]'>
-												add_shopping_cart
+												shopping_bag
 											</span>
 										</button>
 									</div>
@@ -305,11 +324,11 @@ export default function KrishnaVasanam() {
 			<section className='py-stack-xl bg-surface'>
 				<div className='w-full px-8 md:px-16 lg:px-24'>
 					<div className='flex items-center justify-center w-full mb-16'>
-						<div className='flex-1 h-[0.5px] bg-linear-to-r from-transparent to-tertiary/30'></div>
+						<div className='flex-1 h-px bg-linear-to-r from-transparent to-outline/30'></div>
 						<div className='mx-6 material-symbols-outlined text-tertiary'>
 							spa
 						</div>
-						<div className='flex-1 h-[0.5px] bg-linear-to-l from-transparent to-tertiary/30'></div>
+						<div className='flex-1 h-px bg-linear-to-l from-transparent to-outline/30'></div>
 					</div>
 
 					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12'>

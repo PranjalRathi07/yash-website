@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import LikeButton from "../components/LikeButton";
 import api from "../services/api";
 
@@ -32,7 +32,26 @@ const ProductSkeleton = () => (
 
 export default function NewArrivals() {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [page, setPage] = useState(1);
+
+	const cartMutation = useMutation({
+		mutationFn: async (productId) => {
+			return await api.post("/api/cart", { productId, quantity: 1 });
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["cart"] });
+		},
+	});
+
+	const handleAddToCart = (e, productId) => {
+		e.stopPropagation();
+		if (!localStorage.getItem("supabaseToken")) {
+			navigate("/login");
+			return;
+		}
+		cartMutation.mutate(productId);
+	};
 
 	const { data, isLoading, isError, isFetching } = useQuery({
 		queryKey: ["newArrivals", page],
@@ -240,10 +259,11 @@ export default function NewArrivals() {
 													</div>
 													<button
 														type='button'
-														onClick={(e) => e.stopPropagation()}
-														className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform'>
+														onClick={(e) => handleAddToCart(e, p.id)}
+														disabled={cartMutation.isPending}
+														className='h-10 w-10 rounded-full border border-tertiary/30 flex items-center justify-center text-primary hover:bg-linear-to-r hover:from-tertiary/80 hover:via-tertiary/90 hover:to-tertiary/80 hover:text-primary transition-all duration-300 transform disabled:opacity-50'>
 														<span className='material-symbols-outlined text-[20px]'>
-															add_shopping_cart
+															shopping_bag
 														</span>
 													</button>
 												</div>
