@@ -2,11 +2,25 @@
 
 // Checkout.jsx
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
+const loadScript = (src) => {
+	return new Promise((resolve) => {
+		const script = document.createElement("script");
+		script.src = src;
+		script.onload = () => resolve(true);
+		script.onerror = () => resolve(false);
+		document.body.appendChild(script);
+	});
+};
+
 export default function Checkout() {
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [selectedPayment, setSelectedPayment] = useState("card");
+	const [isProcessing, setIsProcessing] = useState(false);
 
 	const [localUser] = useState(() => {
 		const saved = localStorage.getItem("currentUser");
@@ -25,6 +39,137 @@ export default function Checkout() {
 		initialData: localUser,
 	});
 
+	// Fetch Addresses
+	const { data: addresses = [] } = useQuery({
+		queryKey: ["addresses"],
+		queryFn: async () => {
+			const res = await api.get("/api/addresses");
+			return res.data?.addresses || [];
+		},
+	});
+
+	const primaryAddress = addresses.find((addr) => addr.isDefault) || addresses[0];
+
+	// Fetch Cart
+	const { data: cartData, isLoading: isCartLoading } = useQuery({
+		queryKey: ["cart"],
+		queryFn: async () => {
+			const res = await api.get("/api/cart");
+			return res.data?.cart || { items: [] };
+		},
+	});
+
+	const cartItems = cartData?.items || [];
+	const subtotal = cartItems.reduce((acc, item) => {
+		const price = Number(item.variant?.price || item.product?.price || 0);
+		return acc + price * item.quantity;
+	}, 0);
+
+	const discount = 0; // Future enhancement
+	const gst = subtotal * 0.05; // 5% GST
+	const total = subtotal + gst - discount;
+
+	const handleCheckout = async () => {
+		if (!primaryAddress) {
+			alert("Please add a shipping address before completing the purchase.");
+			return;
+		}
+
+		if (cartItems.length === 0) {
+			alert("Your cart is empty.");
+			return;
+		}
+
+		setIsProcessing(true);
+
+		try {
+			// Map payment method correctly. If it's COD, send COD, else send RAZORPAY.
+			const apiPaymentMethod = selectedPayment === "cod" ? "COD" : "RAZORPAY";
+
+			const checkoutRes = await api.post("/api/checkout", {
+				addressId: primaryAddress.id,
+				couponCode: null, // Update when coupon logic is added
+				paymentMethod: apiPaymentMethod,
+			});
+
+			if (apiPaymentMethod === "COD") {
+				// COD Success
+				queryClient.invalidateQueries({ queryKey: ["cart"] });
+				alert("Order placed successfully via Cash on Delivery!");
+				navigate("/profile/my-orders");
+				return;
+			}
+
+			// Razorpay Flow
+			const razorpayOrder = checkoutRes.data.razorpayOrder;
+			
+			const isScriptLoaded = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+			if (!isScriptLoaded) {
+				alert("Razorpay SDK failed to load. Are you offline?");
+				setIsProcessing(false);
+				return;
+			}
+
+			// Fetch Razorpay Key
+			const keyRes = await api.get("/api/payments/razorpay/key");
+			const razorpayKey = keyRes.data.key;
+
+			const options = {
+				key: razorpayKey,
+				amount: razorpayOrder.amount,
+				currency: razorpayOrder.currency,
+				name: "Krishna Vasanam",
+				description: "Sacred Items Purchase",
+				order_id: razorpayOrder.id,
+				handler: async function (response) {
+					try {
+						const verifyRes = await api.post("/api/payments/razorpay/verify", {
+							addressId: primaryAddress.id,
+							couponCode: null,
+							razorpay_order_id: response.razorpay_order_id,
+							razorpay_payment_id: response.razorpay_payment_id,
+							razorpay_signature: response.razorpay_signature,
+						});
+
+						if (verifyRes.data.success) {
+							queryClient.invalidateQueries({ queryKey: ["cart"] });
+							alert("Payment successful! Order placed.");
+							navigate("/profile/my-orders");
+						}
+					} catch (err) {
+						console.error("Payment Verification Failed:", err);
+						alert("Payment verification failed. Please contact support.");
+					}
+				},
+				prefill: {
+					name: primaryAddress.fullName || currentUser?.name || "",
+					email: currentUser?.email || "",
+					contact: primaryAddress.phone || currentUser?.phone || "",
+				},
+				theme: {
+					color: "#d4af37", // Matches the tertiary color
+				},
+			};
+
+			const paymentObject = new window.Razorpay(options);
+			paymentObject.on("payment.failed", function (response) {
+				console.error(response.error);
+				alert("Payment Failed. Reason: " + response.error.description);
+			});
+			paymentObject.open();
+
+		} catch (error) {
+			console.error("Checkout Failed:", error);
+			alert("Checkout failed. Please try again.");
+		} finally {
+			setIsProcessing(false);
+		}
+	};
+
+	if (isCartLoading) {
+		return <div className="min-h-screen flex items-center justify-center font-sans text-on-surface">Loading Checkout...</div>;
+	}
+
 	return (
 		<div className='bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col'>
 			<main className='grow w-full px-8 md:px-16 lg:px-24 pt-10 pb-20'>
@@ -42,27 +187,47 @@ export default function Checkout() {
 								</h2>
 							</div>
 
-							<div className='bg-[#fdfaf5] p-6 rounded-md border-[0.5px] border-tertiary/30 flex justify-between items-start'>
-								<div>
-									<p className='font-sans text-sm font-semibold text-primary mb-1'>
-										{currentUser?.name || "Devotee"}
-									</p>
-									<p className='font-sans text-sm text-on-surface-variant leading-relaxed'>
-										Vrindavan Dham, Sector 5, Lane 3
-									</p>
-									<p className='font-sans text-sm text-on-surface-variant leading-relaxed'>
-										Near ISKCON Temple, Mathura, UP - 281121
-									</p>
-									<p className='font-sans text-sm text-on-surface-variant mt-2'>
-										{currentUser?.phone || "+91 98765 43210"}
-									</p>
+							{primaryAddress ? (
+								<div className='bg-[#fdfaf5] p-6 rounded-md border-[0.5px] border-tertiary/30 flex justify-between items-start'>
+									<div>
+										<p className='font-sans text-sm font-semibold text-primary mb-1'>
+											{primaryAddress.fullName}
+										</p>
+										<p className='font-sans text-sm text-on-surface-variant leading-relaxed'>
+											{primaryAddress.line1}
+										</p>
+										{primaryAddress.line2 && (
+											<p className='font-sans text-sm text-on-surface-variant leading-relaxed'>
+												{primaryAddress.line2}
+											</p>
+										)}
+										<p className='font-sans text-sm text-on-surface-variant leading-relaxed'>
+											{primaryAddress.city}, {primaryAddress.state} - {primaryAddress.postalCode}
+										</p>
+										<p className='font-sans text-sm text-on-surface-variant mt-2'>
+											{primaryAddress.phone}
+										</p>
+									</div>
+									<button
+										type='button'
+										onClick={() => navigate("/profile/addresses")}
+										className='text-tertiary font-sans text-sm font-semibold hover:underline transition-all cursor-pointer'>
+										Change
+									</button>
 								</div>
-								<button
-									type='button'
-									className='text-tertiary font-sans text-sm font-semibold hover:underline transition-all'>
-									Change
-								</button>
-							</div>
+							) : (
+								<div className='bg-[#fdfaf5] p-6 rounded-md border-[0.5px] border-tertiary/30 flex justify-between items-center'>
+									<p className='font-sans text-sm text-on-surface-variant'>
+										No address selected. Please add an address to continue.
+									</p>
+									<button
+										type='button'
+										onClick={() => navigate("/profile/addresses")}
+										className='bg-tertiary text-white px-4 py-2 rounded-md font-sans text-sm font-semibold hover:bg-tertiary/90 transition-all cursor-pointer'>
+										Add Address
+									</button>
+								</div>
+							)}
 						</section>
 
 						{/* Separator */}
@@ -108,23 +273,15 @@ export default function Checkout() {
 										<div className='mt-4 ml-8 p-4 border-[0.5px] border-tertiary/30 rounded-md bg-surface shadow-[0_0_15px_rgba(212,175,55,0.05)]'>
 											<div className='flex justify-between items-center mb-1'>
 												<span className='font-sans text-sm font-semibold text-primary'>
-													Saved Credit Card
+													Pay Securely via Razorpay
 												</span>
 												<span className='material-symbols-outlined text-tertiary/80 text-[20px]'>
 													credit_card
 												</span>
 											</div>
 											<p className='font-sans text-sm text-on-surface-variant mb-4'>
-												HDFC Bank Platinum •••• 4242
+												You will be redirected to the Razorpay payment gateway to complete your transaction securely.
 											</p>
-											<button
-												type='button'
-												className='font-sans text-xs font-semibold text-tertiary hover:underline flex items-center gap-1'>
-												<span className='material-symbols-outlined text-[14px]'>
-													add
-												</span>
-												Add a new credit or debit card
-											</button>
 										</div>
 									)}
 								</div>
@@ -148,18 +305,6 @@ export default function Checkout() {
 											Net Banking
 										</span>
 									</label>
-
-									{selectedPayment === "netbanking" && (
-										<div className='mt-3 ml-8'>
-											<select className='w-full max-w-xs bg-surface border-[0.5px] border-tertiary/30 rounded-md p-2 font-sans text-sm focus:outline-none focus:border-tertiary text-on-surface cursor-pointer'>
-												<option>Choose an Option</option>
-												<option>HDFC Bank</option>
-												<option>ICICI Bank</option>
-												<option>SBI Bank</option>
-												<option>Axis Bank</option>
-											</select>
-										</div>
-									)}
 								</div>
 
 								<div className='h-px bg-tertiary/20 w-full'></div>
@@ -180,57 +325,6 @@ export default function Checkout() {
 										<span className='font-sans text-sm font-bold text-primary grow'>
 											Scan and Pay with UPI
 										</span>
-									</label>
-
-									{selectedPayment === "upi" && (
-										<div className='mt-3 ml-8'>
-											<div className='flex items-start gap-2 text-on-surface-variant mb-3'>
-												<span className='material-symbols-outlined text-[16px] text-tertiary/80 mt-0.5'>
-													info
-												</span>
-												<p className='font-sans text-xs leading-relaxed'>
-													You will need to scan the QR code on the payment page
-													to complete the payment.
-												</p>
-											</div>
-										</div>
-									)}
-								</div>
-
-								<div className='h-px bg-tertiary/20 w-full'></div>
-
-								{/* Divine Gift Card (Instead of EMI) */}
-								<div
-									className={`p-4 transition-all ${selectedPayment === "giftcard" ? "bg-[#fdfaf5]" : "hover:bg-[#fdfaf5]/50"}`}>
-									<label className='flex items-center gap-4 cursor-pointer'>
-										<div className='relative flex items-center justify-center shrink-0'>
-											<input
-												className='appearance-none w-4 h-4 border-[1.5px] border-tertiary/40 rounded-full checked:border-4 checked:border-tertiary transition-all cursor-pointer'
-												name='payment'
-												type='radio'
-												checked={selectedPayment === "giftcard"}
-												onChange={() => setSelectedPayment("giftcard")}
-											/>
-										</div>
-										<div className='flex flex-col grow'>
-											<span className='font-sans text-sm font-bold text-primary'>
-												Divine Gift Card
-											</span>
-											{selectedPayment === "giftcard" && (
-												<div className='mt-3 flex gap-2 items-center'>
-													<input
-														type='text'
-														placeholder='Enter Code'
-														className='bg-surface border-[0.5px] border-tertiary/30 rounded-md px-3 py-1.5 font-sans text-sm focus:outline-none focus:border-tertiary flex-1 max-w-50'
-													/>
-													<button
-														type='button'
-														className='bg-surface border-[0.5px] border-tertiary/40 px-4 py-1.5 rounded-full font-sans text-xs font-semibold text-primary hover:border-tertiary transition-colors shadow-sm'>
-														Apply
-													</button>
-												</div>
-											)}
-										</div>
 									</label>
 								</div>
 
@@ -276,33 +370,36 @@ export default function Checkout() {
 							</h3>
 
 							{/* Product List Preview */}
-							<div className='mb-6'>
-								<div className='flex gap-4 items-center'>
-									<div className='w-16 h-20 rounded-md overflow-hidden bg-surface border-[0.5px] border-tertiary/20 shrink-0'>
-										<img
-											className='w-full h-full object-cover'
-											alt='Pitambari Silk Set'
-											src='https://lh3.googleusercontent.com/aida-public/AB6AXuB6ktgUjiLkGueypozklpYe8TvRW0GnDQEx14LQ3ozFUB3dMCXOlA5zqO18fEwf5eDTTKLP850ybChlQ3YYp_PyjdqFePHU5UiH_Ep4eWnyaWxgslwdn4cbUdMn7NZ5UxzlirkskaqdS2MeoaH8HCYEOfRgaFUximDtqkarM11PbRnd7EDBQukf5qSwT-T15bT8N26B7hJ_3hJ2RyDcIRQb25nJSugCfe-Hr254NmLMkp9Y80g9bg3NxN613D7MFpCBM9gtSsbXU2Rb'
-										/>
+							<div className='mb-6 space-y-4 max-h-60 overflow-y-auto pr-2'>
+								{cartItems.map((item) => (
+									<div key={item.id} className='flex gap-4 items-center'>
+										<div className='w-16 h-20 rounded-md overflow-hidden bg-surface border-[0.5px] border-tertiary/20 shrink-0'>
+											<img
+												className='w-full h-full object-cover'
+												alt={item.product?.title || "Product"}
+												src={item.product?.images?.[0]?.url || "https://placehold.co/400x500?text=No+Image"}
+											/>
+										</div>
+										<div className='grow flex flex-col'>
+											<p className='font-sans text-sm font-bold text-primary mb-1 line-clamp-1'>
+												{item.product?.title}
+											</p>
+											<p className='font-sans text-sm text-on-surface-variant mb-1'>
+												Qty: {item.quantity}
+												{item.variant?.size && ` | Size: ${item.variant.size}`}
+											</p>
+											<p className='font-sans text-sm font-semibold text-tertiary'>
+												₹ {Number((item.variant?.price || item.product?.price || 0) * item.quantity).toLocaleString("en-IN")}
+											</p>
+										</div>
 									</div>
-									<div className='grow flex flex-col'>
-										<p className='font-sans text-sm font-bold text-primary mb-1'>
-											Pitambari Silk Set
-										</p>
-										<p className='font-sans text-sm text-on-surface-variant mb-1'>
-											Size: Large (12&quot;)
-										</p>
-										<p className='font-sans text-sm font-semibold text-tertiary'>
-											₹ 4,500
-										</p>
-									</div>
-								</div>
+								))}
 							</div>
 
 							<div className='space-y-3 mb-6'>
 								<div className='flex justify-between font-sans text-sm text-on-surface-variant'>
 									<span>Subtotal</span>
-									<span>₹ 4,500.00</span>
+									<span>₹ {subtotal.toLocaleString("en-IN")}</span>
 								</div>
 								<div className='flex justify-between font-sans text-sm text-on-surface-variant'>
 									<span>Sacred Delivery</span>
@@ -312,7 +409,7 @@ export default function Checkout() {
 								</div>
 								<div className='flex justify-between font-sans text-sm text-on-surface-variant'>
 									<span>Temple GST (5%)</span>
-									<span>₹ 225.00</span>
+									<span>₹ {gst.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
 								</div>
 							</div>
 
@@ -321,14 +418,16 @@ export default function Checkout() {
 									Total Amount
 								</span>
 								<span className='font-serif text-2xl font-bold text-tertiary'>
-									₹ 4,725.00
+									₹ {total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 								</span>
 							</div>
 
 							<button
 								type='button'
-								className='w-full bg-linear-to-r from-[#d4af37] via-[#c5a017] to-[#d4af37] text-primary font-sans text-sm font-bold py-4 rounded-full shadow-[0_4px_15px_rgba(212,175,55,0.4)] hover:shadow-[0_4px_25px_rgba(212,175,55,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest'>
-								Complete Purchase
+								onClick={handleCheckout}
+								disabled={isProcessing}
+								className='w-full bg-linear-to-r from-[#d4af37] via-[#c5a017] to-[#d4af37] text-primary font-sans text-sm font-bold py-4 rounded-full shadow-[0_4px_15px_rgba(212,175,55,0.4)] hover:shadow-[0_4px_25px_rgba(212,175,55,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'>
+								{isProcessing ? "Processing..." : "Complete Purchase"}
 							</button>
 
 							<div className='flex items-center justify-center gap-2 text-on-surface-variant/80 text-[10px] uppercase tracking-widest mt-6'>

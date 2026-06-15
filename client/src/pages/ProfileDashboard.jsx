@@ -10,16 +10,22 @@ export default function ProfileDashboard() {
 		return saved ? JSON.parse(saved) : null;
 	});
 
-	const { data: currentUser } = useQuery({
+	const { data: currentUser, isError: isAuthError } = useQuery({
 		queryKey: ["auth", "me"],
 		queryFn: async () => {
-			const res = await api.get("/api/auth/me");
-			if (res.data?.user) {
-				localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+			try {
+				const res = await api.get("/api/auth/me");
+				if (res.data?.user) {
+					localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+				}
+				return res.data.user;
+			} catch (err) {
+				localStorage.removeItem("currentUser");
+				throw err;
 			}
-			return res.data.user;
 		},
 		initialData: localUser,
+		retry: false,
 	});
 
 	const { data: ordersData } = useQuery({
@@ -28,7 +34,30 @@ export default function ProfileDashboard() {
 			const res = await api.get("/api/orders/my-orders");
 			return res.data;
 		},
+		enabled: !!currentUser,
 	});
+
+	if (isAuthError || (!currentUser && localUser === null)) {
+		return (
+			<div className='flex flex-col items-center justify-center py-20 text-center'>
+				<span className='material-symbols-outlined text-[64px] text-tertiary mb-6'>
+					lock
+				</span>
+				<h2 className='font-serif text-4xl text-primary mb-4'>
+					Authentication Required
+				</h2>
+				<p className='text-on-surface-variant font-sans text-lg mb-8 max-w-md mx-auto'>
+					Your session has expired or you are not logged in. Please sign in to view your sacred profile.
+				</p>
+				<button
+					onClick={() => navigate("/login")}
+					className='bg-primary text-surface px-8 py-3 font-sans text-sm rounded-md uppercase tracking-widest font-semibold transition-all hover:bg-primary/90 flex items-center gap-2 mx-auto'>
+					<span className='material-symbols-outlined text-[20px]'>login</span>
+					Sign in to Account
+				</button>
+			</div>
+		);
+	}
 
 	const orders = ordersData?.orders || [];
 

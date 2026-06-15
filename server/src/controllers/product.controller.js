@@ -227,6 +227,7 @@ export const updateProduct = async (req, res) => {
 			isNewArrival,
 			isFestivalWear,
 			isActive,
+			retainedImages,
 		} = req.body;
 
 		const existingProduct = await prisma.product.findUnique({
@@ -320,6 +321,31 @@ export const updateProduct = async (req, res) => {
 			await prisma.productImage.createMany({
 				data: imageData,
 			});
+		}
+
+		if (retainedImages !== undefined) {
+			try {
+				const retainedImageIds = JSON.parse(retainedImages);
+				const currentImages = await prisma.productImage.findMany({
+					where: { productId: id }
+				});
+				
+				const imagesToDelete = currentImages.filter(img => !retainedImageIds.includes(img.id));
+				
+				for (const img of imagesToDelete) {
+					if (img.publicId) {
+						try {
+							const cloudinary = (await import("../config/cloudinary.js")).default;
+							await cloudinary.uploader.destroy(img.publicId);
+						} catch (cloudErr) {
+							console.error("Cloudinary delete error:", cloudErr);
+						}
+					}
+					await prisma.productImage.delete({ where: { id: img.id } });
+				}
+			} catch (err) {
+				console.error("Error processing retained images:", err);
+			}
 		}
 
 		const finalProduct = await prisma.product.findUnique({

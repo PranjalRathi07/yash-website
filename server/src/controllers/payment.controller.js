@@ -65,3 +65,18 @@ export const verifyRazorpayPayment = async (req, res) => {
 		});
 	}
 };
+
+export const getRazorpayKey = async (req, res) => {
+	try {
+		return res.status(200).json({
+			success: true,
+			key: process.env.RAZORPAY_KEY_ID,
+		});
+	} catch (error) {
+		console.error("Error fetching razorpay key:", error);
+		return res.status(500).json({
+			success: false,
+			message: "Failed to fetch razorpay key",
+		});
+	}
+};

@@ -35,6 +35,7 @@ export default function ProductManagement() {
 	// Image upload state
 	const [imageFiles, setImageFiles] = useState([]);
 	const [imagePreviews, setImagePreviews] = useState([]);
+	const [existingImages, setExistingImages] = useState([]);
 
 	const fetchCategories = useCallback(async () => {
 		try {
@@ -124,6 +125,10 @@ export default function ProductManagement() {
 		});
 	};
 
+	const removeExistingImage = (index) => {
+		setExistingImages((prev) => prev.filter((_, idx) => idx !== index));
+	};
+
 	const handleOpenAddModal = () => {
 		setIsEditing(false);
 		setEditingProductId(null);
@@ -141,6 +146,7 @@ export default function ProductManagement() {
 		});
 		setImageFiles([]);
 		setImagePreviews([]);
+		setExistingImages([]);
 		setShowAddModal(true);
 	};
 
@@ -160,10 +166,11 @@ export default function ProductManagement() {
 			isFestivalWear: product.isFestivalWear || false,
 		});
 		if (product.images && product.images.length > 0) {
-			setImagePreviews(product.images.map((img) => img.url));
+			setExistingImages(product.images);
 		} else {
-			setImagePreviews([]);
+			setExistingImages([]);
 		}
+		setImagePreviews([]);
 		setImageFiles([]);
 		setShowAddModal(true);
 	};
@@ -194,6 +201,10 @@ export default function ProductManagement() {
 				imageFiles.forEach((file) => {
 					formData.append("images", file);
 				});
+			}
+			
+			if (isEditing) {
+				formData.append("retainedImages", JSON.stringify(existingImages.map(img => img.id)));
 			}
 
 			let response;
@@ -495,10 +506,22 @@ export default function ProductManagement() {
 									</div>
 
 									{/* Image Previews */}
-									{imagePreviews.length > 0 && (
+									{(existingImages.length > 0 || imagePreviews.length > 0) && (
 										<div className='grid grid-cols-3 gap-3 mt-4'>
+											{existingImages.map((img, index) => (
+												<div key={`existing-${index}`} className='aspect-4/5 rounded-lg border border-outline-variant/30 overflow-hidden relative group bg-surface-container shadow-sm'>
+													<img src={img.url} alt='Preview' className='w-full h-full object-cover' />
+													<button 
+														type='button'
+														onClick={() => removeExistingImage(index)}
+														className='absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow focus:outline-none transition-all scale-0 group-hover:scale-100 flex items-center justify-center'
+													>
+														<span className='material-symbols-outlined text-xs' style={{ fontSize: "14px" }}>close</span>
+													</button>
+												</div>
+											))}
 											{imagePreviews.map((preview, index) => (
-												<div key={index} className='aspect-4/5 rounded-lg border border-outline-variant/30 overflow-hidden relative group bg-surface-container shadow-sm'>
+												<div key={`new-${index}`} className='aspect-4/5 rounded-lg border border-outline-variant/30 overflow-hidden relative group bg-surface-container shadow-sm'>
 													<img src={preview} alt='Preview' className='w-full h-full object-cover' />
 													<button 
 														type='button'
