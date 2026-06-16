@@ -2,7 +2,7 @@
 
 
 import { useState, useRef, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Logo from "../assets/Logo.png";
 import gsap from "gsap";
@@ -10,8 +10,10 @@ import api from "../services/api";
 
 const Navbar = () => {
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
 	const searchContainerRef = useRef(null);
 	const searchInputRef = useRef(null);
+	const navigate = useNavigate();
 
 	const isAuthenticated = !!localStorage.getItem("supabaseToken");
 
@@ -30,6 +32,18 @@ const Navbar = () => {
 	const toggleSearch = (e) => {
 		e.preventDefault();
 		setIsSearchOpen(!isSearchOpen);
+		if (isSearchOpen) {
+			setSearchQuery("");
+		}
+	};
+
+	const handleSearchSubmit = (e) => {
+		e.preventDefault();
+		if (searchQuery.trim()) {
+			navigate(`/collection?search=${encodeURIComponent(searchQuery.trim())}`);
+			setIsSearchOpen(false);
+			setSearchQuery("");
+		}
 	};
 
 	useEffect(() => {
@@ -130,8 +144,9 @@ const Navbar = () => {
 
 						<div className='flex items-center space-x-5'>
 							{/* Animated Expandable Search */}
-							<div
+							<form
 								ref={searchContainerRef}
+								onSubmit={handleSearchSubmit}
 								className={`flex items-center h-8.5 rounded-full transition-colors duration-300 ${
 									isSearchOpen
 										? "bg-surface-container-low/10 border-[0.5px] border-tertiary/50 pl-2"
@@ -139,6 +154,7 @@ const Navbar = () => {
 								}`}
 								style={{ width: "22px", overflow: "hidden" }}>
 								<button
+									type="button"
 									onClick={toggleSearch}
 									className='text-tertiary/80 hover:text-tertiary transition-colors flex items-center justify-center shrink-0 w-5.5 h-full'
 									aria-label='Toggle Search'>
@@ -150,10 +166,12 @@ const Navbar = () => {
 								<input
 									ref={searchInputRef}
 									type='text'
+									value={searchQuery}
+									onChange={(e) => setSearchQuery(e.target.value)}
 									placeholder='Search collection...'
 									className='bg-transparent border-none outline-none text-surface placeholder:text-surface/60 font-sans text-sm w-45 pl-2 opacity-0'
 								/>
-							</div>
+							</form>
 
 							<Link
 								className='text-tertiary/80 hover:text-tertiary transition-all flex items-center'

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import LikeButton from "../components/LikeButton";
+import ProductSidebar from "../components/ProductSidebar";
 import api from "../services/api";
 
 const ProductSkeleton = () => (
@@ -31,7 +32,34 @@ const ProductSkeleton = () => (
 export default function ShopKrishnaVastra() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
+	const [searchParams] = useSearchParams();
+	const searchQuery = searchParams.get("search") || "";
 	const [page, setPage] = useState(1);
+	
+	const [selectedCategories, setSelectedCategories] = useState([]);
+	const [minPrice, setMinPrice] = useState("");
+	const [maxPrice, setMaxPrice] = useState("");
+	const [selectedSizes, setSelectedSizes] = useState([]);
+	const [sortOption, setSortOption] = useState("Recommended");
+
+	const handleCategoryChange = (category) => {
+		setSelectedCategories(prev =>
+			prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
+		);
+		setPage(1);
+	};
+
+	const handleSizeChange = (size) => {
+		setSelectedSizes(prev =>
+			prev.includes(size) ? prev.filter(s => s !== size) : [...prev, size]
+		);
+		setPage(1);
+	};
+
+	const handleSortChange = (e) => {
+		setSortOption(e.target.value);
+		setPage(1);
+	};
 
 	const cartMutation = useMutation({
 		mutationFn: async (productId) => {
@@ -52,9 +80,20 @@ export default function ShopKrishnaVastra() {
 	};
 
 	const { data, isLoading, isError, isFetching } = useQuery({
-		queryKey: ["products", page],
+		queryKey: ["products", page, searchQuery, selectedCategories, minPrice, maxPrice, selectedSizes, sortOption],
 		queryFn: async () => {
-			const res = await api.get(`/api/products?page=${page}&limit=9`);
+			const params = new URLSearchParams({
+				page,
+				limit: 9
+			});
+			if (searchQuery) params.append("search", searchQuery);
+			if (selectedCategories.length > 0) params.append("categories", selectedCategories.join(","));
+			if (minPrice) params.append("minPrice", minPrice);
+			if (maxPrice) params.append("maxPrice", maxPrice);
+			if (selectedSizes.length > 0) params.append("sizes", selectedSizes.join(","));
+			if (sortOption !== "Recommended") params.append("sort", sortOption);
+
+			const res = await api.get(`/api/products?${params.toString()}`);
 			return res.data;
 		},
 		placeholderData: keepPreviousData,
@@ -63,15 +102,16 @@ export default function ShopKrishnaVastra() {
 	const products = data?.products || [];
 	const totalPages = data?.totalPages || 1;
 	const showSkeleton = isLoading || isFetching;
-	const categories = [
-		{ label: "Daily Wear", checked: false },
-		{ label: "Mukut", checked: false },
-		{ label: "Jewelry", checked: false },
-		{ label: "Bansuri", checked: false },
-		{ label: "Combo Sets", checked: false },
-		{ label: "Winter Wear", checked: false },
-		{ label: "Premium Sets", checked: false },
+	const categoriesList = [
+		"Daily Wear",
+		"Mukut",
+		"Jewelry",
+		"Bansuri",
+		"Combo Sets",
+		"Winter Wear",
+		"Premium Sets",
 	];
+	const sizesList = ["0-2", "3-5", "6-8", "9-12", "12+"];
 
 	return (
 		<div className='bg-surface text-on-surface min-h-screen flex flex-col font-sans antialiased selection:bg-tertiary/20 selection:text-primary'>
@@ -79,91 +119,29 @@ export default function ShopKrishnaVastra() {
 				{/* Page Header */}
 				<div className='mb-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b-[0.5px] border-tertiary/20 pb-6'>
 					<h1 className='font-serif text-6xl text-primary leading-none whitespace-nowrap shrink-0'>
-						Shop Krishna Vastra
+						{searchQuery ? `Search: ${searchQuery}` : "Shop Krishna Vastra"}
 					</h1>
 					<p className='font-sans text-lg text-on-surface-variant max-w-2xl text-left xl:text-right leading-relaxed'>
-						Explore our premium collection of divine attire, meticulously
-						crafted with reverence and luxury to adorn your beloved deity.
+						{searchQuery 
+							? `Showing results for "${searchQuery}" in our premium collection.`
+							: "Explore our premium collection of divine attire, meticulously crafted with reverence and luxury to adorn your beloved deity."}
 					</p>
 				</div>
 
 				<div className='flex flex-col lg:flex-row gap-12 items-start'>
 					{/* Sidebar */}
-					<aside className='w-full lg:w-64 shrink-0 bg-surface-container-low border-[0.5px] border-tertiary/20 rounded-md p-8 sticky top-28'>
-						<div className='mb-8 pb-8 border-b-[0.5px] border-tertiary/20'>
-							<h3 className='font-sans text-xs uppercase tracking-widest text-primary font-semibold mb-6'>
-								Categories
-							</h3>
-
-							<ul className='space-y-4'>
-								{categories.map((c) => (
-									<li key={c.label}>
-										<label className='flex items-center gap-4 cursor-pointer group'>
-											<div className='relative flex items-center justify-center'>
-												<input
-													type='checkbox'
-													defaultChecked={c.checked}
-													className='peer appearance-none w-5 h-5 border-[1.5px] border-tertiary/40 rounded-sm checked:bg-primary checked:border-primary transition-all cursor-pointer'
-												/>
-												<span className='material-symbols-outlined absolute text-[14px] text-surface opacity-0 peer-checked:opacity-100 pointer-events-none'>
-													check
-												</span>
-											</div>
-											<span className='font-sans text-sm text-on-surface-variant group-hover:text-primary transition-colors'>
-												{c.label}
-											</span>
-										</label>
-									</li>
-								))}
-							</ul>
-						</div>
-
-						<div className='mb-8 pb-8 border-b-[0.5px] border-tertiary/20'>
-							<h3 className='font-sans text-xs uppercase tracking-widest text-primary font-semibold mb-6'>
-								Price
-							</h3>
-
-							<div className='space-y-6'>
-								<input
-									type='range'
-									className='w-full h-0.5 bg-tertiary/20 rounded-full appearance-none cursor-pointer accent-primary'
-								/>
-								<div className='flex items-center justify-between gap-4'>
-									<input
-										type='text'
-										placeholder='Min'
-										className='w-full bg-surface border-b border-tertiary/30 font-sans text-sm text-on-surface focus:outline-none focus:border-primary py-2 px-1 transition-colors placeholder:text-on-surface-variant/50'
-									/>
-									<span className='text-on-surface-variant/50'>-</span>
-									<input
-										type='text'
-										placeholder='Max'
-										className='w-full bg-surface border-b border-tertiary/30 font-sans text-sm text-on-surface focus:outline-none focus:border-primary py-2 px-1 transition-colors placeholder:text-on-surface-variant/50'
-									/>
-								</div>
-							</div>
-						</div>
-
-						<div>
-							<h3 className='font-sans text-xs uppercase tracking-widest text-primary font-semibold mb-6'>
-								Size (Inches)
-							</h3>
-							<div className='flex flex-wrap gap-3'>
-								{["0-2", "3-5", "6-8", "9-12", "12+"].map((size, idx) => (
-									<button
-										key={size}
-										type='button'
-										className={`px-4 py-2 border-[0.5px] rounded-full font-sans text-xs transition-colors ${
-											idx === 1
-												? "border-primary bg-primary text-surface"
-												: "border-tertiary/30 text-on-surface-variant hover:border-primary hover:text-primary"
-										}`}>
-										{size}
-									</button>
-								))}
-							</div>
-						</div>
-					</aside>
+					<ProductSidebar
+						categories={categoriesList}
+						selectedCategories={selectedCategories}
+						onCategoryChange={handleCategoryChange}
+						minPrice={minPrice}
+						maxPrice={maxPrice}
+						onMinPriceChange={(val) => { setMinPrice(val); setPage(1); }}
+						onMaxPriceChange={(val) => { setMaxPrice(val); setPage(1); }}
+						sizes={sizesList}
+						selectedSizes={selectedSizes}
+						onSizeChange={handleSizeChange}
+					/>
 
 					{/* Main Content Area */}
 					<div className='grow w-full'>
@@ -177,6 +155,8 @@ export default function ShopKrishnaVastra() {
 								</label>
 								<select
 									id='sort'
+									value={sortOption}
+									onChange={handleSortChange}
 									className='bg-transparent border-none font-sans text-sm text-primary focus:outline-none focus:ring-0 cursor-pointer font-semibold'>
 									<option>Recommended</option>
 									<option>Price: Low to High</option>
@@ -198,7 +178,9 @@ export default function ShopKrishnaVastra() {
 									<span className="font-serif text-lg">Failed to retrieve divine collection. Please try again.</span>
 								</div>
 							) : products.length === 0 ? (
-								<div className="col-span-full py-20 text-center text-on-surface-variant">No products found in the collection.</div>
+								<div className="col-span-full py-20 text-center text-on-surface-variant">
+									{searchQuery ? `No products found for "${searchQuery}".` : "No products found in the collection."}
+								</div>
 							) : (
 								products.map((p) => {
 									const discountPercent = (p.oldPrice && p.oldPrice > p.price) ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;

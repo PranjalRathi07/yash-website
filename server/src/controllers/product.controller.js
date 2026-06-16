@@ -106,7 +106,7 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
 	try {
-		const { admin, isNewArrival, isFestivalWear } = req.query;
+		const { admin, isNewArrival, isFestivalWear, search, categories, sizes, minPrice, maxPrice, sort } = req.query;
 		const page = req.query.page ? parseInt(req.query.page) : null;
 		const limit = req.query.limit ? parseInt(req.query.limit) : null;
 		
@@ -118,6 +118,41 @@ export const getAllProducts = async (req, res) => {
 		if (isFestivalWear === "true") {
 			whereClause.isFestivalWear = true;
 		}
+		if (search) {
+			whereClause.OR = [
+				{ title: { contains: search, mode: "insensitive" } },
+				{ description: { contains: search, mode: "insensitive" } },
+			];
+		}
+		if (categories) {
+			const categoryNames = categories.split(",");
+			whereClause.category = {
+				OR: categoryNames.map(name => ({
+					name: { equals: name, mode: "insensitive" }
+				}))
+			};
+		}
+		if (sizes) {
+			whereClause.variants = {
+				some: {
+					size: { in: sizes.split(",") }
+				}
+			};
+		}
+		if (minPrice || maxPrice) {
+			whereClause.price = {};
+			if (minPrice) whereClause.price.gte = parseFloat(minPrice);
+			if (maxPrice) whereClause.price.lte = parseFloat(maxPrice);
+		}
+
+		let orderBy = { createdAt: "desc" };
+		if (sort === "Price: Low to High") {
+			orderBy = { price: "asc" };
+		} else if (sort === "Price: High to Low") {
+			orderBy = { price: "desc" };
+		} else if (sort === "Newest Arrivals") {
+			orderBy = { createdAt: "desc" };
+		}
 
 		let queryOptions = {
 			where: whereClause,
@@ -127,9 +162,7 @@ export const getAllProducts = async (req, res) => {
 				variants: true,
 				reviews: true,
 			},
-			orderBy: {
-				createdAt: "desc",
-			},
+			orderBy,
 		};
 
 		if (page && limit) {

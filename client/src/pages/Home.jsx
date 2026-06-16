@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import logoIcon from "../assets/Logo.jpeg";
+import logoIcon from "../assets/Logo.png";
 import api from "../services/api";
 
 const ProductSkeleton = () => (
