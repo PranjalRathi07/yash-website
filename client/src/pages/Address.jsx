@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 export default function SavedAddresses() {
 	const queryClient = useQueryClient();
@@ -91,7 +92,7 @@ export default function SavedAddresses() {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		if (!formData.fullName || !formData.phone || !formData.line1 || !formData.city || !formData.state || !formData.postalCode) {
-			alert("All required fields must be completed.");
+			toast.error("All required fields must be completed.");
 			return;
 		}
 

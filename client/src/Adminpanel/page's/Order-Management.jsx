@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import Topbar from "../components/Topbar";
 import Sidebar from "../components/Sidebar";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 const PLACEHOLDER_IMAGE = "https://placehold.co/100x120?text=No+Image";
 
@@ -84,15 +85,15 @@ export default function OrderManagement() {
 				courierName: editCourierName,
 			});
 			if (response.data.success) {
-				alert("Sacred Request timeline updated successfully!");
+				toast.success("Sacred Request timeline updated successfully!");
 				handleCloseModal();
 				fetchOrders();
 			} else {
-				alert("Failed to update timeline: " + response.data.message);
+				toast.error("Failed to update timeline: " + response.data.message);
 			}
 		} catch (err) {
 			console.error("Order status update error:", err);
-			alert("Error updating order: " + (err.response?.data?.message || err.message));
+			toast.error("Error updating order: " + (err.response?.data?.message || err.message));
 		}
 	};
 
@@ -124,7 +125,7 @@ export default function OrderManagement() {
 							</p>
 						</div>
 						<button
-							onClick={() => alert("Exporting scrolls...")}
+							onClick={() => toast("Exporting scrolls...")}
 							className='flex items-center gap-2 px-6 py-3 rounded-xl border border-outline-variant/30 text-primary hover:bg-surface-container transition-all font-semibold text-sm cursor-pointer'>
 							<span className='material-symbols-outlined' data-icon='file_download'>file_download</span>
 							<span>Export Scroll</span>

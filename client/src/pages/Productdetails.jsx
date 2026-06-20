@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 export default function Productdetails() {
 	const { id: slug } = useParams();
@@ -98,7 +99,7 @@ export default function Productdetails() {
 			return;
 		}
 		if (sizes.length > 0 && !selectedSize) {
-			alert("Please select a size first!");
+			toast.error("Please select a size first!");
 			return;
 		}
 		cartMutation.mutate();

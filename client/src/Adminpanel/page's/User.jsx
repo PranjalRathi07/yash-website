@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 export default function User() {
 	const [devotees, setDevotees] = useState([]);
@@ -44,14 +45,14 @@ export default function User() {
 					isActive: !currentStatus,
 				});
 				if (response.data.success) {
-					alert(`Devotee account successfully ${!currentStatus ? "activated" : "deactivated"}.`);
+					toast.success(`Devotee account successfully ${!currentStatus ? "activated" : "deactivated"}.`);
 					fetchDevotees();
 				} else {
-					alert("Failed to modify account: " + response.data.message);
+					toast.error("Failed to modify account: " + response.data.message);
 				}
 			} catch (err) {
 				console.error("User status toggle error:", err);
-				alert("Error toggling status: " + (err.response?.data?.message || err.message));
+				toast.error("Error toggling status: " + (err.response?.data?.message || err.message));
 			}
 		}
 	};
@@ -84,7 +85,7 @@ export default function User() {
 							</p>
 						</div>
 						<div className='flex gap-4'>
-							<button onClick={() => alert("Exporting devotees scroll...")} className='px-6 py-3 border border-outline-variant/30 rounded-xl text-primary font-semibold hover:bg-surface-container-high transition-colors flex items-center gap-2 text-sm cursor-pointer'>
+							<button onClick={() => toast("Exporting devotees scroll...")} className='px-6 py-3 border border-outline-variant/30 rounded-xl text-primary font-semibold hover:bg-surface-container-high transition-colors flex items-center gap-2 text-sm cursor-pointer'>
 								<span className='material-symbols-outlined' data-icon='download'>download</span>
 								<span>Export Scroll</span>
 							</button>

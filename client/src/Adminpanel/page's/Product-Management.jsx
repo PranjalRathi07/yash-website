@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 const PLACEHOLDER_IMAGE = "https://placehold.co/150x200?text=No+Image";
 
@@ -178,7 +179,7 @@ export default function ProductManagement() {
 	const handleSubmitProduct = async (e) => {
 		e.preventDefault();
 		if (!newProduct.title || !newProduct.price || !newProduct.stock || !newProduct.categoryId || !newProduct.description) {
-			alert("Please fill in all required fields (Title, Category, Price, Stock, and Description).");
+			toast.error("Please fill in all required fields (Title, Category, Price, Stock, and Description).");
 			return;
 		}
 
@@ -219,15 +220,15 @@ export default function ProductManagement() {
 			}
 
 			if (response.data.success) {
-				alert(isEditing ? "Sacred Deity Product updated successfully!" : "Sacred Deity Product added successfully!");
+				toast.success(isEditing ? "Sacred Deity Product updated successfully!" : "Sacred Deity Product added successfully!");
 				setShowAddModal(false);
 				fetchProducts();
 			} else {
-				alert("Failed to save product: " + response.data.message);
+				toast.error("Failed to save product: " + response.data.message);
 			}
 		} catch (err) {
 			console.error("Save product error:", err);
-			alert("An error occurred while saving the product: " + (err.response?.data?.message || err.message));
+			toast.error("An error occurred while saving the product: " + (err.response?.data?.message || err.message));
 		}
 	};
 
@@ -236,14 +237,14 @@ export default function ProductManagement() {
 			try {
 				const response = await api.delete(`/api/products/${id}`);
 				if (response.data.success) {
-					alert("Deity Product deleted successfully.");
+					toast.success("Deity Product deleted successfully.");
 					fetchProducts();
 				} else {
-					alert("Failed to delete product: " + response.data.message);
+					toast.error("Failed to delete product: " + response.data.message);
 				}
 			} catch (err) {
 				console.error("Delete error:", err);
-				alert("Error deleting product: " + (err.response?.data?.message || err.message));
+				toast.error("Error deleting product: " + (err.response?.data?.message || err.message));
 			}
 		}
 	};
@@ -261,11 +262,11 @@ export default function ProductManagement() {
 				setNewCategoryName("");
 				setShowCategoryInput(false);
 			} else {
-				alert("Failed to add category: " + response.data.message);
+				toast.error("Failed to add category: " + response.data.message);
 			}
 		} catch (err) {
 			console.error("Add category error:", err);
-			alert("Error creating category: " + (err.response?.data?.message || err.message));
+			toast.error("Error creating category: " + (err.response?.data?.message || err.message));
 		}
 	};
 

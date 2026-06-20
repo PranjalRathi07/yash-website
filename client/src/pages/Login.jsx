@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import Google from "../assets/google.svg";
 import { supabase } from "../lib/supabase";
+import toast from "react-hot-toast";
 
 const labelCls =
 	"block text-[0.72rem] font-semibold tracking-[0.07em] uppercase text-[#6b6b8a] mb-2";
@@ -132,7 +133,7 @@ export default function LoginPage() {
 						window.location.href = "/";
 					}
 				} else {
-					alert(
+					toast.success(
 						"Account created successfully. Please check your email to confirm your account.",
 					);
 					setIsLoginMode(true);

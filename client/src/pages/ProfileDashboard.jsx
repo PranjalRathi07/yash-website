@@ -165,7 +165,7 @@ export default function ProfileDashboard() {
 						Recent Divine Acquisitions
 					</h3>
 					<button
-						onClick={() => navigate("/profile/orders")}
+						onClick={() => navigate("/profile/my-orders")}
 						className='text-primary font-sans text-xs uppercase tracking-[0.15em] font-semibold hover:text-tertiary transition-colors pb-1 bg-transparent border-none cursor-pointer'>
 						View All
 					</button>
@@ -236,7 +236,7 @@ export default function ProfileDashboard() {
 											₹ {Number(order.finalAmount).toLocaleString("en-IN")}
 										</p>
 										<button 
-											onClick={() => navigate("/profile/orders")}
+											onClick={() => navigate("/profile/my-orders")}
 											className='text-tertiary font-sans text-xs uppercase tracking-widest font-semibold hover:text-primary transition-colors flex items-center gap-1 bg-transparent border-none cursor-pointer'>
 											Track Order
 											<span className='material-symbols-outlined text-[16px]'>
