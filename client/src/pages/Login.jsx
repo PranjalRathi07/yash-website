@@ -177,10 +177,10 @@ export default function LoginPage() {
 	};
 
 	return (
-		<div className='flex w-screen h-screen overflow-hidden font-sans'>
+		<div className='flex flex-col md:flex-row w-screen min-h-screen overflow-hidden font-sans'>
 			{/* ══ LEFT PANEL ══ */}
 			<div
-				className='relative hidden md:flex w-[47%] h-screen shrink-0 items-center justify-center overflow-hidden'
+				className='relative flex w-full md:w-[47%] h-[30vh] md:h-screen shrink-0 items-center justify-center overflow-hidden'
 				style={{
 					background:
 						"linear-gradient(160deg, #0c1a4e 0%, #0a1540 40%, #07112e 100%)",
@@ -230,7 +230,7 @@ export default function LoginPage() {
 			</div>
 
 			{/* ══ RIGHT PANEL ══ */}
-			<div className='relative flex flex-1 h-screen overflow-hidden items-center justify-center bg-[#f5f0e8]'>
+			<div className='relative flex flex-1 h-[70vh] md:h-screen overflow-y-auto items-center justify-center bg-[#f5f0e8]'>
 				<div className='absolute bottom-10 right-10 opacity-[0.08] pointer-events-none rotate-45 select-none'>
 					<span
 						className='material-symbols-outlined text-[110px] text-[#b5965a]'

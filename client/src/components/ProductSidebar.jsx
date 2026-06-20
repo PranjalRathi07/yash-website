@@ -11,7 +11,7 @@ const ProductSidebar = ({
   onSizeChange,
 }) => {
   return (
-    <aside className="w-full lg:w-64 shrink-0 bg-surface-container-low border-[0.5px] border-tertiary/20 rounded-md p-8 sticky top-28 z-10">
+    <aside className="w-full lg:w-64 shrink-0 bg-surface-container-low border-[0.5px] border-tertiary/20 rounded-md p-8 lg:sticky lg:top-28 z-10">
       <div className="mb-8 pb-8 border-b-[0.5px] border-tertiary/20">
         <h3 className="font-sans text-xs uppercase tracking-widest text-primary font-semibold mb-6">
           Categories

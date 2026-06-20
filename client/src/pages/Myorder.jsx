@@ -71,7 +71,7 @@ export default function MyOrders() {
   return (
     <section className="flex-1 bg-surface">
       <header className="mb-8">
-        <h1 className="font-serif text-6xl text-primary mb-2">
+        <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-2">
           Your Sacred Orders
         </h1>
         <p className="font-sans text-base text-on-surface-variant">

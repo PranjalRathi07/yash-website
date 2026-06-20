@@ -3,10 +3,10 @@
 export default function ShippingReturns() {
 	return (
 		<div className='bg-surface text-on-surface font-sans min-h-screen flex flex-col antialiased selection:bg-tertiary/20 selection:text-primary'>
-			<main className='w-full px-8 md:px-16 lg:px-24 py-20 flex flex-col gap-20'>
+			<main className='w-full px-4 md:px-8 lg:px-16 xl:px-24 py-20 flex flex-col gap-20'>
 				{/* Page Header */}
 				<div className='flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b-[0.5px] border-tertiary/20 pb-6'>
-					<h1 className='font-serif text-6xl text-primary leading-none whitespace-nowrap shrink-0'>
+					<h1 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary leading-none whitespace-nowrap shrink-0'>
 						Shipping & Returns
 					</h1>
 					<p className='font-sans text-lg text-on-surface-variant max-w-2xl text-left xl:text-right leading-relaxed'>
@@ -30,7 +30,7 @@ export default function ShippingReturns() {
 							<span className='font-sans text-xs uppercase tracking-widest text-tertiary font-semibold mb-2 block'>
 								Shipping Logistics
 							</span>
-							<h2 className='font-serif text-4xl text-primary mb-6'>
+							<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-6'>
 								Sacred Delivery
 							</h2>
 						</div>
@@ -130,7 +130,7 @@ export default function ShippingReturns() {
 				{/* Initiation Guide */}
 				<section className='bg-surface-container-low rounded-md border-[0.5px] border-tertiary/20 overflow-hidden flex flex-col md:flex-row'>
 					<div className='p-10 md:p-16 flex-1 flex flex-col gap-8'>
-						<h2 className='font-serif text-4xl text-primary'>
+						<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl text-primary'>
 							How to Initiate a Return
 						</h2>
 						<div className='space-y-8'>
@@ -196,7 +196,7 @@ export default function ShippingReturns() {
 
 				{/* FAQ Summary */}
 				<section className='max-w-3xl mx-auto w-full'>
-					<h2 className='font-serif text-4xl text-primary mb-10 text-center'>
+					<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-10 text-center'>
 						Frequently Asked
 					</h2>
 					<div className='divide-y-[0.5px] divide-tertiary/20'>

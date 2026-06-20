@@ -180,7 +180,7 @@ export default function Checkout() {
 
   return (
     <div className="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col">
-      <main className="grow w-full px-8 md:px-16 lg:px-24 pt-10 pb-20">
+      <main className="grow w-full px-4 md:px-8 lg:px-16 xl:px-24 pt-10 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Left Column: Checkout Details */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-12">

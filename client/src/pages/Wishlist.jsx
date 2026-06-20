@@ -80,7 +80,7 @@ export default function Wishlist() {
 	return (
 		<div className='w-full'>
 			<div className='text-center mb-16'>
-				<h2 className='font-serif text-6xl text-primary mb-6'>
+				<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-6'>
 					Your Divine Selection
 				</h2>
 				<p className='font-sans text-base text-on-surface-variant max-w-2xl mx-auto'>

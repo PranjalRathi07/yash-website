@@ -161,7 +161,7 @@ export default function AccountSettings() {
 				<div className='grow space-y-12'>
 					{/* Heading */}
 					<div className='mb-8'>
-						<h1 className='font-serif text-5xl text-primary'>
+						<h1 className='font-serif text-3xl md:text-4xl lg:text-5xl text-primary'>
 							Account Settings
 						</h1>
 						<p className='font-sans text-base text-on-surface-variant mt-2'>

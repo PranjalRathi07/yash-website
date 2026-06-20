@@ -133,7 +133,7 @@ export default function SavedAddresses() {
 				{/* Main Content Area */}
 				<main className='flex-1 p-edge-margin'>
 					<header className='mb-section-gap'>
-						<h1 className='font-serif text-6xl text-primary mb-1'>
+						<h1 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-1'>
 							Your Sacred Addresses
 						</h1>
 						<div className='w-24 h-1 bg-linear-to-r from-tertiary/80 via-tertiary/90 to-tertiary/80 rounded-full' />
@@ -147,7 +147,7 @@ export default function SavedAddresses() {
 								data-icon='home_pin'>
 								home_pin
 							</span>
-							<h2 className='font-serif text-4xl font-bold text-on-surface'>
+							<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-on-surface'>
 								Stored Destinations
 							</h2>
 						</div>
@@ -245,7 +245,7 @@ export default function SavedAddresses() {
 								data-icon='add_location_alt'>
 								add_location_alt
 							</span>
-							<h2 className='font-serif text-4xl font-bold text-on-surface'>
+							<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-on-surface'>
 								{editingAddressId ? "Edit Stored Address" : "Add New Sacred Address"}
 							</h2>
 						</div>

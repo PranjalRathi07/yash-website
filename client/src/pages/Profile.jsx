@@ -31,10 +31,9 @@ export default function UserProfile() {
 			: "flex items-center gap-3 px-4 py-3 rounded-md text-on-surface-variant font-medium hover:bg-surface-container-high transition-all";
 	return (
 		<div className='bg-surface font-sans text-on-surface min-h-screen flex flex-col antialiased selection:bg-tertiary/20 selection:text-primary'>
-			<main className='grow pt-20 pb-20 w-full px-8 md:px-16 lg:px-24'>
+			<main className='grow pt-20 pb-20 w-full px-4 md:px-8 lg:px-16 xl:px-24'>
 				<div className='grid grid-cols-1 lg:grid-cols-12 gap-12'>
-					{/* Sidebar Navigation */}
-					<aside className='lg:col-span-3 space-y-6 sticky top-28 self-start'>
+					<aside className='lg:col-span-3 space-y-6 lg:sticky lg:top-28 self-start'>
 						<div className='bg-surface-container-low rounded-md p-6 border-[0.5px] border-tertiary/20'>
 							<nav className='space-y-2'>
 								<NavLink to='/profile' end className={navLinkClass}>

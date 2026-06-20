@@ -40,7 +40,7 @@ export default function OurStoryPage() {
     >
       <main className="w-full">
         {/* Section: Generations of Artistry */}
-        <section className="py-24 px-8 md:px-16 lg:px-24">
+        <section className="py-24 px-4 md:px-8 lg:px-16 xl:px-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1 relative">
               <div className="relative p-4 border-[0.5px] border-tertiary/20 rounded-xl bg-[#FDFBF7] z-10">
@@ -53,7 +53,7 @@ export default function OurStoryPage() {
               <div className="absolute -bottom-6 -right-6 w-48 h-48 border-[0.5px] border-tertiary/40 rounded-xl z-0 bg-transparent" />
             </div>
             <div className="order-1 lg:order-2 max-w-lg">
-              <h2 className="font-serif text-5xl text-primary mb-6">
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-6">
                 Generations of Artistry
               </h2>
               <div className="flex items-center gap-4 mb-8">
@@ -103,12 +103,12 @@ export default function OurStoryPage() {
         </section>
 
         {/* Section: The Essence of Tejas (Bento Grid) */}
-        <section className="py-24 px-8 md:px-16 lg:px-24 bg-[#050B14] text-surface overflow-hidden">
+        <section className="py-24 px-4 md:px-8 lg:px-16 xl:px-24 bg-[#050B14] text-surface overflow-hidden">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="font-sans text-xs uppercase tracking-widest text-tertiary font-semibold mb-6 block">
               The Philosophy
             </span>
-            <h2 className="font-serif text-5xl text-tertiary mb-6">
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-tertiary mb-6">
               The Essence of Tejas
             </h2>
             <p className="font-sans text-base text-surface/80 leading-relaxed max-w-2xl mx-auto">
@@ -141,7 +141,7 @@ export default function OurStoryPage() {
 
             <div className="bg-[#FDF4D9] p-10 rounded-xl flex flex-col justify-center items-center text-center text-primary">
               <span
-                className="material-symbols-outlined text-4xl mb-6"
+                className="material-symbols-outlined text-2xl md:text-3xl lg:text-4xl mb-6"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 flare
@@ -185,10 +185,10 @@ export default function OurStoryPage() {
         </section>
 
         {/* Section: Pure Ingredients */}
-        <section className="py-24 px-8 md:px-16 lg:px-24 bg-surface">
+        <section className="py-24 px-4 md:px-8 lg:px-16 xl:px-24 bg-surface">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
             <div className="w-full lg:w-1/2">
-              <h2 className="font-serif text-5xl text-primary mb-6">
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-6">
                 Purity in Every Thread
               </h2>
               <div className="flex items-center gap-4 mb-8">
@@ -263,13 +263,13 @@ export default function OurStoryPage() {
         </section>
 
         {/* Call to Worship (Final Section) */}
-        <section className="py-24 px-8 md:px-16 lg:px-24 bg-[#FDFBF7] text-center relative overflow-hidden">
+        <section className="py-24 px-4 md:px-8 lg:px-16 xl:px-24 bg-[#FDFBF7] text-center relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-px bg-tertiary/20" />
           <div className="max-w-3xl mx-auto flex flex-col items-center relative z-10">
-            <span className="material-symbols-outlined text-tertiary text-5xl mb-6">
+            <span className="material-symbols-outlined text-tertiary text-3xl md:text-4xl lg:text-5xl mb-6">
               workspace_premium
             </span>
-            <h2 className="font-serif text-5xl text-primary mb-6">
+            <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-6">
               Invite Divine Elegance Home
             </h2>
             <p className="font-sans text-base text-on-surface-variant mb-10">

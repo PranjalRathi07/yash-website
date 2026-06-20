@@ -32,13 +32,13 @@ export default function Ourstory() {
     <div className="bg-surface text-on-surface font-sans antialiased min-h-screen flex flex-col selection:bg-tertiary/20 selection:text-primary">
       <main className="grow">
         {/* Hero Section */}
-        <section className="w-full px-8 md:px-16 lg:px-24 py-20">
+        <section className="w-full px-4 md:px-8 lg:px-16 xl:px-24 py-20">
           <div className="flex flex-col md:flex-row items-center gap-16">
             <div className="w-full md:w-1/2 flex flex-col items-start">
               <div className="flex items-center justify-start w-full max-w-stack-xl mb-8">
                 <div className="flex-1 h-[0.5px] bg-tertiary/50"></div>
               </div>
-              <h2 className="font-serif text-6xl text-primary mb-8 leading-tight">
+              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-8 leading-tight">
                 Crafted with Devotion <br />
                 for Kanha Ji
               </h2>
@@ -72,9 +72,9 @@ export default function Ourstory() {
 
         {/* Brand Story: Bento Grid */}
         <section className="bg-surface border-t-[0.5px] border-tertiary/20 py-24">
-          <div className="w-full px-8 md:px-16 lg:px-24">
+          <div className="w-full px-4 md:px-8 lg:px-16 xl:px-24">
             <div className="text-center mb-16">
-              <h3 className="font-serif text-4xl text-primary mb-6">
+              <h3 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-6">
                 The Origin of Reverence
               </h3>
               <div className="mt-8 flex justify-center">

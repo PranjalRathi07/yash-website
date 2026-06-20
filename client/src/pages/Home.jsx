@@ -106,11 +106,11 @@ export default function KrishnaVasanam() {
         </div>
         <div className="absolute inset-0 bg-linear-to-r from-primary via-primary/60 to-transparent" />
 
-        <div className="relative w-full px-8 md:px-16 lg:px-24 py-20 z-10 text-center lg:text-left">
+        <div className="relative w-full px-4 md:px-8 lg:px-16 xl:px-24 py-20 z-10 text-center lg:text-left">
           <span className="inline-block text-tertiary font-sans text-xs tracking-[0.2em] uppercase mb-6 font-semibold">
             HANDCRAFTED WITH DEVOTION
           </span>
-          <h1 className="font-serif text-6xl leading-[1.1] text-surface mb-8 max-w-2xl font-normal tracking-[-0.02em]">
+          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-surface mb-8 max-w-2xl font-normal tracking-[-0.02em]">
             Dressing the Divine, Honouring the{" "}
             <span className="italic text-tertiary">Faith</span>
           </h1>
@@ -138,9 +138,9 @@ export default function KrishnaVasanam() {
       </section>
 
       {/* Categories */}
-      <section className="py-stack-xl w-full px-8 md:px-16 lg:px-24">
+      <section className="py-stack-xl w-full px-4 md:px-8 lg:px-16 xl:px-24">
         <div className="flex flex-col items-center mb-16">
-          <h2 className="font-serif text-6xl text-on-surface text-center mb-6">
+          <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface text-center mb-6">
             Shop by Category
           </h2>
           <div className="flex items-center justify-center w-full max-w-xs">
@@ -171,7 +171,7 @@ export default function KrishnaVasanam() {
 
       {/* Featured Collection */}
       <section className="bg-surface-container-low py-stack-xl">
-        <div className="w-full px-8 md:px-16 lg:px-24 flex flex-col lg:flex-row items-center gap-20">
+        <div className="w-full px-4 md:px-8 lg:px-16 xl:px-24 flex flex-col lg:flex-row items-center gap-20">
           <div className="w-full lg:w-1/2 relative scale-95">
             <div className="absolute -inset-4 border-[0.5px] border-tertiary/30 rounded-tl-[100px] rounded-br-[100px] z-0" />
             <img
@@ -191,7 +191,7 @@ export default function KrishnaVasanam() {
             <span className="text-tertiary font-sans text-xs uppercase tracking-[0.2em] mb-6 inline-block font-semibold">
               Featured Collection
             </span>
-            <h2 className="font-serif text-6xl text-on-surface mb-8 leading-[1.2]">
+            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface mb-8 leading-[1.2]">
               The Golden Peacock Heritage
             </h2>
             <p className="font-sans text-lg text-on-surface-variant mb-10 leading-relaxed">
@@ -212,10 +212,10 @@ export default function KrishnaVasanam() {
       </section>
 
       {/* New Arrivals */}
-      <section className="py-stack-xl w-full px-8 md:px-16 lg:px-24">
+      <section className="py-stack-xl w-full px-4 md:px-8 lg:px-16 xl:px-24">
         <div className="flex justify-between items-end mb-16 border-b-[0.5px] border-tertiary/20 pb-6">
           <div>
-            <h2 className="font-serif text-6xl text-on-surface">
+            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface">
               New Arrivals
             </h2>
             <p className="font-sans text-base text-on-surface-variant mt-2">
@@ -306,7 +306,7 @@ export default function KrishnaVasanam() {
 
       {/* Janmashtami Banner */}
       <section className="py-stack-xl px-8">
-        <div className="w-full px-8 md:px-16 lg:px-24 relative rounded-tl-[100px] rounded-br-[100px] overflow-hidden min-h-125 flex items-center justify-center text-center shadow-[0_20px_40px_rgba(31,31,31,0.04)]">
+        <div className="w-full px-4 md:px-8 lg:px-16 xl:px-24 relative rounded-tl-[100px] rounded-br-[100px] overflow-hidden min-h-125 flex items-center justify-center text-center shadow-[0_20px_40px_rgba(31,31,31,0.04)]">
           <div className="absolute inset-0 bg-primary/80 z-10 mix-blend-multiply" />
           <img
             className="absolute inset-0 w-full h-full object-cover"
@@ -324,7 +324,7 @@ export default function KrishnaVasanam() {
             <span className="text-tertiary font-sans text-xs uppercase tracking-[0.2em] mb-6 inline-block font-semibold">
               Special Celebration
             </span>
-            <h2 className="font-serif text-6xl leading-[1.1] text-surface mb-8">
+            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-surface mb-8">
               Janmashtami Special Collection
             </h2>
             <p className="font-sans text-lg text-surface/90 mb-12 leading-relaxed">
@@ -344,7 +344,7 @@ export default function KrishnaVasanam() {
 
       {/* Highlights */}
       <section className="py-stack-xl bg-surface">
-        <div className="w-full px-8 md:px-16 lg:px-24">
+        <div className="w-full px-4 md:px-8 lg:px-16 xl:px-24">
           <div className="flex items-center justify-center w-full mb-16">
             <div className="flex-1 h-px bg-linear-to-r from-transparent to-outline/30"></div>
             <div className="mx-6 material-symbols-outlined text-tertiary">
@@ -396,7 +396,7 @@ export default function KrishnaVasanam() {
       </section>
 
       {/* Size + Story */}
-      <section className="py-stack-xl w-full px-8 md:px-16 lg:px-24">
+      <section className="py-stack-xl w-full px-4 md:px-8 lg:px-16 xl:px-24">
         <div className="flex flex-col lg:flex-row gap-20 items-stretch">
           <div className="w-full lg:w-1/3 bg-surface-container-low p-12 rounded-tl-[60px] rounded-br-[60px] border-[0.5px] border-tertiary/20 flex flex-col">
             <h2 className="font-serif text-[32px] text-primary mb-6">
@@ -439,7 +439,7 @@ export default function KrishnaVasanam() {
 
           <div className="w-full lg:w-2/3 flex flex-col justify-between py-6">
             <div className="mb-16">
-              <h2 className="font-serif text-6xl text-on-surface mb-8">
+              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface mb-8">
                 Our Devotional Journey
               </h2>
               <p className="font-sans text-lg text-on-surface-variant mb-6 leading-relaxed">
@@ -491,7 +491,7 @@ export default function KrishnaVasanam() {
                   key={t.name}
                   className="bg-surface-container-low p-10 rounded-md border-[0.5px] border-tertiary/10 relative"
                 >
-                  <span className="absolute top-6 left-6 font-serif text-6xl text-tertiary/20 leading-none">
+                  <span className="absolute top-6 left-6 font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-tertiary/20 leading-none">
                     "
                   </span>
                   <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-8 relative z-10 pt-4">

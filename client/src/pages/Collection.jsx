@@ -115,10 +115,10 @@ export default function ShopKrishnaVastra() {
 
 	return (
 		<div className='bg-surface text-on-surface min-h-screen flex flex-col font-sans antialiased selection:bg-tertiary/20 selection:text-primary'>
-			<main className='grow w-full px-8 md:px-16 lg:px-24 py-stack-xl'>
+			<main className='grow w-full px-4 md:px-8 lg:px-16 xl:px-24 py-stack-xl'>
 				{/* Page Header */}
 				<div className='mb-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b-[0.5px] border-tertiary/20 pb-6'>
-					<h1 className='font-serif text-6xl text-primary leading-none whitespace-nowrap shrink-0'>
+					<h1 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary leading-none whitespace-nowrap shrink-0'>
 						{searchQuery ? `Search: ${searchQuery}` : "Shop Krishna Vastra"}
 					</h1>
 					<p className='font-sans text-lg text-on-surface-variant max-w-2xl text-left xl:text-right leading-relaxed'>

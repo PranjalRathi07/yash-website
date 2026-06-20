@@ -43,7 +43,7 @@ export default function ProfileDashboard() {
 				<span className='material-symbols-outlined text-[64px] text-tertiary mb-6'>
 					lock
 				</span>
-				<h2 className='font-serif text-4xl text-primary mb-4'>
+				<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-4'>
 					Authentication Required
 				</h2>
 				<p className='text-on-surface-variant font-sans text-lg mb-8 max-w-md mx-auto'>
@@ -77,7 +77,7 @@ export default function ProfileDashboard() {
 	return (
 		<div className='space-y-12'>
 			<div className='mb-12'>
-				<h1 className='font-serif text-6xl text-primary mb-2'>
+				<h1 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-2'>
 					Namaste, {currentUser?.name || "Devotee"}
 				</h1>
 				<p className='text-on-surface-variant font-sans text-lg'>
@@ -153,7 +153,7 @@ export default function ProfileDashboard() {
 						<p className='text-on-surface-variant font-sans text-[10px] uppercase tracking-widest font-semibold mb-2'>
 							{stat.label}
 						</p>
-						<p className='font-serif text-4xl text-primary'>{stat.value}</p>
+						<p className='font-serif text-2xl md:text-3xl lg:text-4xl text-primary'>{stat.value}</p>
 					</div>
 				))}
 			</section>
