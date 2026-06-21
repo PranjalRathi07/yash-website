@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -28,6 +29,9 @@ export default function KrishnaVasanam() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [banners, setBanners] = useState([]);
+  const [featuredLoaded, setFeaturedLoaded] = useState(false);
+  const [janmashtamiLoaded, setJanmashtamiLoaded] = useState(false);
+
 
   const cartMutation = useMutation({
     mutationFn: async (productId) => {
@@ -110,7 +114,7 @@ export default function KrishnaVasanam() {
           <span className="inline-block text-tertiary font-sans text-xs tracking-[0.2em] uppercase mb-6 font-semibold">
             HANDCRAFTED WITH DEVOTION
           </span>
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-surface mb-8 max-w-2xl font-normal tracking-[-0.02em]">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-surface mb-8 max-w-2xl font-normal tracking-[-0.02em]">
             Dressing the Divine, Honouring the{" "}
             <span className="italic text-tertiary">Faith</span>
           </h1>
@@ -140,7 +144,7 @@ export default function KrishnaVasanam() {
       {/* Categories */}
       <section className="py-stack-xl w-full px-4 md:px-8 lg:px-16 xl:px-24">
         <div className="flex flex-col items-center mb-16">
-          <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface text-center mb-6">
+          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-on-surface text-center mb-6">
             Shop by Category
           </h2>
           <div className="flex items-center justify-center w-full max-w-xs">
@@ -175,9 +179,10 @@ export default function KrishnaVasanam() {
           <div className="w-full lg:w-1/2 relative scale-95">
             <div className="absolute -inset-4 border-[0.5px] border-tertiary/30 rounded-tl-[100px] rounded-br-[100px] z-0" />
             <img
-              className="relative z-10 w-full object-cover rounded-tl-[100px] rounded-br-[100px] shadow-[0_20px_40px_rgba(31,31,31,0.04)] transition-transform duration-500 hover:scale-[1.02]"
+              className={`relative z-10 w-full object-cover rounded-tl-[100px] rounded-br-[100px] shadow-[0_20px_40px_rgba(31,31,31,0.04)] transition-all duration-1000 hover:scale-[1.02] ${featuredLoaded ? "opacity-100" : "opacity-0"}`}
+              onLoad={() => setFeaturedLoaded(true)}
               alt="Featured heritage collection"
-              src={featuredBanner?.imageUrl}
+              src={optimizeImage(featuredBanner?.imageUrl)}
               onClick={() =>
                 featuredBanner?.linkUrl && navigate(featuredBanner.linkUrl)
               }
@@ -191,7 +196,7 @@ export default function KrishnaVasanam() {
             <span className="text-tertiary font-sans text-xs uppercase tracking-[0.2em] mb-6 inline-block font-semibold">
               Featured Collection
             </span>
-            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface mb-8 leading-[1.2]">
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-on-surface mb-8 leading-[1.2]">
               The Golden Peacock Heritage
             </h2>
             <p className="font-sans text-lg text-on-surface-variant mb-10 leading-relaxed">
@@ -215,7 +220,7 @@ export default function KrishnaVasanam() {
       <section className="py-stack-xl w-full px-4 md:px-8 lg:px-16 xl:px-24">
         <div className="flex justify-between items-end mb-16 border-b-[0.5px] border-tertiary/20 pb-6">
           <div>
-            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface">
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-on-surface">
               New Arrivals
             </h2>
             <p className="font-sans text-base text-on-surface-variant mt-2">
@@ -256,7 +261,7 @@ export default function KrishnaVasanam() {
                     <img
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       alt={p.title}
-                      src={p.images?.[0]?.url}
+                      src={optimizeImage(p.images?.[0]?.url)}
                     />
                     <span className="absolute top-4 left-4 bg-tertiary/10 text-tertiary backdrop-blur-md border border-tertiary/20 px-3 py-1 font-sans text-[10px] uppercase tracking-wider rounded-full font-bold">
                       New
@@ -309,9 +314,10 @@ export default function KrishnaVasanam() {
         <div className="w-full px-4 md:px-8 lg:px-16 xl:px-24 relative rounded-tl-[100px] rounded-br-[100px] overflow-hidden min-h-125 flex items-center justify-center text-center shadow-[0_20px_40px_rgba(31,31,31,0.04)]">
           <div className="absolute inset-0 bg-primary/80 z-10 mix-blend-multiply" />
           <img
-            className="absolute inset-0 w-full h-full object-cover"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${janmashtamiLoaded ? "opacity-100" : "opacity-0"}`}
+            onLoad={() => setJanmashtamiLoaded(true)}
             alt="Janmashtami banner"
-            src={janmashtamiBanner?.imageUrl}
+            src={optimizeImage(janmashtamiBanner?.imageUrl)}
             onClick={() =>
               janmashtamiBanner?.linkUrl && navigate(janmashtamiBanner.linkUrl)
             }
@@ -324,7 +330,7 @@ export default function KrishnaVasanam() {
             <span className="text-tertiary font-sans text-xs uppercase tracking-[0.2em] mb-6 inline-block font-semibold">
               Special Celebration
             </span>
-            <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-surface mb-8">
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-surface mb-8">
               Janmashtami Special Collection
             </h2>
             <p className="font-sans text-lg text-surface/90 mb-12 leading-relaxed">
@@ -439,7 +445,7 @@ export default function KrishnaVasanam() {
 
           <div className="w-full lg:w-2/3 flex flex-col justify-between py-6">
             <div className="mb-16">
-              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-on-surface mb-8">
+              <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-on-surface mb-8">
                 Our Devotional Journey
               </h2>
               <p className="font-sans text-lg text-on-surface-variant mb-6 leading-relaxed">
@@ -491,7 +497,7 @@ export default function KrishnaVasanam() {
                   key={t.name}
                   className="bg-surface-container-low p-10 rounded-md border-[0.5px] border-tertiary/10 relative"
                 >
-                  <span className="absolute top-6 left-6 font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-tertiary/20 leading-none">
+                  <span className="absolute top-6 left-6 font-serif text-4xl md:text-5xl lg:text-6xl text-tertiary/20 leading-none">
                     "
                   </span>
                   <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-8 relative z-10 pt-4">

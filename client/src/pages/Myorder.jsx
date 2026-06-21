@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 /** @format */
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -71,7 +72,7 @@ export default function MyOrders() {
   return (
     <section className="flex-1 bg-surface">
       <header className="mb-8">
-        <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-2">
+        <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary mb-2">
           Your Sacred Orders
         </h1>
         <p className="font-sans text-base text-on-surface-variant">
@@ -149,7 +150,7 @@ export default function MyOrders() {
                   <div className="w-full lg:w-48 h-64 rounded-xl overflow-hidden bg-surface-container shrink-0">
                     <img
                       className="w-full h-full object-cover"
-                      src={displayImg}
+                      src={optimizeImage(displayImg)}
                       alt={firstItem?.productTitle || ""}
                     />
                   </div>

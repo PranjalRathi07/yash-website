@@ -5,7 +5,7 @@ export default function PrivacyPolicyPage() {
       <main className="w-full px-4 md:px-8 lg:px-16 xl:px-24 py-20 flex flex-col gap-20">
         {/* Page Header */}
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b-[0.5px] border-tertiary/20 pb-6">
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary leading-none whitespace-nowrap shrink-0">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary leading-none whitespace-nowrap shrink-0">
             Our Sacred Covenant
           </h1>
           <p className="font-sans text-lg text-on-surface-variant max-w-2xl text-left xl:text-right leading-relaxed italic">
@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
                     account_circle
                   </span>
                 </div>
-                <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary">
+                <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary">
                   Data Collection
                 </h2>
               </div>
@@ -125,7 +125,7 @@ export default function PrivacyPolicyPage() {
                     shield
                   </span>
                 </div>
-                <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary">
+                <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary">
                   Your Sanctuary
                 </h2>
               </div>
@@ -182,7 +182,7 @@ export default function PrivacyPolicyPage() {
                     handshake
                   </span>
                 </div>
-                <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary">
+                <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary">
                   Sacred Trust
                 </h2>
               </div>
@@ -223,7 +223,7 @@ export default function PrivacyPolicyPage() {
               className="scroll-mt-32 bg-surface-container-low border-[0.5px] border-tertiary/20 p-12 rounded-2xl text-center"
               id="contact"
             >
-              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-4">
+              <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-4">
                 Contact for Privacy Inquiries
               </h2>
               <p className="font-sans text-base text-on-surface-variant mb-10 max-w-xl mx-auto leading-relaxed">

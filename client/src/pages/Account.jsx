@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 /** @format */
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -161,7 +162,7 @@ export default function AccountSettings() {
 				<div className='grow space-y-12'>
 					{/* Heading */}
 					<div className='mb-8'>
-						<h1 className='font-serif text-3xl md:text-4xl lg:text-5xl text-primary'>
+						<h1 className='font-serif text-4xl md:text-5xl lg:text-6xl text-primary'>
 							Account Settings
 						</h1>
 						<p className='font-sans text-base text-on-surface-variant mt-2'>
@@ -202,7 +203,7 @@ export default function AccountSettings() {
 										<img
 											alt='Profile'
 											className='w-32 h-32 rounded-full object-cover border-[3px] border-surface shadow-md'
-											src={currentUser.profilePic}
+											src={optimizeImage(currentUser.profilePic)}
 										/>
 									) : (
 										<div className='w-32 h-32 rounded-full border-[3px] border-surface shadow-md p-1 flex items-center justify-center bg-surface-container-low'>

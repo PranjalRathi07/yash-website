@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 /** @format */
 
 import { useRef } from "react";
@@ -113,7 +114,7 @@ export default function Cart() {
               lock
             </span>
           </div>
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-4 font-bold tracking-tight">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary mb-4 font-bold tracking-tight">
             Your Sacred Cart Awaits
           </h1>
           <p className="font-sans text-base text-on-surface-variant max-w-md mb-8 leading-relaxed">
@@ -181,7 +182,7 @@ export default function Cart() {
           <span className="material-symbols-outlined text-[64px] text-tertiary mb-6 animate-bounce">
             shopping_bag
           </span>
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-4">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary mb-4">
             Your Sacred Cart is Empty
           </h1>
           <p className="font-sans text-base text-on-surface-variant max-w-md mb-8">
@@ -203,7 +204,7 @@ export default function Cart() {
     <div className="font-sans text-on-surface min-h-screen flex flex-col bg-surface antialiased selection:bg-tertiary/20 selection:text-primary">
       <main className="grow w-full px-4 md:px-8 lg:px-16 xl:px-24 pt-10 pb-20">
         <div className="mb-10 text-center relative">
-          <h1 className="font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-2">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary mb-2">
             Your Cart
           </h1>
           <div className="mt-4 flex justify-center">
@@ -263,7 +264,7 @@ export default function Cart() {
                     <img
                       alt={item.product?.title || ""}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                      src={displayImg}
+                      src={optimizeImage(displayImg)}
                     />
                   </div>
 

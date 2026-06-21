@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -43,7 +44,7 @@ export default function ProfileDashboard() {
 				<span className='material-symbols-outlined text-[64px] text-tertiary mb-6'>
 					lock
 				</span>
-				<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl text-primary mb-4'>
+				<h2 className='font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-4'>
 					Authentication Required
 				</h2>
 				<p className='text-on-surface-variant font-sans text-lg mb-8 max-w-md mx-auto'>
@@ -77,7 +78,7 @@ export default function ProfileDashboard() {
 	return (
 		<div className='space-y-12'>
 			<div className='mb-12'>
-				<h1 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-2'>
+				<h1 className='font-serif text-4xl md:text-5xl lg:text-6xl text-primary mb-2'>
 					Namaste, {currentUser?.name || "Devotee"}
 				</h1>
 				<p className='text-on-surface-variant font-sans text-lg'>
@@ -91,7 +92,7 @@ export default function ProfileDashboard() {
 						<img
 							alt='User Profile'
 							className='w-32 h-32 rounded-full object-cover border-2 border-tertiary/30 p-1'
-							src={currentUser.profilePic}
+							src={optimizeImage(currentUser.profilePic)}
 						/>
 					) : (
 						<div className='w-32 h-32 rounded-full border-2 border-tertiary/30 p-1 flex items-center justify-center bg-surface-container-low'>
@@ -215,7 +216,7 @@ export default function ProfileDashboard() {
 											<img
 												alt='Product Thumb'
 												className='object-cover w-full h-full'
-												src={displayImg}
+												src={optimizeImage(displayImg)}
 											/>
 										</div>
 										<div>

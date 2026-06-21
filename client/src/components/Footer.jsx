@@ -16,7 +16,7 @@ const Footer = () => {
     <footer className="bg-primary pt-28 pb-12 px-8 flex flex-col justify-between gap-12 border-t border-tertiary/20 min-h-[calc(100vh-80px)]">
       <div className="w-full px-4 md:px-8 lg:px-16 xl:px-24 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
         <div className="flex flex-col">
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-tertiary mb-6 leading-tight">
+          <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-tertiary mb-6 leading-tight">
             Krishna
             <br />
             Vasanam

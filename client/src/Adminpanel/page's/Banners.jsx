@@ -1,3 +1,4 @@
+import { optimizeImage } from "../../utils/optimizeCloudinary";
 import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
@@ -270,7 +271,7 @@ export default function Banners() {
                   <div className="aspect-video w-full rounded-xl overflow-hidden relative group mb-6 bg-surface-container">
                     <img
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      src={camp.imageUrl || PLACEHOLDER_BANNER}
+                      src={optimizeImage(camp.imageUrl) || PLACEHOLDER_BANNER}
                       alt={`${camp.page} - ${camp.section}`}
                       onError={(e) => {
                         e.target.src = PLACEHOLDER_BANNER;

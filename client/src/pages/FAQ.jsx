@@ -52,7 +52,7 @@ export default function FAQKrishnaVasanam() {
 			<main className='grow w-full px-4 md:px-8 lg:px-16 xl:px-24 py-20 flex flex-col gap-20'>
 				{/* Page Header */}
 				<section className='text-center flex flex-col items-center gap-6'>
-					<h1 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary'>
+					<h1 className='font-serif text-4xl md:text-5xl lg:text-6xl text-primary'>
 						Frequently Asked Questions
 					</h1>
 					<p className='font-sans text-base text-on-surface-variant max-w-2xl mx-auto'>
@@ -110,7 +110,7 @@ export default function FAQKrishnaVasanam() {
 					<div className='absolute -right-20 -top-20 w-80 h-80 bg-tertiary/20 rounded-full blur-[80px]' />
 					<div className='absolute -left-20 -bottom-20 w-80 h-80 bg-tertiary/10 rounded-full blur-[80px]' />
 
-					<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl text-surface relative z-10 mb-4'>
+					<h2 className='font-serif text-3xl md:text-4xl lg:text-5xl text-surface relative z-10 mb-4'>
 						Still have questions?
 					</h2>
 					<p className='font-sans text-sm text-surface/80 max-w-lg mx-auto relative z-10 mb-10'>

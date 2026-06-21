@@ -38,7 +38,7 @@ export default function Ourstory() {
               <div className="flex items-center justify-start w-full max-w-stack-xl mb-8">
                 <div className="flex-1 h-[0.5px] bg-tertiary/50"></div>
               </div>
-              <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-8 leading-tight">
+              <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary mb-8 leading-tight">
                 Crafted with Devotion <br />
                 for Kanha Ji
               </h2>

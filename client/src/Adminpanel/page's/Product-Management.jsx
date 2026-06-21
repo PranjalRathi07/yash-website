@@ -1,3 +1,4 @@
+import { optimizeImage } from "../../utils/optimizeCloudinary";
 import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
@@ -379,7 +380,7 @@ export default function ProductManagement() {
 														<div className='w-16 h-20 rounded-lg overflow-hidden border border-outline-variant/30 shadow-sm bg-surface-container flex items-center justify-center'>
 															<img 
 																className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-105' 
-																src={product.images?.[0]?.url || PLACEHOLDER_IMAGE} 
+																src={optimizeImage(product.images?.[0]?.url) || PLACEHOLDER_IMAGE} 
 																alt={product.title} 
 																onError={(e) => { e.target.src = PLACEHOLDER_IMAGE; }}
 															/>

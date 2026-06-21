@@ -1,3 +1,4 @@
+import { optimizeImage } from "../../utils/optimizeCloudinary";
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Topbar from "../components/Topbar";
@@ -284,7 +285,7 @@ export default function OrderManagement() {
 									{(selectedOrder.items || []).map((item) => (
 										<div key={item.id} className='flex items-center gap-4 py-3 first:pt-0 last:pb-0'>
 											<div className='w-12 h-14 rounded overflow-hidden border border-outline-variant/25 bg-surface-container shrink-0'>
-												<img className='w-full h-full object-cover' src={item.productImage || PLACEHOLDER_IMAGE} alt={item.productTitle} />
+												<img className='w-full h-full object-cover' src={optimizeImage(item.productImage) || PLACEHOLDER_IMAGE} alt={item.productTitle} />
 											</div>
 											<div className='flex-1 min-w-0'>
 												<h5 className='font-bold text-primary text-sm truncate'>{item.productTitle}</h5>

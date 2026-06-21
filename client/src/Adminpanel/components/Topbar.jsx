@@ -1,3 +1,4 @@
+import { optimizeImage } from "../../utils/optimizeCloudinary";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -151,7 +152,7 @@ export default function Topbar({ searchQuery, setSearchQuery, placeholder = "Sea
 							<img
 								alt='Admin Avatar'
 								className='w-10 h-10 rounded-full border-2 border-tertiary-fixed object-cover group-hover:scale-105 transition-transform shrink-0'
-								src={currentUser.profilePic}
+								src={optimizeImage(currentUser.profilePic)}
 							/>
 						) : (
 							<div className='w-10 h-10 rounded-full border-2 border-tertiary-fixed flex items-center justify-center bg-tertiary/10 text-tertiary group-hover:scale-105 transition-transform shrink-0'>

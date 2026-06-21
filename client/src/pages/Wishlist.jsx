@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 /** @format */
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -80,7 +81,7 @@ export default function Wishlist() {
 	return (
 		<div className='w-full'>
 			<div className='text-center mb-16'>
-				<h2 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary mb-6'>
+				<h2 className='font-serif text-4xl md:text-5xl lg:text-6xl text-primary mb-6'>
 					Your Divine Selection
 				</h2>
 				<p className='font-sans text-base text-on-surface-variant max-w-2xl mx-auto'>
@@ -119,7 +120,7 @@ export default function Wishlist() {
 									<img
 										alt={p.title}
 										className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-										src={displayImg}
+										src={optimizeImage(displayImg)}
 									/>
 									<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
 									<LikeButton productId={p.id} />

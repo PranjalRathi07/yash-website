@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 /** @format */
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -44,32 +45,17 @@ export default function Productdetails() {
     },
   });
 
-  const related = [
-    {
-      title: "Ivory Ananta Drape",
-      price: "₹18,000",
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuCF09BkwjpMpKq6NGDBHpL4davox-v1Xe185vTGIm_MxsYAuxjMmRVOjvN8iC_9E4qK4HAU44ycofMBIFDwOloSZWNeQx72u-6YbsdjOxv16mY--YwJzlPFLAhfvcXtAPx_6P9OBOLM0ohrX7-M_kgoIfhvarrHBaVxy79beTUQBwC7dXHJCyIGzFXob3VDNaLySuBkrhJptd04tFqX-xqpGhiSEFjAiFY6HenDv5b_StxOumDyyZmDt78AjAQtfvm6bgpmT_WF0s0-",
-      alt: "Related Product 1",
+  const { data: relatedData } = useQuery({
+    queryKey: ["relatedProducts", product?.category?.name],
+    queryFn: async () => {
+      if (!product?.category?.name) return [];
+      const res = await api.get(`/api/products?limit=5&categories=${encodeURIComponent(product.category.name)}`);
+      return res.data?.products?.filter(p => p.id !== product.id).slice(0, 4) || [];
     },
-    {
-      title: "Royal Velvet Odhni",
-      price: "₹12,500",
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBhzDDCpwBTC2O9xr792QaeTmGX_yb_1m9pm61ff_KjV2reAgirahnab6eGWHQdAZOBra0GKSwr--p7lbPCrGZ37UAfIu3s52Tp5qF977LQAUIkY1gsQS0J0kUV3xyQVlSjSPXl4WlLYWo77Pak2DoRgJzywo_8h-eGCbL_ik9KkJ3Ypm0tIVogEx2hADAGk_WujFLZghiBVvLaUNWsXQLKLPhlkeclhJj0km2MJRy3pzpOpLqz9gLwp8BNmuaqV63VALkwXZEwVQwM",
-      alt: "Related Product 2",
-    },
-    {
-      title: "Saffron Tejas Sari",
-      price: "₹28,000",
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuADZgajLemPu9lkEluFJQmAMast93GerywYm_lKVSsCNEguQR3Nq0V9XZZBckDc_eEu70DmI4IuDeFx4RZy3GSa2-djWM4wrz9jGFbHJ9Oebw_HLOlCu_BnThN2i0NQT4xtA4Y725c-W73Wb_P8sOzMFbY_wTdZdVLbGITlJVXgJKjHFFMIE29eVQ_PAZNQOlo3S_Pd14TTgZp1Ba1c2uX0bCy4TSj7OSW7-vYFA6dZ_3C1kOmQ4wqDW6SwUA2NLoAVKpxBEOwqjARO",
-      alt: "Related Product 3",
-    },
-    {
-      title: "Emerald Vana Silk",
-      price: "₹22,000",
-      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuB1v71z8TG1_XvZm-KVUDMtWA05_dLPIKA02xe5RyAIcvX1o2_XQmt5oN2N5ssmvGOzmZ0_gs2BT4RjAPhAKW2viJ8neXEjok75oCm0DFT-wFz3rnrP6bFG7QEPYaG3BUM-ZrF0WffCTXnLNd_ApNbck3Q291Q49r2QdjhXRV38gdmvtdmSR07SRjSJU35HLB-pvTvfvV-AbPVh-4kS6RoJEJ3CBE6fEK6CYPuFMV2Iop8mDdpNi5PAhurZpE3S6V7f0LjQdbPi1eVs",
-      alt: "Related Product 4",
-    },
-  ];
+    enabled: !!product?.category?.name,
+  });
+
+  const relatedProducts = relatedData || [];
 
   if (isLoading) {
     return (
@@ -159,7 +145,7 @@ export default function Productdetails() {
                 <img
                   alt={product.title}
                   className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                  src={images[0]}
+                  src={optimizeImage(images[0])}
                 />
               </div>
 
@@ -168,7 +154,7 @@ export default function Productdetails() {
                   <img
                     alt={`${product.title} Detail 1`}
                     className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                    src={images[1]}
+                    src={optimizeImage(images[1])}
                   />
                 </div>
               )}
@@ -178,7 +164,7 @@ export default function Productdetails() {
                   <img
                     alt={`${product.title} Detail 2`}
                     className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-                    src={images[2]}
+                    src={optimizeImage(images[2])}
                   />
                 </div>
               )}
@@ -368,16 +354,23 @@ export default function Productdetails() {
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            {related.map((p) => (
+            {relatedProducts.map((p) => (
               <div
-                key={p.title}
+                key={p.id}
+                onClick={() => {
+                  window.scrollTo(0, 0);
+                  navigate(`/product/${p.slug}`);
+                }}
                 className="flex flex-col gap-4 group cursor-pointer"
               >
                 <div className="aspect-3/4 bg-surface-container-low rounded-md overflow-hidden relative">
                   <img
-                    alt={p.alt}
+                    alt={p.title}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    src={p.img}
+                    src={optimizeImage(
+                      p.images?.[0]?.url ||
+                        "https://placehold.co/400x500?text=No+Image",
+                    )}
                   />
                   <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none" />
                 </div>
@@ -387,7 +380,7 @@ export default function Productdetails() {
                     {p.title}
                   </h4>
                   <span className="font-sans text-sm text-primary font-medium">
-                    {p.price}
+                    ₹{Number(p.price).toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>

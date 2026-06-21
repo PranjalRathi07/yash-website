@@ -1,3 +1,4 @@
+import { optimizeImage } from "../utils/optimizeCloudinary";
 /** @format */
 
 import { useState } from "react";
@@ -119,7 +120,7 @@ export default function FestivalWear() {
 			<main className='grow w-full px-4 md:px-8 lg:px-16 xl:px-24 py-stack-xl'>
 				{/* Page Header */}
 				<div className='mb-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6 border-b-[0.5px] border-tertiary/20 pb-6'>
-					<h1 className='font-serif text-2xl md:text-3xl lg:text-4xl md:text-5xl lg:text-6xl text-primary leading-none whitespace-nowrap shrink-0'>
+					<h1 className='font-serif text-4xl md:text-5xl lg:text-6xl text-primary leading-none whitespace-nowrap shrink-0'>
 						Festival Wear
 					</h1>
 					<p className='font-sans text-lg text-on-surface-variant max-w-2xl text-left xl:text-right leading-relaxed'>
@@ -199,7 +200,7 @@ export default function FestivalWear() {
 												<img
 													alt={p.title}
 													className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-700'
-													src={p.images?.[0]?.url || "https://placehold.co/400x500?text=No+Image"}
+													src={optimizeImage(p.images?.[0]?.url) || "https://placehold.co/400x500?text=No+Image"}
 												/>
 												{/* Hover overlay */}
 												<div className='absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors duration-500 pointer-events-none'></div>
