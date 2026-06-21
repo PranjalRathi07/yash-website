@@ -22,7 +22,7 @@ import Account from "../pages/Account";
 import ShippingReturns from "../pages/Shipping-return";
 import PrivacyPolicy from "../pages/Privacy-Policy";
 import CareGuide from "../pages/Care-guide";
-import OurStory from "../pages/Ourstory";
+import OurStory from "../pages/OurStory";
 import Login from "../pages/Login";
 import AuthCallback from "../pages/AuthCallback";
 import Dashboard from "../Adminpanel/page's/Dashboard";
