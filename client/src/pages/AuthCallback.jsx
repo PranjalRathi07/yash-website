@@ -21,7 +21,8 @@ export default function AuthCallback() {
 
 			localStorage.setItem("supabaseToken", token);
 
-			const res = await fetch("http://localhost:5000/api/auth/me", {
+			const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+			const res = await fetch(`${API_URL}/api/auth/me`, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
