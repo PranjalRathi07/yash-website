@@ -108,7 +108,7 @@ const Footer = () => {
 
       <div className="w-full px-4 md:px-8 lg:px-16 xl:px-24 pt-8 border-t border-tertiary/10 mt-12 flex justify-center text-center">
         <p className="font-sans text-base tracking-wider text-surface/80">
-          © 2024 Krishna Vasanam. Handcrafted Divine Attire.
+          ©️ 2026 Krishna Vasanam. All Rights Reserved.
         </p>
       </div>
     </footer>

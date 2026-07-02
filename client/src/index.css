@@ -152,3 +152,10 @@
 	animation: shimmer 1.6s infinite;
 	content: '';
 }
+
+@media (min-width: 1024px) {
+	html {
+		font-size: 17px;
+	}
+}
+

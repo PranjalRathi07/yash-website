@@ -2,24 +2,14 @@
 
 export default function ContactKrishnaVasanam() {
   const contactCards = [
-    { icon: "forum", title: "WhatsApp Concierge", value: "+91 7457067630" },
+    { icon: "phone_in_talk", title: "Phone", value: "+91 7457067630" },
     {
       icon: "mail",
-      title: "Email Support",
-      value: "Krishnavasanam@gmail.com",
+      title: "Email",
+      value: "krishnavasanam@gmail.com",
     },
-    { icon: "phone_in_talk", title: "Phone Line", value: "+91 7457067630" },
-    {
-      icon: "schedule",
-      title: "Boutique Hours",
-      value: (
-        <>
-          Mon - Sat: 10:00 AM - 7:00 PM (IST)
-          <br />
-          Sunday: Closed for Devotion
-        </>
-      ),
-    },
+    { icon: "photo_camera", title: "Instagram", value: "@Krishna.Vasanam" },
+    { icon: "forum", title: "Whatsapp", value: "+91 7457067630" },
   ];
 
   const handleSubmit = (e) => {

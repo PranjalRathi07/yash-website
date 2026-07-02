@@ -39,13 +39,13 @@ export default function OurStoryPage() {
       className="bg-surface text-on-surface font-sans antialiased selection:bg-tertiary/20 selection:text-primary"
     >
       <main className="w-full">
-        {/* Section: Generations of Artistry */}
+        {/* Section: The Story Behind Krishna Vasanam */}
         <section className="py-24 px-4 md:px-8 lg:px-16 xl:px-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="order-2 lg:order-1 relative">
               <div className="relative p-4 border-[0.5px] border-tertiary/20 rounded-xl bg-[#FDFBF7] z-10">
                 <img
-                  alt="Artisanal Weaving"
+                  alt="Krishna Vasanam"
                   className="rounded-lg w-full aspect-4/5 object-cover"
                   src={artisanalImage}
                 />
@@ -54,7 +54,7 @@ export default function OurStoryPage() {
             </div>
             <div className="order-1 lg:order-2 max-w-lg">
               <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-6">
-                Generations of Artistry
+                The Story Behind Krishna Vasanam
               </h2>
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-12 h-px bg-tertiary/40" />
@@ -62,66 +62,40 @@ export default function OurStoryPage() {
                 <div className="w-12 h-px bg-tertiary/40" />
               </div>
               <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-6">
-                Our lineage traces back to the master weavers of Varanasi and
-                Kanchipuram, who have dedicated their lives to the service of
-                the divine. We have preserved the ancient secrets of &quot;Asli
-                Zari&quot; weaving, ensuring that every Vastra for Laddu Gopal
-                carries the weight of history and the lightness of devotion.
+                Every great journey begins with faith, devotion, and a purpose greater than oneself. Krishna Vasanam was born from a heartfelt desire to bring devotees closer to Lord Krishna through beautifully crafted devotional clothing and customized spiritual designs.
               </p>
-              <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-10 italic">
-                &quot;We do not just manufacture clothing; we weave the physical
-                manifestation of a devotee&apos;s love for their Lord.&quot;
+              <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-6">
+                The name &quot;Krishna Vasanam&quot; carries a deep spiritual meaning. In Sanskrit, Vasanam means &quot;attire&quot; or &quot;clothing,&quot; while Krishna represents the embodiment of divine love, compassion, and eternal joy. Together, Krishna Vasanam signifies &quot;The Divine Attire of Lord Krishna&quot; — clothing and creations inspired by devotion and designed to honor the beloved Lord.
               </p>
-              <ul className="space-y-6">
-                <li className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-tertiary text-[20px]">
-                    verified
-                  </span>
-                  <span className="font-sans text-sm text-on-surface-variant">
-                    Traditional Pit Looms Only
-                  </span>
-                </li>
-                <li className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-tertiary text-[20px]">
-                    verified
-                  </span>
-                  <span className="font-sans text-sm text-on-surface-variant">
-                    Generational Master Craftsmen
-                  </span>
-                </li>
-                <li className="flex items-center gap-4">
-                  <span className="material-symbols-outlined text-tertiary text-[20px]">
-                    verified
-                  </span>
-                  <span className="font-sans text-sm text-on-surface-variant">
-                    Hand-Drawn Gold Embroidery
-                  </span>
-                </li>
-              </ul>
+              <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-6">
+                The foundation of the brand was laid in 2026, a year made even more special because the brand was launched on the sacred occasion of Janmashtami, which also coincided with the birthday of the brand&apos;s founder. This unique alignment was seen as a divine blessing and a sign to dedicate the venture to Lord Krishna&apos;s service.
+              </p>
+              <p className="font-sans text-base text-on-surface-variant leading-relaxed italic">
+                What started as a vision to create unique devotional designs soon evolved into a mission to provide devotees with meaningful, high-quality, and personalized creations. We recognized that every devotee expresses devotion differently, and therefore every design should reflect a personal spiritual connection. This inspired us to offer both exclusive ready-made collections and customized designs tailored to individual requirements.
+              </p>
             </div>
           </div>
         </section>
 
-        {/* Section: The Essence of Tejas (Bento Grid) */}
+        {/* Section: Mission & Vision (Bento Grid) */}
         <section className="py-24 px-4 md:px-8 lg:px-16 xl:px-24 bg-[#050B14] text-surface overflow-hidden">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="font-sans text-xs uppercase tracking-widest text-tertiary font-semibold mb-6 block">
-              The Philosophy
+              The Foundation
             </span>
             <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-tertiary mb-6">
-              The Essence of Tejas
+              Our Mission & Vision
             </h2>
             <p className="font-sans text-base text-surface/80 leading-relaxed max-w-2xl mx-auto">
-              Tejas is the radiant glow of the divine. Our mission is to capture
-              this luminescence in every thread, creating attire that
-              doesn&apos;t just clothe the deity, but illuminates the shrine.
+              Krishna Vasanam is not just a brand; it is a celebration of devotion, creativity, and the eternal love of Lord Krishna. 🙏✨
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Our Mission */}
             <div className="md:col-span-2 bg-[#0B152A] p-10 rounded-xl border-[0.5px] border-tertiary/20 relative overflow-hidden flex flex-col justify-end min-h-100">
               <div className="absolute inset-0 opacity-40">
                 <img
-                  alt="Radiant Silk"
+                  alt="Our Mission"
                   className="w-full h-full object-cover"
                   src={radiantImage}
                 />
@@ -129,40 +103,39 @@ export default function OurStoryPage() {
               </div>
               <div className="relative z-10">
                 <h3 className="font-serif text-2xl text-tertiary mb-3">
-                  Divine Radiance
+                  Our Mission
                 </h3>
                 <p className="font-sans text-sm text-surface/80 max-w-md leading-relaxed">
-                  Our fabrics are treated with traditional herbal infusions to
-                  enhance their natural luster, ensuring they catch the flicker
-                  of every Diya.
+                  To create devotional apparel and spiritual designs that help devotees express their faith, celebrate their devotion, and carry the divine presence of Lord Krishna in their daily lives.
                 </p>
               </div>
             </div>
 
+            {/* Motto */}
             <div className="bg-[#FDF4D9] p-10 rounded-xl flex flex-col justify-center items-center text-center text-primary">
               <span
                 className="material-symbols-outlined text-2xl md:text-3xl lg:text-4xl mb-6"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
-                flare
+                auto_awesome
               </span>
-              <h3 className="font-serif text-2xl mb-3">The Glow</h3>
+              <h3 className="font-serif text-2xl mb-3">Our Motto</h3>
               <p className="font-sans text-sm font-medium leading-relaxed max-w-50">
-                Capture the light of a thousand suns in a single weave.
+                &quot;Woven with Devotion, Inspired by Krishna.&quot;<br /><br />&quot;Where Faith Meets Design.&quot;
               </p>
             </div>
 
+            {/* Our Vision */}
             <div className="bg-[#111A2E] p-10 rounded-xl border-[0.5px] border-tertiary/20">
               <h3 className="font-serif text-2xl text-tertiary mb-4">
-                Sacred Patterns
+                Our Vision
               </h3>
               <p className="font-sans text-sm text-surface/80 leading-relaxed">
-                Every motif—from the Lotus to the Peacock feather—is carefully
-                researched for its spiritual significance and traditional
-                accuracy.
+                To become a trusted devotional lifestyle brand that connects spirituality, creativity, and tradition, inspiring devotees around the world through meaningful and personalized designs.
               </p>
             </div>
 
+            {/* Our Promise */}
             <div className="md:col-span-2 bg-[#0C172C] p-10 rounded-xl border-[0.5px] border-tertiary/20 flex flex-col sm:flex-row items-center sm:justify-start justify-center text-center sm:text-left gap-8">
               <div className="shrink-0 w-32 h-32 rounded-full border-[0.5px] border-tertiary p-1 flex items-center justify-center">
                 <img
@@ -173,23 +146,22 @@ export default function OurStoryPage() {
               </div>
               <div>
                 <h3 className="font-serif text-2xl text-tertiary mb-3">
-                  Impeccable Precision
+                  Our Promise
                 </h3>
                 <p className="font-sans text-sm text-surface/80 leading-relaxed max-w-lg">
-                  A single Vastra can take up to 120 hours of manual labor to
-                  complete, reflecting our dedication to perfection.
+                  At Krishna Vasanam, we believe that devotion is personal, and every creation should reflect that sacred bond. Whether it is a special festival, a temple event, a spiritual gathering, or a personalized gift, our aim is to create designs that carry the essence of Krishna&apos;s grace and blessings.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Section: Pure Ingredients */}
+        {/* Section: What Makes Us Different */}
         <section className="py-24 px-4 md:px-8 lg:px-16 xl:px-24 bg-surface">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
             <div className="w-full lg:w-1/2">
               <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-primary mb-6">
-                Purity in Every Thread
+                What Makes Us Different
               </h2>
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-12 h-px bg-tertiary/40" />
@@ -197,51 +169,58 @@ export default function OurStoryPage() {
                 <div className="w-12 h-px bg-tertiary/40" />
               </div>
               <p className="font-sans text-base text-on-surface-variant mb-12 leading-relaxed">
-                We believe that what touches the Deity must be as pure as the
-                devotion itself. We source only the finest materials, ensuring
-                that every step of our process respects the environment and the
-                living beings within it.
+                Every design is crafted to celebrate devotion and divine love. We take pride in our unique approach to spiritual clothing and designs.
               </p>
               <div className="space-y-8">
                 <div className="flex gap-6 items-start">
                   <span className="material-symbols-outlined text-tertiary text-2xl">
-                    nature
+                    design_services
                   </span>
                   <div>
                     <h4 className="font-sans text-sm text-primary font-semibold mb-2">
-                      Cruelty-Free Ahimsa Silk
+                      Unique Krishna-Inspired Designs
                     </h4>
                     <p className="font-sans text-sm text-on-surface-variant leading-relaxed">
-                      Silk harvested only after the moth has naturally left the
-                      cocoon, honoring the sanctity of life.
+                      Created with pure devotion to reflect the beauty and grace of the Lord.
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-6 items-start">
                   <span className="material-symbols-outlined text-tertiary text-2xl">
-                    eco
+                    handyman
                   </span>
                   <div>
                     <h4 className="font-sans text-sm text-primary font-semibold mb-2">
-                      Organic Vegetable Dyes
+                      Customized Creations
                     </h4>
                     <p className="font-sans text-sm text-on-surface-variant leading-relaxed">
-                      Extracted from turmeric, indigo, and madder root to create
-                      vibrant yet gentle hues.
+                      Tailored for special occasions and personal requirements, reflecting your unique spiritual connection.
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-6 items-start">
                   <span className="material-symbols-outlined text-tertiary text-2xl">
-                    star
+                    auto_awesome
                   </span>
                   <div>
                     <h4 className="font-sans text-sm text-primary font-semibold mb-2">
-                      Authentic Silver & Gold Zari
+                      Tradition Meets Creativity
                     </h4>
                     <p className="font-sans text-sm text-on-surface-variant leading-relaxed">
-                      No imitation metals. Only pure silver wire electroplated
-                      with 24-carat gold for eternal shine.
+                      A seamless blend of traditional spirituality and modern creativity.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-6 items-start">
+                  <span className="material-symbols-outlined text-tertiary text-2xl">
+                    verified
+                  </span>
+                  <div>
+                    <h4 className="font-sans text-sm text-primary font-semibold mb-2">
+                      Commitment to Quality
+                    </h4>
+                    <p className="font-sans text-sm text-on-surface-variant leading-relaxed">
+                      We ensure authenticity and customer satisfaction in every piece we create.
                     </p>
                   </div>
                 </div>
@@ -249,12 +228,12 @@ export default function OurStoryPage() {
             </div>
             <div className="w-full lg:w-1/2 flex items-center justify-center gap-6">
               <img
-                alt="Silk Cocoon"
+                alt="Devotion in Design"
                 className="rounded-2xl aspect-square object-cover w-[45%] shadow-lg"
                 src={cocoonImage}
               />
               <img
-                alt="Organic Dye"
+                alt="Spiritual Creativity"
                 className="rounded-2xl aspect-square object-cover w-[45%] shadow-lg mt-16"
                 src={dyeImage}
               />
