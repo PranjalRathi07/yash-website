@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import LikeButton from "../components/LikeButton";
 import ProductSidebar from "../components/ProductSidebar";
+import SortDropdown from "../components/SortDropdown";
 import api from "../services/api";
 
 const ProductSkeleton = () => (
@@ -178,17 +179,11 @@ export default function FestivalWear() {
                 >
                   Sort by:
                 </label>
-                <select
-                  id="sort"
+                <SortDropdown
                   value={sortOption}
                   onChange={handleSortChange}
-                  className="bg-transparent border-none font-sans text-sm text-primary focus:outline-none focus:ring-0 cursor-pointer font-semibold"
-                >
-                  <option>Recommended</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                  <option>Newest Arrivals</option>
-                </select>
+                  options={["Recommended", "Price: Low to High", "Price: High to Low", "Newest Arrivals"]}
+                />
               </div>
             </div>
 

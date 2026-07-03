@@ -1,12 +1,10 @@
 const ProductSidebar = ({
-  categories,
   selectedCategories,
   onCategoryChange,
   minPrice,
   maxPrice,
   onMinPriceChange,
   onMaxPriceChange,
-  sizes,
   selectedSizes,
   onSizeChange,
 }) => {
@@ -18,7 +16,7 @@ const ProductSidebar = ({
         </h3>
 
         <ul className="space-y-4">
-          {categories.map((c) => (
+          {["Daily Wear", "Premium Sets"].map((c) => (
             <li key={c}>
               <label className="flex items-center gap-4 cursor-pointer group">
                 <div className="relative flex items-center justify-center">
@@ -72,7 +70,7 @@ const ProductSidebar = ({
           Size (Inches)
         </h3>
         <div className="flex flex-wrap gap-3">
-          {sizes.map((size) => {
+          {["4", "6", "8", "10", "12"].map((size) => {
             const isSelected = selectedSizes.includes(size);
             return (
               <button
