@@ -18,8 +18,6 @@ export default function ProductManagement() {
 	const [showAddModal, setShowAddModal] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingProductId, setEditingProductId] = useState(null);
-	const [showCategoryInput, setShowCategoryInput] = useState(false);
-	const [newCategoryName, setNewCategoryName] = useState("");
 
 	const [newProduct, setNewProduct] = useState({
 		title: "",
@@ -44,13 +42,17 @@ export default function ProductManagement() {
 		try {
 			const response = await api.get("/api/categories");
 			if (response.data.success) {
-				setCategories(response.data.categories);
-				if (response.data.categories.length > 0) {
+				const allowed = ["daily wear", "premium sets"];
+				const filteredCategories = response.data.categories.filter((cat) => 
+					allowed.includes(cat.name.toLowerCase())
+				);
+				setCategories(filteredCategories);
+				if (filteredCategories.length > 0) {
 					setNewProduct((prev) => {
 						if (!prev.categoryId) {
 							return {
 								...prev,
-								categoryId: response.data.categories[0].id,
+								categoryId: filteredCategories[0].id,
 							};
 						}
 						return prev;
@@ -253,27 +255,6 @@ export default function ProductManagement() {
 				console.error("Delete error:", err);
 				toast.error("Error deleting product: " + (err.response?.data?.message || err.message));
 			}
-		}
-	};
-
-	const handleAddCategoryInline = async (e) => {
-		e.preventDefault();
-		if (!newCategoryName.trim()) return;
-
-		try {
-			const response = await api.post("/api/categories", { name: newCategoryName });
-			if (response.data.success) {
-				const newCat = response.data.category;
-				setCategories((prev) => [newCat, ...prev]);
-				setNewProduct((prev) => ({ ...prev, categoryId: newCat.id }));
-				setNewCategoryName("");
-				setShowCategoryInput(false);
-			} else {
-				toast.error("Failed to add category: " + response.data.message);
-			}
-		} catch (err) {
-			console.error("Add category error:", err);
-			toast.error("Error creating category: " + (err.response?.data?.message || err.message));
 		}
 	};
 
@@ -634,35 +615,7 @@ export default function ProductManagement() {
 										<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80'>
 											Category <span className='text-red-500'>*</span>
 										</label>
-										<button 
-											type='button' 
-											onClick={() => setShowCategoryInput(!showCategoryInput)}
-											className='text-[10px] uppercase font-bold text-tertiary flex items-center gap-1 hover:underline focus:outline-none cursor-pointer'
-										>
-											<span className='material-symbols-outlined text-xs' style={{ fontSize: "12px" }}>add</span>
-											New Category
-										</button>
 									</div>
-
-									{/* Inline Category Creation Input */}
-									{showCategoryInput && (
-										<div className='flex items-center gap-2 mb-3 bg-surface-container-low p-2 rounded-lg border border-outline-variant/15 animate-fadeIn'>
-											<input
-												value={newCategoryName}
-												onChange={(e) => setNewCategoryName(e.target.value)}
-												className='flex-1 bg-surface border border-outline-variant/20 rounded p-1.5 text-xs text-on-surface'
-												placeholder='e.g. Bansuri'
-												type='text'
-											/>
-											<button
-												type='button'
-												onClick={handleAddCategoryInline}
-												className='bg-primary text-white text-xs font-bold px-3 py-1.5 rounded hover:bg-primary-container transition-colors cursor-pointer'
-											>
-												Add
-											</button>
-										</div>
-									)}
 
 									<select
 										value={newProduct.categoryId}
