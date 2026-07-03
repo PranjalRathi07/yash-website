@@ -32,6 +32,7 @@ export default function ProductManagement() {
 		isBestSeller: false,
 		isNewArrival: false,
 		isFestivalWear: false,
+		sizes: [],
 	});
 
 	// Image upload state
@@ -145,6 +146,7 @@ export default function ProductManagement() {
 			isBestSeller: false,
 			isNewArrival: false,
 			isFestivalWear: false,
+			sizes: [],
 		});
 		setImageFiles([]);
 		setImagePreviews([]);
@@ -166,6 +168,7 @@ export default function ProductManagement() {
 			isBestSeller: product.isBestSeller || false,
 			isNewArrival: product.isNewArrival || false,
 			isFestivalWear: product.isFestivalWear || false,
+			sizes: product.variants ? product.variants.map((v) => v.size).filter(Boolean) : [],
 		});
 		if (product.images && product.images.length > 0) {
 			setExistingImages(product.images);
@@ -198,6 +201,9 @@ export default function ProductManagement() {
 			formData.append("isBestSeller", newProduct.isBestSeller);
 			formData.append("isNewArrival", newProduct.isNewArrival);
 			formData.append("isFestivalWear", newProduct.isFestivalWear);
+			if (newProduct.sizes && newProduct.sizes.length > 0) {
+				formData.append("sizes", JSON.stringify(newProduct.sizes));
+			}
 
 			if (imageFiles.length > 0) {
 				imageFiles.forEach((file) => {
@@ -672,6 +678,33 @@ export default function ProductManagement() {
 											))
 										)}
 									</select>
+								</div>
+
+								{/* Sizes Selection */}
+								<div>
+									<label className='block text-xs uppercase tracking-wider font-bold text-on-surface-variant/80 mb-2'>
+										Available Sizes
+									</label>
+									<div className='flex flex-wrap gap-4'>
+										{["4", "6", "8", "10", "12"].map((size) => (
+											<label key={size} className='flex items-center gap-2 cursor-pointer group relative'>
+												<input
+													type='checkbox'
+													checked={newProduct.sizes.includes(size)}
+													onChange={(e) => {
+														if (e.target.checked) {
+															setNewProduct({ ...newProduct, sizes: [...newProduct.sizes, size] });
+														} else {
+															setNewProduct({ ...newProduct, sizes: newProduct.sizes.filter((s) => s !== size) });
+														}
+													}}
+													className='peer appearance-none w-5 h-5 border-[1.5px] border-outline-variant/40 rounded-sm checked:bg-primary checked:border-primary transition-all cursor-pointer'
+												/>
+												<span className='material-symbols-outlined absolute text-[14px] text-surface opacity-0 peer-checked:opacity-100 pointer-events-none' style={{ marginLeft: "3px" }}>check</span>
+												<span className='text-sm font-bold text-on-surface-variant group-hover:text-primary transition-colors'>{size}</span>
+											</label>
+										))}
+									</div>
 								</div>
 
 								{/* Prices & Stock Grid */}

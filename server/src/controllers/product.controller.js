@@ -21,6 +21,7 @@ export const createProduct = async (req, res) => {
 			isBestSeller,
 			isNewArrival,
 			isFestivalWear,
+			sizes,
 		} = req.body;
 
 		if (!title || !description || !price || !categoryId) {
@@ -58,6 +59,24 @@ export const createProduct = async (req, res) => {
 				isFestivalWear: isFestivalWear === "true" || isFestivalWear === true,
 			},
 		});
+
+		if (sizes) {
+			try {
+				const parsedSizes = JSON.parse(sizes);
+				if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
+					await prisma.productVariant.createMany({
+						data: parsedSizes.map((size) => ({
+							productId: product.id,
+							size: size,
+							stock: stock ? Number(stock) : 0,
+							price: Number(price),
+						})),
+					});
+				}
+			} catch (e) {
+				console.error("Error parsing sizes:", e);
+			}
+		}
 
 		if (req.files && req.files.length > 0) {
 			const imageData = [];
@@ -261,6 +280,7 @@ export const updateProduct = async (req, res) => {
 			isFestivalWear,
 			isActive,
 			retainedImages,
+			sizes,
 		} = req.body;
 
 		const existingProduct = await prisma.product.findUnique({
@@ -334,6 +354,39 @@ export const updateProduct = async (req, res) => {
 						: existingProduct.isActive,
 			},
 		});
+
+		if (sizes !== undefined) {
+			try {
+				const parsedSizes = JSON.parse(sizes);
+				if (Array.isArray(parsedSizes)) {
+					const existingVariants = await prisma.productVariant.findMany({
+						where: { productId: id },
+					});
+
+					const sizesToAdd = parsedSizes.filter((s) => !existingVariants.some((v) => v.size === s));
+					const variantsToRemove = existingVariants.filter((v) => !parsedSizes.includes(v.size));
+
+					if (variantsToRemove.length > 0) {
+						await prisma.productVariant.deleteMany({
+							where: { id: { in: variantsToRemove.map((v) => v.id) } },
+						});
+					}
+
+					if (sizesToAdd.length > 0) {
+						await prisma.productVariant.createMany({
+							data: sizesToAdd.map((size) => ({
+								productId: id,
+								size: size,
+								stock: stock ? Number(stock) : existingProduct.stock,
+								price: price ? Number(price) : existingProduct.price,
+							})),
+						});
+					}
+				}
+			} catch (e) {
+				console.error("Error updating sizes:", e);
+			}
+		}
 
 		if (req.files && req.files.length > 0) {
 			const imageData = [];
