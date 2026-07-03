@@ -32,7 +32,14 @@ export default function KrishnaVasanam() {
   const [featuredLoaded, setFeaturedLoaded] = useState(false);
   const [janmashtamiLoaded, setJanmashtamiLoaded] = useState(false);
 
-
+  const { data: globalReviewsData, isLoading: globalReviewsLoading } = useQuery({
+    queryKey: ["global-reviews"],
+    queryFn: async () => {
+      const res = await api.get("/api/reviews/global");
+      return res.data;
+    },
+  });
+  const globalReviews = globalReviewsData?.reviews || [];
   const cartMutation = useMutation({
     mutationFn: async (productId) => {
       return await api.post("/api/cart", { productId, quantity: 1 });
@@ -481,33 +488,33 @@ export default function KrishnaVasanam() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[
-                {
-                  quote:
-                    "The quality of the silk is beyond anything I've bought before. My Laddu Gopal looks truly divine in the Golden Heritage set.",
-                  name: "Radhika M.",
-                },
-                {
-                  quote:
-                    "The fitting was perfect for my Size 2 Bal Gopal. The packaging was also very safe and beautiful. Highly recommended.",
-                  name: "Ananya S.",
-                },
-              ].map((t) => (
-                <div
-                  key={t.name}
-                  className="bg-surface-container-low p-10 rounded-md border-[0.5px] border-tertiary/10 relative"
-                >
-                  <span className="absolute top-6 left-6 font-serif text-4xl md:text-5xl lg:text-6xl text-tertiary/20 leading-none">
-                    "
-                  </span>
-                  <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-8 relative z-10 pt-4">
-                    {t.quote}
-                  </p>
-                  <p className="font-sans text-xs font-bold text-primary uppercase tracking-widest">
-                    — {t.name}
-                  </p>
+              {globalReviewsLoading ? (
+                <>
+                  <div className="h-48 shimmer-bg rounded-md border-[0.5px] border-tertiary/10" />
+                  <div className="h-48 shimmer-bg rounded-md border-[0.5px] border-tertiary/10" />
+                </>
+              ) : globalReviews.length > 0 ? (
+                globalReviews.map((r) => (
+                  <div
+                    key={r.id}
+                    className="bg-surface-container-low p-10 rounded-md border-[0.5px] border-tertiary/10 relative"
+                  >
+                    <span className="absolute top-6 left-6 font-serif text-4xl md:text-5xl lg:text-6xl text-tertiary/20 leading-none">
+                      "
+                    </span>
+                    <p className="font-sans text-base text-on-surface-variant leading-relaxed mb-8 relative z-10 pt-4">
+                      {r.comment}
+                    </p>
+                    <p className="font-sans text-xs uppercase tracking-[0.2em] font-semibold text-primary">
+                      — {r.user?.name || "Customer"}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center text-on-surface-variant font-sans text-sm py-10">
+                  No reviews yet. Check back soon for testimonials from our devotees!
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

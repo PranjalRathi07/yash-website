@@ -120,3 +120,79 @@ export const deleteReview = async (req, res) => {
 		});
 	}
 };
+
+export const getGlobalReviews = async (req, res) => {
+	try {
+		const reviews = await prisma.review.findMany({
+			where: { isApproved: true },
+			include: {
+				user: { select: { name: true } },
+				product: { select: { title: true } },
+			},
+			orderBy: { createdAt: "desc" },
+			take: 2,
+		});
+
+		return res.status(200).json({
+			success: true,
+			reviews,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Failed to fetch global reviews",
+			error: error.message,
+		});
+	}
+};
+
+export const getPendingReviews = async (req, res) => {
+	try {
+		const userId = req.user.id;
+
+		const pendingProducts = await prisma.product.findMany({
+			where: {
+				orderItems: {
+					some: {
+						order: {
+							userId: userId,
+							orderStatus: "DELIVERED",
+						},
+					},
+				},
+				reviews: {
+					none: {
+						userId: userId,
+					},
+				},
+			},
+			select: {
+				id: true,
+				title: true,
+				images: {
+					where: { isMain: true },
+					take: 1,
+					select: { url: true }
+				},
+			},
+		});
+
+		// Map to a friendlier format for frontend
+		const products = pendingProducts.map(p => ({
+			id: p.id,
+			title: p.title,
+			image: p.images.length > 0 ? p.images[0].url : null,
+		}));
+
+		return res.status(200).json({
+			success: true,
+			products,
+		});
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: "Failed to fetch pending reviews",
+			error: error.message,
+		});
+	}
+};

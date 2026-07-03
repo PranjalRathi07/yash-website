@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import AppRoutes from "./routes/Approutes";
 import { Toaster } from "react-hot-toast";
+import ReviewPopup from "./components/ReviewPopup";
 
 function App() {
 	const location = useLocation();
@@ -21,6 +22,7 @@ function App() {
 
 			{!hideLayout && <Footer />}
 
+			<ReviewPopup />
 			<Toaster
 				position="top-center"
 				toastOptions={{
