@@ -21,7 +21,7 @@ export const createReview = async (req, res) => {
 				userId: req.user.id,
 				rating: Number(rating),
 				comment: comment || null,
-				isApproved: false,
+				isApproved: true,
 			},
 		});
 
