@@ -1,9 +1,8 @@
 /** @format */
 
 import slugify from "slugify";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../config/prisma.js";
+import { getCache, setCache, deleteCache, setHttpCacheHeaders } from "../config/redis.js";
 
 const generateUniqueCategorySlug = async (name, categoryId = null) => {
 	const baseSlug = slugify(name, {
@@ -53,6 +52,8 @@ export const createCategory = async (req, res) => {
 			},
 		});
 
+		await deleteCache("categories*");
+
 		return res.status(201).json({
 			success: true,
 			message: "Category created successfully",
@@ -71,6 +72,14 @@ export const createCategory = async (req, res) => {
 
 export const getAllCategories = async (req, res) => {
 	try {
+		const cacheKey = "categories:all";
+		const cachedData = await getCache(cacheKey);
+
+		if (cachedData) {
+			setHttpCacheHeaders(res, 300);
+			return res.status(200).json(cachedData);
+		}
+
 		const categories = await prisma.category.findMany({
 			include: {
 				products: {
@@ -87,11 +96,16 @@ export const getAllCategories = async (req, res) => {
 			},
 		});
 
-		return res.status(200).json({
+		const responseData = {
 			success: true,
 			count: categories.length,
 			categories,
-		});
+		};
+
+		await setCache(cacheKey, responseData, 600);
+		setHttpCacheHeaders(res, 300);
+
+		return res.status(200).json(responseData);
 	} catch (error) {
 		console.error("Get categories error:", error);
 
@@ -106,6 +120,13 @@ export const getAllCategories = async (req, res) => {
 export const getSingleCategory = async (req, res) => {
 	try {
 		const { slug } = req.params;
+		const cacheKey = `categories:slug:${slug}`;
+		const cachedData = await getCache(cacheKey);
+
+		if (cachedData) {
+			setHttpCacheHeaders(res, 300);
+			return res.status(200).json(cachedData);
+		}
 
 		const category = await prisma.category.findUnique({
 			where: {
@@ -134,10 +155,16 @@ export const getSingleCategory = async (req, res) => {
 			});
 		}
 
-		return res.status(200).json({
+		const responseData = {
 			success: true,
 			category,
-		});
+		};
+
+		// Cache in Redis for 10 minutes (600s)
+		await setCache(cacheKey, responseData, 600);
+		setHttpCacheHeaders(res, 300);
+
+		return res.status(200).json(responseData);
 	} catch (error) {
 		console.error("Get single category error:", error);
 
@@ -182,6 +209,9 @@ export const updateCategory = async (req, res) => {
 				slug,
 			},
 		});
+
+		// Invalidate category cache on update
+		await deleteCache("categories*");
 
 		return res.status(200).json({
 			success: true,
@@ -233,6 +263,9 @@ export const deleteCategory = async (req, res) => {
 			},
 		});
 
+		// Invalidate category cache on delete
+		await deleteCache("categories*");
+
 		return res.status(200).json({
 			success: true,
 			message: "Category deleted successfully",
@@ -247,3 +280,4 @@ export const deleteCategory = async (req, res) => {
 		});
 	}
 };
+

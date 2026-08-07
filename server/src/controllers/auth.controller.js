@@ -2,10 +2,9 @@
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../config/prisma.js";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
 
-const prisma = new PrismaClient();
 
 const generateToken = (userId) => {
 	return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -188,8 +187,22 @@ export const getAllUsersAdmin = async (req, res) => {
 			where: {
 				role: "CUSTOMER",
 			},
-			include: {
-				orders: true,
+			select: {
+				id: true,
+				name: true,
+				email: true,
+				phone: true,
+				role: true,
+				isActive: true,
+				profilePic: true,
+				createdAt: true,
+				orders: {
+					select: {
+						id: true,
+						finalAmount: true,
+						paymentStatus: true,
+					},
+				},
 			},
 			orderBy: {
 				createdAt: "desc",
@@ -208,6 +221,7 @@ export const getAllUsersAdmin = async (req, res) => {
 				phone: user.phone,
 				role: user.role,
 				isActive: user.isActive,
+				profilePic: user.profilePic,
 				ordersCount: user.orders.length,
 				totalSpend: totalSpend,
 				createdAt: user.createdAt,
@@ -236,6 +250,10 @@ export const toggleUserStatusAdmin = async (req, res) => {
 
 		const user = await prisma.user.findUnique({
 			where: { id },
+			select: {
+				id: true,
+				isActive: true,
+			},
 		});
 
 		if (!user) {
@@ -250,17 +268,20 @@ export const toggleUserStatusAdmin = async (req, res) => {
 			data: {
 				isActive: isActive === undefined ? !user.isActive : isActive,
 			},
+			select: {
+				id: true,
+				name: true,
+				email: true,
+				phone: true,
+				role: true,
+				isActive: true,
+			},
 		});
 
 		return res.status(200).json({
 			success: true,
 			message: `Devotee account ${updatedUser.isActive ? "activated" : "deactivated"} successfully`,
-			user: {
-				id: updatedUser.id,
-				name: updatedUser.name,
-				email: updatedUser.email,
-				isActive: updatedUser.isActive,
-			},
+			user: updatedUser,
 		});
 	} catch (error) {
 		console.error("Toggle user status error:", error);

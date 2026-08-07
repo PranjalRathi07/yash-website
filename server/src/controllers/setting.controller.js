@@ -1,17 +1,30 @@
 /** @format */
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../config/prisma.js";
+import { getCache, setCache, deleteCache, setHttpCacheHeaders } from "../config/redis.js";
 
 export const getSettings = async (req, res) => {
 	try {
+		const cacheKey = "settings:all";
+		const cachedData = await getCache(cacheKey);
+
+		if (cachedData) {
+			setHttpCacheHeaders(res, 300);
+			return res.status(200).json(cachedData);
+		}
+
 		const settings = await prisma.websiteSetting.findMany();
 
-		return res.status(200).json({
+		const responseData = {
 			success: true,
 			settings,
-		});
+		};
+
+		// Cache for 15 minutes (900s)
+		await setCache(cacheKey, responseData, 900);
+		setHttpCacheHeaders(res, 300);
+
+		return res.status(200).json(responseData);
 	} catch (error) {
 		return res.status(500).json({
 			success: false,
@@ -47,6 +60,9 @@ export const upsertSetting = async (req, res) => {
 			},
 		});
 
+		// Invalidate settings cache
+		await deleteCache("settings*");
+
 		return res.status(200).json({
 			success: true,
 			message: "Setting saved successfully",
@@ -71,6 +87,9 @@ export const deleteSetting = async (req, res) => {
 			},
 		});
 
+		// Invalidate settings cache
+		await deleteCache("settings*");
+
 		return res.status(200).json({
 			success: true,
 			message: "Setting deleted successfully",
@@ -83,3 +102,4 @@ export const deleteSetting = async (req, res) => {
 		});
 	}
 };
+

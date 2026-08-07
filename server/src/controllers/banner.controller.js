@@ -1,10 +1,9 @@
 /** @format */
 /** @format */
 
-import { PrismaClient } from "@prisma/client";
+import prisma from "../config/prisma.js";
 import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
-
-const prisma = new PrismaClient();
+import { getCache, setCache, deleteCache, setHttpCacheHeaders } from "../config/redis.js";
 
 export const createBanner = async (req, res) => {
 	try {
@@ -41,6 +40,9 @@ export const createBanner = async (req, res) => {
 			},
 		});
 
+		// Invalidate banners cache
+		await deleteCache("banners*");
+
 		return res.status(201).json({
 			success: true,
 			message: "Banner created successfully",
@@ -57,6 +59,14 @@ export const createBanner = async (req, res) => {
 
 export const getActiveBanners = async (req, res) => {
 	try {
+		const cacheKey = "banners:active";
+		const cachedData = await getCache(cacheKey);
+
+		if (cachedData) {
+			setHttpCacheHeaders(res, 300);
+			return res.status(200).json(cachedData);
+		}
+
 		const banners = await prisma.banner.findMany({
 			where: {
 				isActive: true,
@@ -66,10 +76,16 @@ export const getActiveBanners = async (req, res) => {
 			},
 		});
 
-		return res.status(200).json({
+		const responseData = {
 			success: true,
 			banners,
-		});
+		};
+
+		// Cache for 10 minutes (600s)
+		await setCache(cacheKey, responseData, 600);
+		setHttpCacheHeaders(res, 300);
+
+		return res.status(200).json(responseData);
 	} catch (error) {
 		return res.status(500).json({
 			success: false,
@@ -145,6 +161,9 @@ export const updateBanner = async (req, res) => {
 			},
 		});
 
+		// Invalidate banners cache
+		await deleteCache("banners*");
+
 		return res.status(200).json({
 			success: true,
 			message: "Banner updated successfully",
@@ -167,6 +186,9 @@ export const deleteBanner = async (req, res) => {
 			where: { id },
 		});
 
+		// Invalidate banners cache
+		await deleteCache("banners*");
+
 		return res.status(200).json({
 			success: true,
 			message: "Banner deleted successfully",
@@ -179,3 +201,4 @@ export const deleteBanner = async (req, res) => {
 		});
 	}
 };
+

@@ -10,6 +10,8 @@ import {
 } from "../controllers/order.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { isAdmin } from "../middleware/admin.middleware.js";
+import { validateBody } from "../middleware/validate.middleware.js";
+import { updateOrderStatusSchema } from "../validations/order.validation.js";
 
 const router = express.Router();
 // Customer order routes
@@ -23,6 +25,7 @@ router.put(
 	"/admin/:id/status",
 	authMiddleware,
 	isAdmin,
+	validateBody(updateOrderStatusSchema),
 	updateOrderStatusAdmin,
 );
 

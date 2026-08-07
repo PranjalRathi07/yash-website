@@ -1,10 +1,9 @@
 /** @format */
 
 import slugify from "slugify";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../config/prisma.js"
 import { uploadToCloudinary } from "../utils/uploadToCloudinary.js";
 
-const prisma = new PrismaClient();
 
 export const createProduct = async (req, res) => {
 	try {

@@ -4,6 +4,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import compression from "compression";
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
@@ -19,18 +21,32 @@ import addressRoutes from "./routes/address.routes.js";
 import checkoutRoutes from "./routes/checkout.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 
+import {
+	globalLimiter,
+	authLimiter,
+	checkoutLimiter,
+	productSearchLimiter,
+} from "./middleware/rateLimit.middleware.js";
+
 const app = express();
+app.use(helmet());
+app.use(compression());
 
 app.use(
 	cors({
-		origin: [process.env.CLIENT_URL],
+		origin: process.env.CLIENT_URL,
 		credentials: true,
+		methods: ["GET", "POST", "PUT", "DELETE"],
+		allowedHeaders: ["Content-Type", "Authorization"],
 	}),
 );
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Apply global rate limiter to all API endpoints
+app.use("/api", globalLimiter);
 
 app.get("/", (req, res) => {
 	res.send("Backend server is running");
@@ -43,11 +59,11 @@ app.get("/api/health", (req, res) => {
 	});
 });
 
-// Authentication routes
-app.use("/api/auth", authRoutes);
+// Authentication routes (Strict Rate Limiting)
+app.use("/api/auth", authLimiter, authRoutes);
 
-// Product routes
-app.use("/api/products", productRoutes);
+// Product routes (Scraping & Search Rate Limiting)
+app.use("/api/products", productSearchLimiter, productRoutes);
 
 // Category routes
 app.use("/api/categories", categoryRoutes);
@@ -79,11 +95,11 @@ app.use("/api/admin/dashboard", dashboardRoutes);
 // Address routes
 app.use("/api/addresses", addressRoutes);
 
-// Checkout routes
-app.use("/api/checkout", checkoutRoutes);
+// Checkout routes (Strict Payment & Checkout Rate Limiting)
+app.use("/api/checkout", checkoutLimiter, checkoutRoutes);
 
-// Payment routes
-app.use("/api/payments", paymentRoutes);
+// Payment routes (Strict Payment & Checkout Rate Limiting)
+app.use("/api/payments", checkoutLimiter, paymentRoutes);
 
 const PORT = process.env.PORT || 5000;
 

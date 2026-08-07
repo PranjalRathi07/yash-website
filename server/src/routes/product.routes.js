@@ -4,6 +4,11 @@ import express from "express";
 import { upload } from "../config/multer.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { isAdmin } from "../middleware/admin.middleware.js";
+import { validateBody } from "../middleware/validate.middleware.js";
+import {
+	createProductSchema,
+	updateProductSchema,
+} from "../validations/product.validation.js";
 import {
 	createProduct,
 	getAllProducts,
@@ -22,6 +27,7 @@ router.post(
 	authMiddleware,
 	isAdmin,
 	upload.array("images", 5),
+	validateBody(createProductSchema),
 	createProduct,
 );
 
@@ -30,6 +36,7 @@ router.put(
 	authMiddleware,
 	isAdmin,
 	upload.array("images", 5),
+	validateBody(updateProductSchema),
 	updateProduct,
 );
 

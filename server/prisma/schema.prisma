@@ -129,7 +129,10 @@ model Product {
   updatedAt DateTime @updatedAt
 
   @@index([categoryId])
-  @@index([slug])
+  @@index([categoryId, isActive])
+  @@index([isActive, isNewArrival])
+  @@index([isActive, isFestivalWear])
+  @@index([price])
 }
 
 enum ProductAction {
@@ -260,6 +263,8 @@ model Order {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+  @@index([userId, createdAt])
+  @@index([orderStatus, paymentStatus])
   @@index([addressId])
   @@index([couponId])
 }
@@ -363,6 +368,7 @@ model Review {
 
   @@unique([userId, productId])
   @@index([productId])
+  @@index([productId, isApproved])
   @@index([userId])
 }
 

@@ -4,6 +4,8 @@ import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { isAdmin } from "../middleware/admin.middleware.js";
 import { upload } from "../config/multer.js";
+import { validateBody } from "../middleware/validate.middleware.js";
+import { updateProfileSchema } from "../validations/auth.validation.js";
 import {
 	getAllUsersAdmin,
 	toggleUserStatusAdmin,
@@ -20,7 +22,7 @@ router.get("/me", authMiddleware, (req, res) => {
 	});
 });
 
-router.put("/profile", authMiddleware, updateProfile);
+router.put("/profile", authMiddleware, validateBody(updateProfileSchema), updateProfile);
 router.put("/profile/picture", authMiddleware, upload.single("profilePic"), updateProfilePicture);
 
 // Admin User Directory
