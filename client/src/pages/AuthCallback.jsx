@@ -39,7 +39,7 @@ export default function AuthCallback() {
 			localStorage.setItem("currentUser", JSON.stringify(data.user));
 
 			if (data.user.role === "ADMIN") {
-				window.location.href = "/admin/dashboard";
+				window.location.href = "/panel-option";
 			} else {
 				window.location.href = "/";
 			}

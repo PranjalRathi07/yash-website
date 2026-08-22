@@ -98,7 +98,7 @@ export default function LoginPage() {
 				const user = await syncUserWithBackend(token);
 
 				if (user.role === "ADMIN") {
-					window.location.href = "/admin/dashboard";
+					window.location.href = "/panel-option";
 				} else {
 					window.location.href = "/";
 				}
@@ -129,7 +129,7 @@ export default function LoginPage() {
 					const user = await syncUserWithBackend(token);
 
 					if (user.role === "ADMIN") {
-						window.location.href = "/admin/dashboard";
+						window.location.href = "/panel-option";
 					} else {
 						window.location.href = "/";
 					}
