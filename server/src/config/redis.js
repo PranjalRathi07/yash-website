@@ -17,7 +17,7 @@ if (redisUrl) {
 			retryStrategy(times) {
 				if (times > 3) {
 					console.warn("Redis unavailable, falling back to in-memory cache.");
-					return null; // Stop retrying, use memory cache
+					return null; 
 				}
 				return Math.min(times * 200, 1000);
 			},
@@ -48,11 +48,7 @@ if (redisUrl) {
 	console.log("No REDIS_URL configured; using high-performance in-memory cache.");
 }
 
-/**
- * Retrieve value from cache
- * @param {string} key
- * @returns {Promise<any|null>}
- */
+
 export const getCache = async (key) => {
 	try {
 		if (isRedisReady && redis) {
@@ -75,12 +71,6 @@ export const getCache = async (key) => {
 	}
 };
 
-/**
- * Set value in cache with TTL
- * @param {string} key
- * @param {any} value
- * @param {number} ttlInSeconds Default 600 (10 minutes)
- */
 export const setCache = async (key, value, ttlInSeconds = 600) => {
 	try {
 		if (isRedisReady && redis) {
@@ -108,10 +98,7 @@ export const setCache = async (key, value, ttlInSeconds = 600) => {
 	}
 };
 
-/**
- * Invalidate specific key or wildcard pattern (e.g., "categories*")
- * @param {string} patternOrKey
- */
+
 export const deleteCache = async (patternOrKey) => {
 	try {
 		if (isRedisReady && redis) {
@@ -142,11 +129,7 @@ export const deleteCache = async (patternOrKey) => {
 	}
 };
 
-/**
- * Send HTTP Cache-Control headers for static / read-heavy public endpoints
- * @param {import('express').Response} res
- * @param {number} maxAgeSeconds Default 300 (5 minutes)
- */
+
 export const setHttpCacheHeaders = (res, maxAgeSeconds = 300) => {
 	res.set("Cache-Control", `public, max-age=${maxAgeSeconds}, stale-while-revalidate=60`);
 };
