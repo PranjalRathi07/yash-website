@@ -58,7 +58,7 @@ function PanelOption() {
 
           {/* Admin Panel Card */}
           <button
-            onClick={() => navigate("/admin")}
+            onClick={() => navigate("/admin/dashboard")}
             className="group relative flex flex-col items-center justify-center p-10 md:p-14 bg-white/5 border border-white/10 rounded-[2.5rem] hover:bg-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           >
             <div className="absolute inset-0 bg-linear-to-br from-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
