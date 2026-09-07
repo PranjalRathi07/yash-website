@@ -4,17 +4,16 @@ function PanelOption() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Gradients */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-neutral-900 via-neutral-950 to-neutral-950"></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+      {/* Background Decorators */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-tertiary/5 rounded-full blur-[100px] pointer-events-none"></div>
 
       <div className="relative z-10 w-full max-w-5xl">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-6 tracking-tight font-serif">
             Welcome Back, Admin
           </h1>
-          <p className="text-neutral-400 text-lg md:text-xl max-w-2xl mx-auto">
+          <p className="text-on-surface-variant text-lg md:text-xl max-w-2xl mx-auto">
             Choose your destination. Would you like to manage the store or view
             it as a customer?
           </p>
@@ -24,11 +23,11 @@ function PanelOption() {
           {/* Customer View Card */}
           <button
             onClick={() => navigate("/")}
-            className="group relative flex flex-col items-center justify-center p-10 md:p-14 bg-white/5 border border-white/10 rounded-[2.5rem] hover:bg-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            className="group relative flex flex-col items-center justify-center p-10 md:p-14 bg-white/60 backdrop-blur-md border border-outline-variant/30 rounded-[2.5rem] hover:bg-white hover:border-tertiary/50 transition-all duration-500 overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-tertiary/50 shadow-sm hover:shadow-md"
           >
-            <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute inset-0 bg-linear-to-br from-tertiary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-            <div className="w-24 h-24 mb-8 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-500/20 transition-all duration-500 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)]">
+            <div className="w-24 h-24 mb-8 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500 shadow-[0_0_30px_-10px_rgba(8,27,75,0.1)] group-hover:shadow-[0_0_30px_-10px_rgba(212,160,23,0.3)]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="40"
@@ -39,7 +38,7 @@ function PanelOption() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-blue-400 group-hover:text-blue-300 transition-colors"
+                className="text-primary group-hover:text-tertiary transition-colors"
               >
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
                 <path d="M3 6h18" />
@@ -47,10 +46,10 @@ function PanelOption() {
               </svg>
             </div>
 
-            <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl font-semibold text-primary mb-4 tracking-tight font-serif">
               Storefront
             </h2>
-            <p className="text-neutral-400 text-base text-center leading-relaxed">
+            <p className="text-on-surface-variant text-base text-center leading-relaxed">
               Browse the website, view products, and experience the storefront
               exactly as your customers do.
             </p>
@@ -59,11 +58,11 @@ function PanelOption() {
           {/* Admin Panel Card */}
           <button
             onClick={() => navigate("/admin/dashboard")}
-            className="group relative flex flex-col items-center justify-center p-10 md:p-14 bg-white/5 border border-white/10 rounded-[2.5rem] hover:bg-white/10 hover:border-white/20 transition-all duration-500 overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="group relative flex flex-col items-center justify-center p-10 md:p-14 bg-white/60 backdrop-blur-md border border-outline-variant/30 rounded-[2.5rem] hover:bg-white hover:border-tertiary/50 transition-all duration-500 overflow-hidden text-left focus:outline-none focus:ring-2 focus:ring-tertiary/50 shadow-sm hover:shadow-md"
           >
-            <div className="absolute inset-0 bg-linear-to-br from-emerald-500/10 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute inset-0 bg-linear-to-br from-tertiary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-            <div className="w-24 h-24 mb-8 rounded-full bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-500 shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
+            <div className="w-24 h-24 mb-8 rounded-full bg-primary/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-500 shadow-[0_0_30px_-10px_rgba(8,27,75,0.1)] group-hover:shadow-[0_0_30px_-10px_rgba(212,160,23,0.3)]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="40"
@@ -74,7 +73,7 @@ function PanelOption() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-emerald-400 group-hover:text-emerald-300 transition-colors"
+                className="text-primary group-hover:text-tertiary transition-colors"
               >
                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
                 <path d="M3 9h18" />
@@ -82,10 +81,10 @@ function PanelOption() {
               </svg>
             </div>
 
-            <h2 className="text-3xl font-semibold text-white mb-4 tracking-tight">
+            <h2 className="text-3xl font-semibold text-primary mb-4 tracking-tight font-serif">
               Admin Panel
             </h2>
-            <p className="text-neutral-400 text-base text-center leading-relaxed">
+            <p className="text-on-surface-variant text-base text-center leading-relaxed">
               Manage inventory, process orders, update banners, and control all
               aspects of your store.
             </p>
